@@ -1,0 +1,56 @@
+.noflash { padding:10px; margin:10px; border: 1px solid #555555; background-color: #f8f8f8; text-align:center; width:330px; }
+
+.noflash a { text-decoration:none; }
+.nounderline  { text-decoration:none; }
+div.flashcontent { padding:0;margin:0;border:none;}
+.error { color:#FF0000; }
+.errordiv { padding:10px; margin:10px; border: 1px solid #555555;color: #000000;background-color: #f8f8f8; text-align:center; width:360px; }
+.w250 { width:250px; }
+.w230 { width:230px; }
+.wfu_reg li { 
+list-style-type: disc;
+list-style-position: inside;
+padding-left:30px;
+margin:2px;
+ }
+.wfu_reg ul {  
+list-style-type: disc ;
+list-style-position: inside;
+}
+.wfu_reg a { 
+text-decoration:none; 
+}
+
+.wfu_reg input {
+font-size: 11px;
+}
+
+#im_test .text, #im_test img {
+  vertical-align: middle;
+}
+
+.install {   margin-top: 1em;  margin-bottom: 1em; padding: 10px; border: 1px solid #cccccc;  width: 650px; background: #F1F1F1; }
+
+.wfupadding {
+padding-left:5px;
+}
+
+.linepad p {
+line-height: 1.3em;
+}
+
+.updated p, .error p {
+	line-height: 1.1;
+}
+
+.icon_jfu {
+float: left;
+height: 36px;
+margin-top: 14px;
+margin-right: 6px;
+margin-bottom: 0pt;
+margin-left: 0pt;
+width: 36px;
+background-image: url(../img/jfu_logo_32x32.png) !important;
+background-position: -0px -0px !important;
+}
