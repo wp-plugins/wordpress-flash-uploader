@@ -33,11 +33,11 @@ Michael
 
 == Frequently Asked Questions ==
 
-FAQ / Help: http://blog.tinywebgallery.com/wfu/wfu-faq/
+FAQ / Help: http://www.tinywebgallery.com/blog/wfu/wfu-faq/
 
 == Website / Help / Forum ==
 
-Website:    http://blog.tinywebgallery.com/wfu/
+Website:    http://www.tinywebgallery.com/blog/wfu/
 Forum:      http://www.tinywebgallery.com/en/forum.php
 
 == Installation ==
