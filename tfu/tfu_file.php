@@ -1,6 +1,6 @@
 <?php
 /**
- * TWG Flash uploader 2.10.x
+ * TWG Flash uploader 2.12.x
  *
  * Copyright (c) 2004-2009 TinyWebGallery
  * written by Michael Dempfle
@@ -177,7 +177,7 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['
         } 
         store_temp_session();
         $size = $nrFiles . " files (" . formatSize($size) . ")"; // formating of the display can be done here!
-        echo "&tfufiles=" . $size . "|" . $files . "&tfudirs=" . $dirs . $status . "&dirtext=" . $dirsub . $mem_errors . $upload_ok . $baseurl;
+       echo "&tfufiles=" . $size . "|" . $files . "&tfudirs=" . $dirs . $status . "&dirtext=" . $dirsub . $mem_errors . $upload_ok . $baseurl;
     } else {
         // shows an error message that the expected index was not send
         echo '&result=index'; 

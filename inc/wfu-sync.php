@@ -32,7 +32,7 @@ flush();
               }</script>';
             }
 
-            if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library'])) {
+            if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library']) || isset($_GET['clean_media_library'])) {
                 // we remove the ones tat are not in the upload folder anymore.
                 echo '<div class="updated"><p><strong>';
                 if (count($mfo) > 0) {

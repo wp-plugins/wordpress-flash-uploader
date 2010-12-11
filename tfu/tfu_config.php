@@ -1,6 +1,6 @@
 <?php
 /**
- * TWG Flash uploader 2.10.x
+ * TWG Flash uploader 2.12.x
  *
  * Copyright (c) 2004-2009 TinyWebGallery
  * written by Michael Dempfle
@@ -70,7 +70,7 @@ if (defined('_VALID_TWG')) {
     $hide_directory_in_title = 'false';  // You can disable the display of the upload dir in the title bar if you set this to 'true'
     $truncate_dir_in_title = 'false';    // You can truncate everything before the main upload directory if you set this to true. So only sub directories are shown in the title.
     // the text of the email is stored in the tfu_upload.php if you like to change it :)
-    $upload_notification_email = '';     // you can get an email everytime a fileupload was initiated! The mail is sent at the first file of an upload queue! '' = no emails - php mail has to be configured properly!
+    $upload_notification_email = '';     // you can get an email everytime a fileupload was initiated! The mail is sent at the first file of an upload queue! '' = no emails - php mail has to be configured properly! Enter the e-mail you want to send the notification to.
     $upload_notification_email_from = ''; // the sender of the notification email!
     $upload_notification_email_subject = 'Files were uploaded by the TWG Flash Uploader'; // Subject of the email - you should set a nicer one after the login or in tfu_upload.php
     $upload_notification_email_text = 'The following files where uploaded by %s: %s'; // Text of the email - the first %s ist the username (if no is set 'not set is used'), the 2nd %s is the list of files that where uploaded!
@@ -78,8 +78,8 @@ if (defined('_VALID_TWG')) {
 
     $exclude_directories = array('data.pxp', '_vti_cnf', 'CVS', 'thumbs'); // new 2.6 - You can enter directories here that are ignored in TFU. You can enter files as well that should be hidden!
     $keep_internal_session_handling = false;  // new 2.7.5 - TFU can detect servers with session problems. And it removes the session_cache folder it it is not needed. If you set this to true the session_Cache folder is not removed automatically. You should set this to true if you have only sometimes problems with the upload!
-    $normalise_file_names = false;         // new 2.7.5 - This setting convertes all filenames to lowercase and special characters are removed e.g. !"#$%&'()*+,-- []\^_`öäüß are replaces with an _
-    $normalise_directory_names = false;   // new 2.8.1 - This setting convertes all directory names that are created or renamed to lowercase and special characters are removed e.g. !"#$%&'()*+,-- []\^_`öäüß are replaces with an _
+    $normalise_file_names = false;         // new 2.7.5 - This setting convertes all filenames to lowercase and special characters are removed e.g. !"#$%&'()*+,-- []\^_`Ã¶Ã¤Ã¼ÃŸ are replaces with an _
+    $normalise_directory_names = false;   // new 2.8.1 - This setting convertes all directory names that are created or renamed to lowercase and special characters are removed e.g. !"#$%&'()*+,-- []\^_`Ã¶Ã¤Ã¼ÃŸ are replaces with an _
     
     // This switch is for supporting filesystems for e.g. chinese characters.
     $fix_utf8 = ''; // Please read the faq 8 for TFU on the homepage first before change anything here -> http://www.tinywebgallery.com/en/tfu/web_faq.php#10
@@ -99,7 +99,7 @@ if (defined('_VALID_TWG')) {
     $js_rename_folder = '';              // 'ren_folder.???' - You can e.g. specify an url that is called by the flash in the js function renameFolder(status,param). status is the status of the folder rename. Possible status values are: exists (destination folder exists), true (folder renamed), false (folder not renamed) - only available in the registered version!
     $js_delete_folder = '';              // 'del_folder.???' - You can e.g. specify an url that is called by the flash in the js function deleteFolder(status,param). status is the status of the folder delete. Possible status values are: true (folder deleted), false (folder not deleted) - only available in the registered version!
     $js_copymove = '';                   // 'copymove.???' - You can e.g. specify an url that is called by the flash in the js function copymove(doCopyFolder,type,total,ok,error,exits,param). Check the example in tfu.htm for a description of all parameters - only available in the registered version!
-    $show_full_url_for_selected_file = ''; // 'true' - if you use this parameter the link to the selected file is shown - can be used for direct links - only available in the registered version!
+    $show_full_url_for_selected_file = 'false'; // 'true' - if you use this parameter the link to the selected file is shown - can be used for direct links - only available in the registered version!
     $directory_file_limit = '100000';    // you can specify a maximum number of files someone is allowed to have in a folder to limit the upload someone can make! - only available in the registered version!
     $queue_file_limit = '100000';        // you can specify a maximum number of files someone can upload at once! - only available in the registered version!
     $queue_file_limit_size = '100000';   // you can specify the limit of the upload queue in MB! - only available in the registered version!
@@ -126,30 +126,38 @@ if (defined('_VALID_TWG')) {
     $dir_chmod=0;                        // by using 0 the default mode of the directory is used. Then the creation depend on the umask of the server. If you want the directory to have different permissions please use the octal representation e.g. 0777, 0755, 0644 ...
     
     // New 2.10 
-    $enable_upload_debug = false;        // New 2.10 - This enables the debuging ouput at the upload. You should only use this after contacting me!
-    $enable_enhanced_debug = false;      // New 2.10 - This shows the request to each debug line.  
+    $enable_upload_debug = false;        // This enables the debuging ouput at the upload. You should only use this after contacting me!
+    $enable_enhanced_debug = false;      // This shows the request to each debug line.  
     // This settings will be added to JFU backend in 2.11 - you can change this directly here if you need to!
-    $form_fields = '';                   // New 2.10 - You can enable TFU to read form fields from the html page and add then to the upload as 'get' parameters. Please read howto 15 how to configure this. Only available for professional license or above.
-    $hide_hidden_files = false;          // New 2.10.6 - You can hide hidden files and directories in the remote view. All files and folders starting with a . are hidden if you set this to true. 
+    $form_fields = '';                   // You can enable TFU to read form fields from the html page and add then to the upload as 'get' parameters. Please read howto 15 how to configure this. Only available for professional license or above.
+    $hide_hidden_files = false;          // You can hide hidden files and directories in the remote view. All files and folders starting with a . are hidden if you set this to true. 
     
     // New 2.11
     // For the big progress bar you need a professional license or higher.
-    $big_progressbar='true';
-    $img_progressbar='progressbar.png';
-    $img_progressbar_back='progressbar_back.png';
-    $img_progressbar_anim='progressbar_anim.swf'; 
+    $big_progressbar='true';             // New 2.11 - Enable/disable the big progress bar
+    $img_progressbar='progressbar.png';  // New 2.11 - The image for the progress bar
+    $img_progressbar_back='progressbar_back.png'; // New 2.11 - The background image for the progress bar
+    $img_progressbar_anim='progressbar_anim.swf'; // New 2.11 - The animation of the big progress bar
     
-    $enable_dir_create_detection=true;   // New 2.9.0.2 - If you cannot create directories you can try to disable the automatic detection which prevents this. If you set this to 'false' the flash tries to create the directory; maybe it works ;). - try to upload files into the directory and create another subdirectory too. If this works you can leave this to false. This setting is currently not mapped in JFU 2.9 - will be added in 2.11! Please check also the option to create directories by ftp.
     // By default directories are created by php. On some servers with safe mode on it can then happen that no directores can be created. You can now first try to set $enable_dir_create_detection=false; This detection is not 100% and sometimes turning it off will enable that you can create directories you can upload to.
     // If this does not work you can use ftp to create a directory. Make sure to set $dir_chmod too! You need php 5 to use ftp_chmod!
     $ftp_enable = false;                 // New 2.11 - Set this to true to use ftp to create directories  
-    $ftp_host   = "host";                // New 2.11 - Your ftp host
+    $ftp_host   = 'host';                // New 2.11 - Your ftp host
     $ftp_port   = 21;                    // New 2.11 - Your ftp port
-    $ftp_user   = "user";                // New 2.11 - Your ftp user
-    $ftp_pass   = "pass";                // New 2.11 - Your ftp password
-    $ftp_root   = "<full root directory>"; // New 2.11 - The full path to the root upload directory of TFU. e.g. /httpdocs/test/path/upload. If you have $folder dynamic you have to make this variable dynamic too.
+    $ftp_user   = 'user';                // New 2.11 - Your ftp user
+    $ftp_pass   = 'pass';                // New 2.11 - Your ftp password
+    $ftp_root   = '<full root directory>'; // New 2.11 - The full path to the root upload directory of TFU. e.g. /httpdocs/test/path/upload. If you have $folder dynamic you have to make this variable dynamic too.
     
+    $enable_dir_create_detection = !$ftp_enable;   // New 2.9.0.2 - (true, false) If you cannot create directories you can try to disable the automatic detection which prevents this. If you set this to 'false' the flash tries to create the directory; maybe it works ;). - try to upload files into the directory and create another subdirectory too. If this works you can leave this to false. This setting is currently not mapped in JFU 2.9 - will be added in 2.11! Please check also the option to create directories by ftp.
+    $big_server_view = 'false';          // New 2.11 - Use this if you want the server side the same size as the upload.     
     
+    // New 2.12
+    $compression = 80;                   // New 2.12 - This is the compression used for jpg images when you resize a file  - 100 is no compression. Normally 75 or 80 is used. The value is used for GD-Lib and image magick.
+    $remove_multiple_php_extension = true; // New 2.12 - Some servers execute e.g. file.php.gif files which is a security issue. If you don't allow php files to upload please leave this to true because of security reasons.
+    $scan_images = true;                 // New 2.12 - Scans images (gif,png,jpg) for php code. This is done by default when no size could be detected. By setting this to true all files are scanned because there are gif exploits around that returns valid sizes!   
+    $forbidden_view_file_filter = '';    // New 2.12.x - If you have set $allowed_view_file_extensions = 'all' then you can define a list filters which are not shown! This is the enhanced version of $forbidden_view_file_extensions which will be removed in the next main version! A filter can have full file names and * or ?. e.g. sp*.*, test*.gif. Seperate different filters by , a filter looks maybe like this:  '*.gif,test*.png,hide.txt', if you have a windows server you need php > 5.3 to use this. - Only available for registered users.
+    $zip_file_pattern = 'download-{number}-files_{date}.zip'; // New 2.12.x - // zip file pattern can have the following patterns {number} = number of files in the zip, {date} = currenty date with year,month,day. Please provide the name WITH extension. If the pattern is empty <first filename>.zip is used. 
+  
     // special extension - a post upload panel - this is only implemented for JFU and not documented yet!
     $post_upload_panel='false';
     /*  This is example data for the post upload panel - this is not documented yet!

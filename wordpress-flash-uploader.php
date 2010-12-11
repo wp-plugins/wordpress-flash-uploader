@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Wordpress Flash Uploader
-Plugin URI: http://blog.tinywebgallery.com/wfu
+Plugin URI: http://www.tinywebgallery.com/blog/wfu
 Description: The Wordpress Flash Uploader does contain 2 plugins: '<strong>Wordpress Flash Uploader</strong>' and '<strong>Sync Media Library</strong>'. The Wordpress Flash Uploader is a flash uploader that replaces the existing flash uploader and let you manage your whole  WP installation. 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library. 
-Version: 2.11.1
+Version: 2.12
 Author: Michael Dempfle
 Author URI: http://www.tinywebgallery.com
 */
@@ -34,6 +34,25 @@ if (!class_exists("WFU")) {
         }
         //Returns an array of admin options
         function getAdminOptions() {
+        
+            $arr = array();
+                      
+            $arr[] = get_option('large_size_h');
+            $arr[] = get_option('large_size_w');
+            $arr[] = get_option('medium_size_h');
+            $arr[] = get_option('medium_size_w');
+            $arr[] = get_option('thumbnail_size_h');
+            $arr[] = get_option('thumbnail_size_w');
+            
+            $unique_sizes=array_unique($arr);
+            $unique_sizes_filter='';
+            foreach($unique_sizes as $size) {
+               if ($unique_sizes_filter != '') {
+                 $unique_sizes_filter .= ',';
+               }
+               $unique_sizes_filter .= '*'.$size.'*.*';
+            }
+            
             $wfuAdminOptions = array(
                 'wp_path' => '',
                 'maxfilesize' => '',
@@ -69,7 +88,8 @@ if (!class_exists("WFU")) {
                 'show_sync_tab' => 'true', 
                 'hide_donate' => 'false',
                 'hide_htaccess' => 'false',
-                'detect_resized' => 'true'    
+                'detect_resized' => 'true', 
+                'file_filter' => $unique_sizes_filter   
             );
 
             $wfuOptions = get_option($this->adminOptionsName);
@@ -220,16 +240,14 @@ if (!class_exists("WFU")) {
 </div>';
         }//End function printAdminPage()
 
-
-
-
         //Add a tab to the media uploader:
         function tabs($tabs) {
-            if( current_user_can( 'unfiltered_upload' ) ) {
+            if( current_user_can( 'upload_files' ) ) {
                 $wfuOptions = $this->getAdminOptions();
                 if ($wfuOptions['show_wfu_tab'] == "true") {
                     $tabs['wfu'] = __('WP Flash Uploader');
                 }
+                $tabs['wfu'] = __('WP Flash Uploader'); 
                 if ($wfuOptions['show_sync_tab'] == "true") {
                     $tabs['sync'] = __('Sync');
                 }
@@ -239,7 +257,7 @@ if (!class_exists("WFU")) {
 
         //Handle the actual page:
         function tab_wfu_handler(){
-            if( ! current_user_can( 'unfiltered_upload' ) )
+            if( ! current_user_can( 'upload_files' ) )
             return;
             //Set the body ID
             $GLOBALS['body_id'] = 'media-upload';
@@ -255,7 +273,7 @@ if (!class_exists("WFU")) {
 
         //Handle the actual page:
         function tab_sync_handler(){
-            if( ! current_user_can( 'unfiltered_upload' ) )
+            if( ! current_user_can( 'upload_files' ) )
             return;
             //Set the body ID
             $GLOBALS['body_id'] = 'media-upload';
@@ -284,7 +302,6 @@ if (!class_exists("WFU")) {
             }
             return $links;
         }
-
     } } //End Class WFU
 
 if (class_exists("WFU")) {
@@ -299,14 +316,14 @@ if (!function_exists("WFU_ap")) {
             return;
         }
         if (function_exists('add_options_page')) {
-            add_options_page('WP Flash Uplader', 'WP Flash Uploader', 9, basename(__FILE__), array(&$dl_pluginSeries, 'printAdminPage'));
+            add_options_page('WP Flash Uplader', 'WP Flash Uploader', 'manage_options', basename(__FILE__), array(&$dl_pluginSeries, 'printAdminPage'));
         }
         $wfuOptions = &$dl_pluginSeries->getAdminOptions();
         if (function_exists('add_media_page')&& $wfuOptions['show_wfu_media'] == "true") {
-            add_media_page('WP Flash Uploader', 'WP Flash Uploader', 7, basename(__FILE__), array(&$dl_pluginSeries, 'printWFU'));
+            add_media_page('WP Flash Uploader', 'WP Flash Uploader', 'upload_files', basename(__FILE__), array(&$dl_pluginSeries, 'printWFU'));
         }
         if (function_exists('add_media_page')&& $wfuOptions['show_sync_media'] == "true") {
-            add_media_page('Sync Media Library', 'Sync Media Library', 7, basename(__FILE__) . '?printSync=true', array(&$dl_pluginSeries, 'printSync'));
+            add_media_page('Sync Media Library', 'Sync Media Library', 'upload_files', basename(__FILE__) . '?printSync=true', array(&$dl_pluginSeries, 'printSync'));
         }
     }
 }

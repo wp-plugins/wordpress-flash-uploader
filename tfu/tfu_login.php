@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.10.x
+ * TWG Flash uploader 2.12.x
  *
- * Copyright (c) 2004-2009 TinyWebGallery
+ * Copyright (c) 2004-2010 TinyWebGallery
  * written by Michael Dempfle
  *
  *    This file is the login and stetup file of the flash.
@@ -72,8 +72,8 @@ if (isset($_POST['twg_user']) && isset($_POST['twg_pass'])) { // twg_user and tw
      * add users/folders/paths at .htusers.php.
      * The password is encrypted - please use the password generator that is included.
      * Read the "Important" part on top!
-     */
-    if (($login == "auth" || $login == "reauth") && $user != "") {
+     */ 
+    if (($login == "auth" || $login == "reauth") && $user != "__empty__" && $user != "") {
         include ($install_path . ".htusers.php");
         foreach ($GLOBALS["users"] as $userarray) {
 
@@ -95,7 +95,7 @@ if (isset($_POST['twg_user']) && isset($_POST['twg_pass'])) { // twg_user and tw
             }
         }
     }
-    
+
     /*
     Here the $login variable has to be finally set if you do your own authentification
     */

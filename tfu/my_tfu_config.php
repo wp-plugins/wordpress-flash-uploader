@@ -76,6 +76,7 @@ $enable_file_copymove=$_SESSION["TFU_ENABLE_FILE_COPYMOVE"];
 $preview_textfile_extensions = $_SESSION["TFU_PREVIEW_TEXTFILE_EXTENSIONS"]; 
 $edit_textfile_extensions = $_SESSION["TFU_EDIT_TEXTFILE_EXTENSIONS"];  
 $exclude_directories = array_map("trim", explode(",", $_SESSION["TFU_EXCLUDE_DIRECTORIES"])); 
+$forbidden_view_file_filter = $_SESSION["TFU_FILE_FILTER"]; 
 
 $zip_folder = $folder; // has to be set again!
 

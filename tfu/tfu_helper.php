@@ -1,6 +1,6 @@
 <?php
 /**
- * TWG Flash uploader 2.10.x
+ * TWG Flash uploader 2.12.x
  *
  * Copyright (c) 2004-2009 TinyWebGallery
  * written by Michael Dempfle
@@ -34,6 +34,7 @@ $bg_color_preview_G = 255;
 $bg_color_preview_B = 255;
 $input_invalid = false;
 $old_error_handler = false;
+$debug_file = dirname(__FILE__) . "/tfu.log"; // can be overwritten in the config!
 
 tfu_setHeader();
 
@@ -235,16 +236,16 @@ function resize_file($image, $size, $compression, $image_name, $dest_image = fal
                    return 1;
                 }
                 } else {
-                  if ($enable_upload_debug) { tfu_debug("Resize: Image could not be resized - no file"); }
+                  if ($enable_upload_debug) { tfu_debug("Resize: Image could not be resized in temp upload dir. Retry after move to final destination."); }
                   return 2;
                 }
               }
         } else {
             if ($enable_upload_debug) { tfu_debug("Resize: gd-lib is used."); }
-            if (!isMemoryOk($oldsize, $image_name, true)) {
+            if (!isMemoryOk($oldsize, $size, $image_name, true)) {
                 return 0;
             }
-            if ($enable_upload_debug) { tfu_debug("Resize: memory is o.k."); }
+            if ($enable_upload_debug) { tfu_debug("Resize: memory seems o.k."); }
 
             $src = get_image_src($image, $oldsize[2]);
             if (!$src) {
@@ -345,7 +346,7 @@ function send_thumb($image, $compression, $sizex, $sizey, $generateOnly = false)
             $height = ($width / $oldsizex) * $oldsizey;
         }
 
-        if (isMemoryOk($oldsize, '')) {
+        if (isMemoryOk($oldsize, $sizex, '')) {
             $src = get_image_src($image, $oldsize[2]);
             if (!$src) { // error in image!
                 if ($sizex < 100) {
@@ -416,15 +417,18 @@ function send_thumb($image, $compression, $sizex, $sizey, $generateOnly = false)
     return false;
 }
 // we check if we can get a memory problem!
-function isMemoryOk($oldsize, $image_name, $debug = true)
+function isMemoryOk($oldsize, $newsize, $image_name, $debug = true)
 {
-    $memory = ($oldsize[0] * $oldsize[1] * 6) + 1048576; // mem and we add 1 MB for safty
+    $memory_read = ($oldsize[0] * $oldsize[1] * 6) + 1048576; // mem and we add 1 MB for safty
+    $memory_orig = $newsize * $newsize * 4;
+    $memory = $memory_read + $memory_orig; 
+       
     // I try to increase the memory if more is needed and if it is possible.
     if (function_exists("memory_get_usage")) {
       $InUse=memory_get_usage();
       if ($memory > return_kbytes(ini_get('memory_limit')*1024) - $InUse)
       {
-        @ini_set('memory_limit',$memory + $InUse + 3000000); // 3 MB for processing extra!
+        @ini_set('memory_limit',$memory + $InUse + 5000000); // 5 MB for processing extra!
       }
     }
     $memory_limit = return_kbytes(ini_get('memory_limit')) * 1024;
@@ -596,16 +600,14 @@ function replaceInput($input)
 
     $output = str_replace('<', '_', $input);
     $output = str_replace('>', '_', $output);
+    $output = str_replace('?', '_Q_', $input);
     // we check some other settings too :)
     if (strpos($output, 'cookie(') || strpos($output, 'popup(') || strpos($output, 'open(') || strpos($output, 'alert(') || strpos($output, 'reload(') || strpos($output, 'refresh(')) {
-        $input_inv_alid = true;
+        $output = 'XSS';
     }
     // we check for security if a .. is in the path we remove this!	and .// like in http:// is invalid too!
-	  $output = str_replace("..", "__", $output);
-	  $output = str_replace("://", "___", $output);
-    if ($input != $output) {
-        $input_invalid = true;
-    }
+    $output = str_replace("..", "__", $output);
+    $output = str_replace("//", "__", $output);
     return $output;
 }
 
@@ -622,7 +624,7 @@ function getCurrentDir()
 
 function getFileName($dir)
 {
-    global $fix_utf8, $exclude_directories, $sort_files_by_date, $hide_hidden_files;
+    global $fix_utf8, $exclude_directories, $sort_files_by_date, $hide_hidden_files, $enable_enhanced_debug;
     $sort_by_date = $sort_files_by_date;
 
     if (!isset($_GET['index']) || $_GET['index'] == '') {
@@ -650,7 +652,14 @@ function getFileName($dir)
     }
     // now we have the same order as in the listing and check if we have one or multiple indexes !
     if (strpos($index, ',') === false) { // only 1 selection
-        return get_decoded_string($dir, $myFiles[$index]);
+        if (isset($myFiles[$index])) {
+          return get_decoded_string($dir, $myFiles[$index]);
+        } else {
+          if ($enable_enhanced_debug) {
+            tfu_debug("File index not found.");
+          }
+          return "_FILE_NOT_FOUND";
+        }
     } else { // we return an array !
         // we need the offset
         $offset = parseInputParameter($_GET['offset']);
@@ -693,7 +702,7 @@ function getRootUrl()
     }
     $dirn = dirname ($GLOBALS['__SERVER']['PHP_SELF']);
     if ($dirn == '\\') $dirn = '';
-    return 'http://' . $GLOBALS['__SERVER']['HTTP_HOST'] . $dirn . '/';
+    return 'http' . (isset($GLOBALS['__SERVER']['HTTPS']) ? 's' : '') . '://' . $GLOBALS['__SERVER']['HTTP_HOST'] . $dirn . '/';
 }
 
 function tfu_checkSession()
@@ -828,6 +837,8 @@ function restore_split_files($items)
             $fp = fopen($parts_name, 'rb');
             while ($content = fread($fp, 8192)) {
                 fputs($dest_file, $content);
+                flush();
+                ob_flush();
             }
             fclose($fp);
         }
@@ -841,6 +852,7 @@ function restore_split_files($items)
 
 function resize_merged_files($items, $size)
 {
+    global $compression;
     $split_array = array();
     // first we check if files are split and group the splited files
     foreach ($items as $filename) {
@@ -850,7 +862,7 @@ function resize_merged_files($items, $size)
     }
     foreach ($split_array as $restore => $parts) {
         if (is_supported_tfu_image(my_basename($restore), $restore) && $size < 100000) {
-          resize_file($restore, $size, 80, my_basename($restore));
+          resize_file($restore, $size, $compression, my_basename($restore));
         }
     }
 }
@@ -871,6 +883,7 @@ function is_part($str)
 
 function is_supported_tfu_image($image,$current)
 {
+    global $scan_images;
     $image = strtolower ($image);
     $isimage = preg_match('/.*\.(jp)(e){0,1}(g)$/', $image) ||
     preg_match('/.*\.(gif)$/', $image) ||
@@ -880,7 +893,7 @@ function is_supported_tfu_image($image,$current)
       set_error_handler('on_error_no_output');
       if (file_exists($current)) {
         $size = @getimagesize ($current);
-        if ($size === false) {
+        if ($size === false || $scan_images) {
           // seems not to be an image - now we we replace the <?php with <_php
           $data = file_get_contents($current);
           $data2 = str_replace("<?php","<_php",$data);
@@ -1200,12 +1213,14 @@ function setSessionVariables()
     // this settings are needed in the other php files too!
     if ($login == 'true') {
         $_SESSION['TFU_LOGIN'] = 'true';
+        if (!isset($_SESSION['TFU_USER'])) { // can be set by the Joomla wrapper and we don't overwrite it with a dummy value!
+          $_SESSION['TFU_USER'] = ($user != '' && $user != '__empty__') ? $user : $_SERVER['REMOTE_ADDR'];
+        }
+    } else {
+       unset($_SESSION['TFU_USER']);
     }
     $_SESSION['TFU_RN'] = parseInputParameter($_POST['twg_rn']);
     $_SESSION['TFU_ROOT_DIR'] = $_SESSION['TFU_DIR'] = $folder;
-    if (!isset($_SESSION['TFU_USER']) || $user != '') {
-      $_SESSION['TFU_USER'] = ($user != '') ? $user : $_SERVER['REMOTE_ADDR'];
-    }
     store_temp_session();
 }
 
@@ -1231,7 +1246,8 @@ function sendConfigData()
     global $queue_file_limit_size, $split_extension, $hide_help_button, $direct_download;
     global $description_mode_show_default, $description_mode, $download_multiple_files_as_zip;
     global $overwrite_files, $description_mode_mandatory, $post_upload_panel, $form_fields;
-    global $big_progressbar,$img_progressbar,$img_progressbar_back,$img_progressbar_anim;
+    global $big_progressbar,$img_progressbar,$img_progressbar_back,$img_progressbar_anim, $big_server_view;
+    global $zip_file_pattern;
     
     // the sessionid is mandatory because upload in flash and Firefox would create a new session otherwise - sessionhandled login would fail then!
     $output = '&session_id=' . session_id() . '&login=' . tfu_enc($login, $rn);
@@ -1270,6 +1286,7 @@ function sendConfigData()
     $output .= '&post_upload_panel=' . $post_upload_panel . '&form_fields=' .$form_fields;
     $output .= '&big_progressbar=' . $big_progressbar . '&img_progressbar=' .$img_progressbar;
     $output .= '&img_progressbar_back=' . $img_progressbar_back . '&img_progressbar_anim=' .$img_progressbar_anim;
+    $output .= '&big_server_view=' . $big_server_view . '&zip_file_pattern=' . $zip_file_pattern;
 
     echo $output;
 }
@@ -1281,6 +1298,7 @@ function sendConfigData()
 function store_temp_session()
 {
     global $session_double_fix;
+    clearstatcache();
     if (file_exists(dirname(__FILE__) . '/session_cache') && session_id() != "") { // we do your own small session handling
         $cachename = dirname(__FILE__) . '/session_cache/' . session_id();
         $ser_file = fopen($cachename, 'w');
@@ -1314,7 +1332,7 @@ function checkSessionTempDir($type = 0)
             fclose($datei);
         }
 
-    } if ($type == 5) { // the upload check has to fail because the whole session data is gone.
+    } else if ($type == 5) { // the upload check has to fail because the whole session data is gone.
       echo 'int_session_handling=true';
     } else {
         tfu_debug('It seems that the session handling of the server is not o.k. TFU already tried a workaround that does not seem to work. TFU deleted the session_cache folder. Maybe it was created because of a wrong request! Please go to http://www.tinywebgallery.com/de/tfu/web_faq.php#12. If this does not help please report this in the forum to find a solution!');
@@ -1330,7 +1348,7 @@ $check_server_file_extensions = $m;
 function restore_temp_session($checkrn = false)
 {
     global $session_double_fix;
-
+    clearstatcache();
     if (file_exists(dirname(__FILE__) . '/session_cache')) { // we do your own small session handling
         $cachename = dirname(__FILE__) . '/session_cache/' . session_id();
         if (file_exists($cachename)) {
@@ -1398,24 +1416,44 @@ function restore_temp_session($checkrn = false)
 // checks if the extension is allowed to be viewed!
 function check_view_extension($name)
 {
-    global $check_server_file_extensions, $allowed_view_file_extensions, $forbidden_view_file_extensions;
+    global $check_server_file_extensions, $allowed_view_file_extensions, $forbidden_view_file_extensions, $forbidden_view_file_filter;
     $allowed_view_file_extensions = str_replace(' ', '', strtolower($allowed_view_file_extensions));
     $forbidden_view_file_extensions = str_replace(' ', '', strtolower($forbidden_view_file_extensions));
+    $forbidden_view_file_filter = str_replace(' ', '', strtolower($forbidden_view_file_filter));
 
-    if ((($allowed_view_file_extensions != 'all') || ($forbidden_view_file_extensions != '')) && (strlen($check_server_file_extensions) > 10)) {
-        if (strpos($name, '.') === false) {
-            return false;
-        } else {
-            $ext = strtolower(getExtension($name));
-            if ($allowed_view_file_extensions == 'all') { // we check the not allowed extensions
-                return !in_array($ext, explode(',', $forbidden_view_file_extensions));
-            } else { // we only allow the allowed extension
-                return in_array($ext, explode(',', $allowed_view_file_extensions));
-            }
-        }
-    } else {
-        return true;
+    $isAllowed = true;
+    
+    if (strlen($check_server_file_extensions) > 10) {
+         if ($allowed_view_file_extensions != 'all' || $forbidden_view_file_extensions != '') {
+             if (strpos($name, '.') === false) {
+                 $isAllowed = false;
+             } else {
+                 $ext = strtolower(getExtension($name));
+                 if ($allowed_view_file_extensions == 'all') { // we check the not allowed extensions
+                     $isAllowed = !in_array($ext, explode(',', $forbidden_view_file_extensions));
+                 } else { // we only allow the allowed extension
+                     $isAllowed = in_array($ext, explode(',', $allowed_view_file_extensions));
+                 }
+             }
+         } else {
+             $isAllowed = true;
+         }
+         // now we check the filter on non windows systems!
+         if (function_exists('fnmatch')) {
+              if ($forbidden_view_file_filter != '') {
+                   $filters =explode(',', $forbidden_view_file_filter);
+                   foreach ($filters as $filter) {
+                     if (fnmatch ($filter, $name)) {
+                       $isAllowed = false;
+                       break;
+                     } 
+                   }
+              }
+         }
     }
+  
+    return $isAllowed;
+    
 }
 
 function t($l, $s)
@@ -1902,7 +1940,7 @@ function tfu_info($file) {
         $oldsize = @getimagesize($file);
         set_error_handler('on_error');
         if ($oldsize) {
-            if (isMemoryOk($oldsize, "")) {
+            if (isMemoryOk($oldsize, 400, "")) {
                 echo '&hasPreview=true&tfu_x=' . $oldsize[0] . '&tfu_y=' . $oldsize[1] ; // has preview!
             } else {
                 echo '&hasPreview=error'; // too big! - same error massage as hasPreview=false
@@ -1981,18 +2019,21 @@ function tfu_download($file, $enable_file_download) {
     header('Content-type: application/octet-stream');
     header('Content-Length: ' . filesize($file));
     
-    // small chunk size is used for IE!
+    // small chunk size is used for IE! 1024 would be better but has only half the dl speed - 2048 seems to be the best trade off. 
     $fp = fopen($file, 'rb');
-    while ($content = fread($fp, 1024)) {
+    while ($content = fread($fp, 2048)) {
         echo $content;
-        flush();
+        set_error_handler('on_error_no_output');
+        @set_time_limit(20);
+        @flush();
+        @ob_flush(); // some server need this althou on some server this throws a warning 
+        set_error_handler('on_error');
     }
-    fclose($fp);
-    
+    fclose($fp);  
 }
 
 function tfu_zip_download($files, $enable_file_download) {
-    global $zip_folder; // The folder is used to create the temp download files!
+    global $zip_folder, $zip_file_pattern; // The folder is used to create the temp download files!
     if ($enable_file_download == 'false' && !isset($_GET['fullscreen'])) {
         echo 'This action is not enabled!';
         exit(0);
@@ -2009,10 +2050,19 @@ function tfu_zip_download($files, $enable_file_download) {
     $out = fwrite ($fd, $createZip -> getZippedfile());
     fclose ($fd);
     */
-    $fileName = $zip_folder . '/' . $_GET['zipname'];
+    $nrfiles = count($files);
+    
+    if ($zip_file_pattern == '') {
+      $zipName = parseInputParameterFile(trim(my_basename(' ' . $_GET['zipname']))); // fixes that file can be renamed to an upper dir.    
+      $fileName = $zip_folder . '/' . $zipName;
+    } else {
+      // zip file pattern can have the following patterns {number}, {date} e.g. "download-{number}-files_{date}.zip"
+      $newName = str_replace('{number}', $nrfiles, $zip_file_pattern);
+      $newName = str_replace('{date}', date("Y-m-d"), $newName);
+      $fileName = $zip_folder . '/' . $newName;
+    }
     $fd = fopen ($fileName, "wb");
     $createZip = new TFUZipFile($fd);
-    $nrfiles = count($files);
     for ($i = 0; $i < $nrfiles; $i++) {
       $createZip -> addFile($files[$i], my_basename($files[$i]));
     }
@@ -2346,6 +2396,20 @@ function formatSize($size) {
 
 function resetSessionTree() {
   unset($_SESSION["TREE_" . $_SESSION['TFU_ROOT_DIR']]);
+}
+
+function check_multiple_extensions($image, $remove_multiple_php_extension) {
+  if ($remove_multiple_php_extension) {
+    $ext = getExtension($image);
+    if (substr($ext,0,2) != "php") {
+      $image2 = str_replace(".php", "", $image);
+      if ($image != $image2) {
+          tfu_debug("SECURITY WARNING: Please check the file ".$image2.". It was uploaded with an image extensions and also a nested php extension. On some server this is a security problem (multiple extensions) and therefore the .php part of the file name was removed!" );
+          $image = $image2;
+      }
+    }
+  }
+  return $image;
 }
 
 @ob_end_clean();

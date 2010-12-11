@@ -140,7 +140,7 @@ if (!class_exists("WFUFlash")) {
                 echo '<p class="howto">If you select \'Media\' the files are copied where the normal wordpress upload would upload the file (upload/&lt;year&gt;/&lt;month&gt;).<br>If you select \'Wordpress\' you can upload to the main wordpress folder and manage your Wordpress installation.</p>';
             }
             echo '<p>Choose files to upload. You can add titles and description for the media files after the upload on the media library page.</p>';
-            if (!file_exists($reg_path)) {
+            if (false) { // !file_exists($reg_path)
                 if ($istab) {
                     echo '<p>Please <strong>synchronize</strong> the media library after the upload on the "Sync" tab.</p>';
                 } else {
@@ -174,21 +174,21 @@ if ($devOptions['swf_text']) {
   }
 }
 echo '
-swfobject.embedSWF("../wp-content/plugins/wordpress-flash-uploader/tfu/tfu_211.swf", "flashcontent", "650", "340", "8.0.0", "", flashvars, params, attributes);
+swfobject.embedSWF("../wp-content/plugins/wordpress-flash-uploader/tfu/tfu_212.swf", "flashcontent", "650", "340", "8.0.0", "", flashvars, params, attributes);
  
 </script>
 ';
             echo '<br>&nbsp;';
 
-            if (file_exists($reg_path)) {
+            if (true) { // file_exists($reg_path)
                 echo '<div id="status" name="status"><strong>Synchronisation status:</strong> <span id="status_text">Files will be automatically synchronized after upload.</span></div><br>
     <div id="statusframediv" style="display:none;" name="statusframediv"><iframe id="statusframe" name="statusfame" src="about:blank"></iframe></div>';
                 echo '<script type="text/javascript">';
                 echo 'function uploadFinished(loc) {';
-                echo 'document.getElementById("statusframe").src="upload.php?page=wordpress-flash-uploader.php?&import_media_library=true"';
+                echo 'document.getElementById("statusframe").src="upload.php?page=wordpress-flash-uploader.php?printSync=true&import_media_library=true"';
                 echo '}';
                 echo 'function deleteFile(loc) {';
-                echo 'document.getElementById("statusframe").src="upload.php?page=wordpress-flash-uploader.php?&clean_media_library=true"';
+                echo 'document.getElementById("statusframe").src="upload.php?page=wordpress-flash-uploader.php?printSync=true&clean_media_library=true"';
                 echo '} </script>';
             } else {
                 echo '<div id="status" name="status"><strong>Synchronisation status:</strong> Please synchronize the files manually.</div><br>';

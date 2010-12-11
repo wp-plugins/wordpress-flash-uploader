@@ -2,8 +2,8 @@
 Contributors: mdempfle, Michael Dempfle
 Tags: admin, media, upload, synchronize, flash, 2.7, folder, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
-Tested up to: 3.0
-Stable tag: 2.11.1
+Tested up to: 3.0.3
+Stable tag: 2.12
 Donate link: Please check the settings of Wordpress Flash Uploader
 
 'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you additionally manage your whole Wordpress installation and synchronize your media library. 
@@ -58,6 +58,15 @@ Please go to the settings page of Wordpress Flash Uploader. There you find a sma
 
 == Changelog ==
 
+
+= 2.12 =
+ * Updated the flash to TFU 2.12
+ * Now tested up to Wordpress 3.0.3!
+ * Tabs in the media library popup are now available again.
+ * Sync is now triggered by the uploader automatically in the free version!
+ * Delete of files in the flash does now sync the library as well.  
+ * Enhanced file filter for registered users to hide generated thumbnails, middle and large images.  
+   
 = Update for Wordpress 3.0 =
  * Now compatible up to Wordpress 3.0!
  * The tabs in the image popup are not working yet. The wordpress team has changed something I have to find out how to do this now!   
