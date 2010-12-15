@@ -758,10 +758,9 @@ function has_safemode_problem_global()
     $isWindows = substr(PHP_OS, 0, 3) == 'WIN';
     $no_cgi = runsNotAsCgi();
 
-    if (function_exists('posix_getpwuid') && function_exists('posix_getpwuid')) {
-     
+    if (function_exists('posix_getpwuid') && function_exists('posix_getpwuid')) {     
         if (!isset($_SESSION['tfu_posix_geteuid_works'])) {
-          $_SESSION['tfu_posix_geteuid_works'] == 'check';
+          $_SESSION['tfu_posix_geteuid_works'] = 'check';
           $userid = posix_geteuid();
           $userinfo = posix_getpwuid($userid);
           $def_user = array ('apache', 'nobody', 'www');
