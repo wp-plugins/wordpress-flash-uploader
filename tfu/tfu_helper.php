@@ -761,8 +761,8 @@ function has_safemode_problem_global()
     if (function_exists('posix_getpwuid') && function_exists('posix_getpwuid')) {     
         if (!isset($_SESSION['tfu_posix_geteuid_works'])) {
           $_SESSION['tfu_posix_geteuid_works'] = 'check';
-          $userid = posix_geteuid();
-          $userinfo = posix_getpwuid($userid);
+          $userid = @posix_geteuid();
+          $userinfo = @posix_getpwuid($userid);
           $def_user = array ('apache', 'nobody', 'www');
           if (in_array ($userinfo['name'], $def_user)) {
             $no_cgi = true;
