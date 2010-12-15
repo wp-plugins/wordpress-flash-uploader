@@ -70,7 +70,9 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
         $_SESSION['TFU_LAST_UPLOADS'] = array();
     }
     $_SESSION['TFU_UPLOAD_REMAINING'] = $_GET['remaining'];
-
+    
+    if ($enable_upload_debug) tfu_debug("3a. \$_FILES content:\n" . print_r($_FILES, true) );
+    
     foreach ($_FILES as $fieldName => $file) {
         // we check the uploaded files first because we don't know if it's the flash or any other script!
         if ($enable_upload_debug) tfu_debug('4. Check valid extension: ' . $file['name']);
@@ -95,7 +97,7 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
 			
 			      // This is only needed for JFU - ignore this small part if you use TFU standalone:
             $workaround_dir = ($dir == "./../../../..") && is_writeable("./../../../../cache"); // start workaround for some php versions (e.g. 5.0.3!) if you upload to the main folder !
-			      if ($workaround_dir) { 
+		  if ($workaround_dir) { 
               $filename = $dir . '/cache/' . $image; 
             }
             // end JFU
@@ -116,7 +118,7 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
             if (!$uploaded) { 
                 // we normalize even if not selected because saving with the default name failed!
                 $filename = $dir . '/' . (fix_decoding(normalizeFileNames($base_filename),$fix_utf8)); 
-                if ($enable_upload_debug) tfu_debug('5b. Retry move_uploaded_file : ' . $filename);
+                if ($enable_upload_debug) tfu_debug('5b. Retry move_uploaded_file : ' . $file['tmp_name'] . ' -> ' . $filename);
                 if (move_uploaded_file($file['tmp_name'], $filename)) {
                     $uploaded = file_exists($filename);
                 }

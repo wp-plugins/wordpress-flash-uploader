@@ -156,8 +156,8 @@ if (defined('_VALID_TWG')) {
     $remove_multiple_php_extension = true; // New 2.12 - Some servers execute e.g. file.php.gif files which is a security issue. If you don't allow php files to upload please leave this to true because of security reasons.
     $scan_images = true;                 // New 2.12 - Scans images (gif,png,jpg) for php code. This is done by default when no size could be detected. By setting this to true all files are scanned because there are gif exploits around that returns valid sizes!   
     $forbidden_view_file_filter = '';    // New 2.12.x - If you have set $allowed_view_file_extensions = 'all' then you can define a list filters which are not shown! This is the enhanced version of $forbidden_view_file_extensions which will be removed in the next main version! A filter can have full file names and * or ?. e.g. sp*.*, test*.gif. Seperate different filters by , a filter looks maybe like this:  '*.gif,test*.png,hide.txt', if you have a windows server you need php > 5.3 to use this. - Only available for registered users.
-    $zip_file_pattern = 'download-{number}-files_{date}.zip'; // New 2.12.x - // zip file pattern can have the following patterns {number} = number of files in the zip, {date} = currenty date with year,month,day. Please provide the name WITH extension. If the pattern is empty <first filename>.zip is used. 
-  
+    $zip_file_pattern = 'download-{number}-files_{date}.zip'; // New 2.12.x - zip file pattern can have the following patterns {number} = number of files in the zip, {date} = currenty date with year,month,day. Please provide the name WITH extension. If the pattern is empty <first filename>.zip is used. 
+   
     // special extension - a post upload panel - this is only implemented for JFU and not documented yet!
     $post_upload_panel='false';
     /*  This is example data for the post upload panel - this is not documented yet!

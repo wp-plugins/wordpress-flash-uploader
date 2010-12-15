@@ -15,6 +15,7 @@
 defined('_VALID_TWG') or die('Direct Access to this location is not allowed.');
 
 // some globals you can change
+$check_safemode = true;              // New 2.12.x - By default TFU checks if you have a safe mode problem. On some server this test does not work. There you can try to turn it off and test if you can e.g. create directories, upload files to new created directories.
 $session_double_fix = false; // this is only needed if you get errors because of corrupt sessions. If you turn this on a backup is made and checked if the first one is corrupt
 $timezone = ''; // Please set your timezone here if you have problems with timezones - if you need exact times - enter your timezone - see http://www.dynamicwebpages.de/php/timezones.php
 if (function_exists('date_default_timezone_set')) { // php 5.1.x
@@ -755,15 +756,19 @@ function runsNotAsCgi()
 function has_safemode_problem_global()
 {
     $isWindows = substr(PHP_OS, 0, 3) == 'WIN';
-
     $no_cgi = runsNotAsCgi();
 
     if (function_exists('posix_getpwuid') && function_exists('posix_getpwuid')) {
-        $userid = posix_geteuid();
-        $userinfo = posix_getpwuid($userid);
-        $def_user = array ('apache', 'nobody', 'www');
-        if (in_array ($userinfo['name'], $def_user)) {
+     
+        if (!isset($_SESSION['tfu_posix_geteuid_works'])) {
+          $_SESSION['tfu_posix_geteuid_works'] == 'check';
+          $userid = posix_geteuid();
+          $userinfo = posix_getpwuid($userid);
+          $def_user = array ('apache', 'nobody', 'www');
+          if (in_array ($userinfo['name'], $def_user)) {
             $no_cgi = true;
+          }
+          unset($_SESSION['tfu_posix_geteuid_works']);       
         }
     }
     if (ini_get('safe_mode') == 1 && $no_cgi && !$isWindows) {
@@ -772,7 +777,7 @@ function has_safemode_problem_global()
     return false;
 }
 // set a umask that makes the files deletable again!
-if (has_safemode_problem_global() || runsNotAsCgi()) {
+if ($check_safemode && (has_safemode_problem_global() || runsNotAsCgi())) {
     umask(0000); // otherwise you cannot delete files anymore with ftp if you are no the owner!
 } else {
     umask(0022); // Added to make created files/dirs group writable
@@ -2267,7 +2272,7 @@ function sort_data (&$myFiles, &$myDirs, $sort_files_by_date) {
 }
 
 function check_restrictions($dir, $show_root, &$myFiles, $fix_utf8, $status) {
-    global $enable_dir_create_detection;
+    global $enable_dir_create_detection, $check_safemode;
     // this is a check if the dir exists - this is a configuration error!
     if (file_exists($dir)) {
       $status .=  "&dir_exists=true";
@@ -2280,7 +2285,7 @@ function check_restrictions($dir, $show_root, &$myFiles, $fix_utf8, $status) {
     $status .= (is_tfu_deletable($dir) && $show_root) ? "&dir_delete=true" : "&dir_delete=false";
     // new we check if we can create folders - we have to check safemode too!
     set_error_handler("on_error_no_output");
-    $sm_prob = has_safemode_problem_global() && runsNotAsCgi();
+    $sm_prob = $check_safemode && has_safemode_problem_global() && runsNotAsCgi();
 
     if (is_writeable($dir)) {
         if ($enable_dir_create_detection) { // the detection of the safemode does not work on all systems - therefore it can be disabled.
