@@ -14,6 +14,7 @@ if (!class_exists("WFUSettings")) {
 <div class="wfu_reg nounderline">
 <h3>Settings</h3>
 <a href="#wor">Wordpress Options</a> | 
+<a href="#front">Frontend Options</a> | 
 <a href="#bas">Basic Options</a> | 
 <a href="#adv">Advanced Options</a> | 
 <a href="#reg">Registered Options</a>
@@ -47,6 +48,24 @@ if (!class_exists("WFUSettings")) {
 <input type="submit" class="button-primary" name="update_WFUSettings" value="';
             echo _e('Update Settings', 'WFU');
             echo '" /></div>';
+        }
+
+
+        function printFrontendOptions($devOptions) {
+            echo '
+<a name="front"></a>
+<div id="icon-options-general" class="icon_jfu"><br></div>
+<h2>WP Flash Uploader - Frontend Options</h2>
+You can use the flash in the frontend by adding the following shorttag to your article or page: <p><b>[wfu securitykey="'.$devOptions['securitykey'].'"]</b></p>The security key is mandatory while there is an optional parameter \'width\' that has a default of 650 px. If you want to specify the width simply add e.g. width="500". Please note that the uploaded images are NOT synchronized with the media library. This can be done in the administration of Wordpress.
+<table class="form-table">';
+            WFUSettings::printTextInput($devOptions, 'Security key',  'securitykey', 'This is security key which has to be used in the shorttag. This is mandatory because otherwise anyone who can create an article can use the flash. The default security key was randomly generated during installation. Please change the key if you like.');
+            WFUSettings::printTextInput($devOptions, 'Upload folder',  'frontend_upload_folder', 'This is the optional upload folder for the frontend. If no folder is specified the current image upload directory is choosen. If you like a different directory simply add the folder relative to the main Wordpress installation. This makes is e.g. easy to use the uploader for a image gallery and let users without administrator access upload images too.');
+            echo '</table>';
+            echo '<div class="submit">
+<input type="submit" class="button-primary" name="update_WFUSettings" value="';
+            echo _e('Update Settings', 'WFU');
+            echo '" /></div>';
+
         }
 
         function printOptions($devOptions) {

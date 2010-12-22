@@ -3,7 +3,7 @@
 Plugin Name: Wordpress Flash Uploader
 Plugin URI: http://www.tinywebgallery.com/blog/wfu
 Description: The Wordpress Flash Uploader does contain 2 plugins: '<strong>Wordpress Flash Uploader</strong>' and '<strong>Sync Media Library</strong>'. The Wordpress Flash Uploader is a flash uploader that replaces the existing flash uploader and let you manage your whole  WP installation. 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library. 
-Version: 2.12
+Version: 2.12.1
 Author: Michael Dempfle
 Author URI: http://www.tinywebgallery.com
 */
@@ -89,7 +89,10 @@ if (!class_exists("WFU")) {
                 'hide_donate' => 'false',
                 'hide_htaccess' => 'false',
                 'detect_resized' => 'true', 
-                'file_filter' => $unique_sizes_filter   
+                'file_filter' => $unique_sizes_filter,
+                'flash_size' => '650', // default in the backend - can be owerwritten by the frontend
+                'securitykey' => sha1(session_id()),
+                'frontend_upload_folder' => ''    
             );
 
             $wfuOptions = get_option($this->adminOptionsName);
@@ -223,6 +226,7 @@ if (!class_exists("WFU")) {
 
             echo '<div class=wrap><form method="post" action="'. $_SERVER["REQUEST_URI"] . '">';
             WFUSettings::printWordpressOptions($wfuOptions);
+            WFUSettings::printFrontendOptions($wfuOptions); 
             WFUSettings::printOptions($wfuOptions);
             WFUSettings::printAdvancedOptions();
             WFUSettings::printRegisteredSettings($wfuOptions);
@@ -302,6 +306,43 @@ if (!class_exists("WFU")) {
             }
             return $links;
         }
+        
+         // [wfu]
+         function wfu_func($atts) {
+	        extract(shortcode_atts(array(
+		   'securitykey' => 'xxx',
+		   'width' => '650',
+	        ), $atts));	          
+	           ob_start();
+                @session_start();
+                ob_end_clean();
+
+               $_SESSION["IS_ADMIN"] = "true";
+               $devOptions = $this->getAdminOptions();
+               
+               if ($devOptions['securitykey'] == $securitykey) {
+                 if (is_numeric ($width)) {
+                   $devOptions['flash_size'] = $width;
+                 }
+                 WFUFlash::storeSettingsToSession($devOptions); 
+                 unset($_SESSION["IS_ADMIN"]);
+	            $_SESSION["IS_FRONTEND"] = "true";
+	            
+	            if ($devOptions['frontend_upload_folder'] == '') {
+	              WFUFlash::setUploadFolder();
+	            } else {
+                   $_SESSION["TFU_FOLDER"] =  '../../../../'. $devOptions['frontend_upload_folder'];
+                 }           
+                  $js = '<script type="text/javascript">function uploadFinished(loc) {}; function deleteFile(loc) {} </script>';
+                     
+                 return WFUFlash::printFlash($devOptions , '', 'frontend') . $js;
+               } else {
+                 return '<div style="padding:10px; margin:10px; border: 1px solid #555555; background-color: #f8f8f8; text-align:center; width:330px;">A wrong security key is used - please read the documentation how to use the flash in the frontend.</div>';
+               }
+             }
+        
+        
+        
     } } //End Class WFU
 
 if (class_exists("WFU")) {
@@ -345,6 +386,8 @@ if (isset($dl_pluginSeries)) {
     add_action('media_upload_wfu', array(&$dl_pluginSeries, 'tab_wfu_handler'));
     //Filters
     add_filter('plugin_action_links', array(&$dl_pluginSeries, 'aktt_plugin_action_links'),10,2);
+
+    add_shortcode('wfu', array(&$dl_pluginSeries,'wfu_func'));
 
 }
 

@@ -11,17 +11,187 @@ if (!class_exists("WFUFlash")) {
             $show_flash = true;
             $htaccess_path = dirname(__FILE__) . '/../tfu/.htaccess';
             $reg_path = dirname(__FILE__) . '/../tfu/twg.lic.php';
-
-            $relative_dir = dirname($_SERVER['PHP_SELF']);
-            $relative_dir = rtrim($relative_dir,"\\/.") . '/'; // we replace to get a consistent output with different php versions!
-            $base_dir = "../wp-content/plugins/wordpress-flash-uploader/tfu";
-
+           
             ob_start();
             @session_start();
             ob_end_clean();
-
             $_SESSION["IS_ADMIN"] = "true";
             WFUFlash::storeSettingsToSession($devOptions);
+            WFUFlash::setUploadFolder();
+
+            if ($istab) {
+                echo '<div style="clear: both;"></div>';
+            }
+            echo '<form method="post" action="' . $_SERVER["REQUEST_URI"] . '">';
+            echo '<div class="wrap wfupadding">';
+            echo '<div id="icon-upload" class="icon_jfu"><br></div>';
+            echo '<h2>WP Flash Uploader</h2>';
+
+            if (current_user_can('manage_options') && !$istab) {
+                echo '<p>Please select if you want to upload a media file or if you want to manage Wordpress.</p>';
+                echo '<div class="submit" style="padding:0px;">&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="upload_media" value="';
+                echo _e('Media', 'WFU');
+                echo  '" />&nbsp;&nbsp;&nbsp;&nbsp;';
+                echo '<input type="submit" name="upload_wordpress" value="';
+                echo _e('Wordpress', 'WFU');
+                echo '" />';
+
+                echo '<p class="howto">If you select \'Media\' the files are copied where the normal wordpress upload would upload the file (upload/&lt;year&gt;/&lt;month&gt;).<br>If you select \'Wordpress\' you can upload to the main wordpress folder and manage your Wordpress installation.</p>';
+            }
+            echo '<p>Choose files to upload. You can add titles and description for the media files after the upload on the media library page.</p>';
+            if (false) { // !file_exists($reg_path)
+                if ($istab) {
+                    echo '<p>Please <strong>synchronize</strong> the media library after the upload on the "Sync" tab.</p>';
+                } else {
+                    echo '<p>Please <strong>synchronize</strong> the media library after the upload on the "Sync media library" menu entry.</p>';
+                }
+            }
+            
+            
+            echo WFUFlash::printFlash($devOptions);
+   
+            echo '<br>&nbsp;';
+
+            if (true) { // file_exists($reg_path)
+                echo '<div id="status" name="status"><strong>Synchronisation status:</strong> <span id="status_text">Files will be automatically synchronized after upload.</span></div><br>
+    <div id="statusframediv" style="display:none;" name="statusframediv"><iframe id="statusframe" name="statusfame" src="about:blank"></iframe></div>';
+                echo '<script type="text/javascript">';
+                echo 'function uploadFinished(loc) {';
+                echo 'document.getElementById("statusframe").src="upload.php?page=wordpress-flash-uploader.php?printSync=true&import_media_library=true"';
+                echo '}';
+                echo 'function deleteFile(loc) {';
+                echo 'document.getElementById("statusframe").src="upload.php?page=wordpress-flash-uploader.php?printSync=true&clean_media_library=true"';
+                echo '} </script>';
+            } else {
+                echo '<div id="status" name="status"><strong>Synchronisation status:</strong> Please synchronize the files manually.</div><br>';
+            }
+
+            if (!$istab && current_user_can('manage_options') && $devOptions['hide_htaccess'] == 'false') {
+                if (!file_exists($htaccess_path)) {
+                    echo '<div class="setting-description" style="float:left">If you get the error message in the flash that you have to copy the provided <br>.htaccess file please click on the button on the right to create this file.</div>';
+                    echo '<div class="submit" style="padding:5px; style="float:left">&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="create_htaccess" value="';
+                    echo _e('Create .htaccess', 'WFU');
+                    echo  '" />';
+                } else {
+                    echo '<div class="howto" style="float:left">You have a .htaccess file in your flash directory. If your upload <br>still not work please remove this file by clicking on the right button.<br>Please go to <a target="blank" class="nounderline" href="http://blog.tinywebgallery.com/wfu/wfu-faq/">blog.tinywebgallery.com/wfu/wfu-faq/</a> for more help.</div>';
+                    echo '<div class="submit" style="padding:5px; margin-left:20px; float:left;">&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="delete_htaccess" value="';
+                    echo _e('Delete .htaccess', 'WFU');
+                    echo  '" />';
+                }
+            }
+            echo '</div></form><div style="clear:both" />';
+
+            if (!$istab && $devOptions['hide_donate'] == 'false') {
+                echo '<br><table><tr><td>You like this plugin? Support the development with a small donation. </td><td>&nbsp;&nbsp;&nbsp;<A target="_blank" HREF="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=paypal%40mdempfle%2ede&item_name=WP%20Flash%20Uploader&item_number=Support%20Open%20Source&no_shipping=0&no_note=1&tax=0&currency_code=EUR&lc=EN&bn=PP%2dDonationsBF&charset=UTF%2d8"><img src="../wp-content/plugins/wordpress-flash-uploader/img/btn_donate_SM.gif"></A></td></tr></table>';
+            }
+        }
+
+        function create_htaccess() {
+            $filename = dirname(__FILE__) . "/../tfu/.htaccess";
+            ob_start();
+            $file = @fopen($filename, 'w');
+            @fputs($file, "SecFilterEngine Off\nSecFilterScanPOST Off");
+            @fclose($file);
+            ob_end_clean();
+            if (file_exists($filename)) {
+                echo '<div class="updated"><p><strong>';
+                echo 'The .htaccess file was created successfully.';
+
+            } else {
+                echo '<div class="error"><p><strong>';
+                echo 'The .htaccess file could not be created. Please make the folder wp-content/plugins/tfu writable. You can change this permission back after the file was created.';
+            }
+            echo '</p></strong></div>';
+        }
+
+        function delete_htaccess() {
+            $file = dirname(__FILE__) . "/../tfu/.htaccess";
+            @unlink($file);
+            echo '<div class="updated"><p><strong>';
+            echo 'The .htaccess file was deleted.';
+            echo '</p></strong></div>';
+
+        }
+
+        function storeSettingsToSession($devOptions) {
+            global $current_user;
+
+            if (!empty($devOptions)) {
+                foreach ($devOptions as $key => $option) {
+                    $_SESSION['TFU_' . strtoupper($key)] = $option;
+                }
+            }
+            get_currentuserinfo();
+            $_SESSION['TFU_USER'] =  $current_user->user_login;
+            $_SESSION['TFU_USER_EMAIL'] = $current_user->user_email;
+            $_SESSION['TFU_USER_ID'] = $current_user->ID;
+        }
+        
+        function mkdir_recursive($pathname)
+        { 
+            is_dir(dirname($pathname)) || WFUFlash::mkdir_recursive(dirname($pathname));
+            return is_dir($pathname) || @mkdir($pathname);
+        }
+        
+        function printFlash($devOptions, $rel_dir = "../", $admin = 'true') {    
+            $htaccess_path = dirname(__FILE__) . '/../tfu/.htaccess'; 
+            $relative_dir = dirname($_SERVER['PHP_SELF']);
+            $relative_dir = rtrim($relative_dir,"\\/.") . '/'; // we replace to get a consistent output with different php versions!
+            $base_dir = $rel_dir . "wp-content/plugins/wordpress-flash-uploader/tfu";
+          
+            ob_start();
+            $id = session_id();
+            session_write_close();
+            ob_end_clean();
+          
+            $output = '
+           <script type="text/javascript" src="'.$rel_dir.'wp-content/plugins/wordpress-flash-uploader/tfu/swfobject.js"></script>
+           <script type="text/javascript">
+           function debugError(errorString) { }
+           function refreshFileList() {
+             var obj = document.getElementById("flash_tfu");
+             if (obj && typeof obj.refreshFileList != "undefined") {
+             obj.refreshFileList();
+             }
+           }           
+               document.write(\'<div id="flashcontent"><div class="noflash">TWG Flash Uploader requires at least Flash 8.<br>Please go to <a target="blank" href="http://www.adobe.com/go/EN_US-H-GET-FLASH">adobe</a> and install it.';
+            if (file_exists($htaccess_path)) {
+                $output .= '<p>You have created a .htaccess file which seems not to help on your server. Please go to <a target="blank" class="nounderline" href="http://blog.tinywebgallery.com/wfu/wfu-faq/">blog.tinywebgallery.com/wfu/wfu-faq/</a> for more help.</p>';
+            }
+            $output .= '<\/div><\/div>\');
+
+          var flashvars = {};
+          var params = {};
+          var attributes = { id: "flash_tfu", name: "flash_tfu" };
+          
+          params.allowfullscreen = "true";
+          flashvars.wordpress="'.$admin.'";
+          flashvars.session_id="'. $id .'";	
+          flashvars.base="'.$base_dir.'";
+          flashvars.relative_dir="'.$relative_dir.'";';
+          if ($width == '650') {
+            echo 'params.scale = "noScale"';
+          } 
+          if ($devOptions['swf_text']) {
+            $elements = split("&",$devOptions['swf_text']);
+            foreach ($elements as $element) {
+              $output .= "flashvars." . str_replace("=", "=\"", $element) . "\";";
+            }
+          }
+          
+          $width = $devOptions['flash_size'];   
+          $height=floor($width*(340/650));
+          if ($height > 390) $height = floor($height * 0.95);
+          
+          $output .= '
+          swfobject.embedSWF("'.$rel_dir.'wp-content/plugins/wordpress-flash-uploader/tfu/tfu_212.swf", "flashcontent", "'.$width.'", "'.$height.'", "8.0.0", "", flashvars, params, attributes);
+
+          </script>
+          ';          
+          return $output;
+     }
+     
+     function setUploadFolder() {
 
             // the options we need from Wordpress:
             $uploads_use_yearmonth_folders = get_option('uploads_use_yearmonth_folders');
@@ -116,150 +286,11 @@ if (!class_exists("WFUFlash")) {
             }
 
             $_SESSION["TFU_FOLDER"] =  $folder;
-            ob_start();
-            $id = session_id();
-            session_write_close();
-            ob_end_clean();
-            if ($istab) {
-                echo '<div style="clear: both;"></div>';
             }
-            echo '<form method="post" action="' . $_SERVER["REQUEST_URI"] . '">';
-            echo '<div class="wrap wfupadding">';
-            echo '<div id="icon-upload" class="icon_jfu"><br></div>';
-            echo '<h2>WP Flash Uploader</h2>';
-
-            if (current_user_can('manage_options') && !$istab) {
-                echo '<p>Please select if you want to upload a media file or if you want to manage Wordpress.</p>';
-                echo '<div class="submit" style="padding:0px;">&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="upload_media" value="';
-                echo _e('Media', 'WFU');
-                echo  '" />&nbsp;&nbsp;&nbsp;&nbsp;';
-                echo '<input type="submit" name="upload_wordpress" value="';
-                echo _e('Wordpress', 'WFU');
-                echo '" />';
-
-                echo '<p class="howto">If you select \'Media\' the files are copied where the normal wordpress upload would upload the file (upload/&lt;year&gt;/&lt;month&gt;).<br>If you select \'Wordpress\' you can upload to the main wordpress folder and manage your Wordpress installation.</p>';
-            }
-            echo '<p>Choose files to upload. You can add titles and description for the media files after the upload on the media library page.</p>';
-            if (false) { // !file_exists($reg_path)
-                if ($istab) {
-                    echo '<p>Please <strong>synchronize</strong> the media library after the upload on the "Sync" tab.</p>';
-                } else {
-                    echo '<p>Please <strong>synchronize</strong> the media library after the upload on the "Sync media library" menu entry.</p>';
-                }
-            }
-            echo '
-           <script type="text/javascript" src="../wp-content/plugins/wordpress-flash-uploader/tfu/swfobject.js"></script>
-<script type="text/javascript">
-   document.write(\'<div id="flashcontent"><div class="noflash">TWG Flash Uploader requires at least Flash 8.<br>Please go to <a target="blank" href="http://www.adobe.com/go/EN_US-H-GET-FLASH">adobe</a> and install it.';
-            if (file_exists($htaccess_path)) {
-                echo '<p>You have created a .htaccess file which seems not to help on your server. Please go to <a target="blank" class="nounderline" href="http://blog.tinywebgallery.com/wfu/wfu-faq/">blog.tinywebgallery.com/wfu/wfu-faq/</a> for more help.</p>';
-            }
-            echo '<\/div><\/div>\');
-
-var flashvars = {};
-var params = {};
-var attributes = {};
-
-params.allowfullscreen = "true";
-params.scale = "noScale";
-flashvars.wordpress="true";
-flashvars.session_id="'. $id .'";	
-flashvars.base="'.$base_dir.'";
-flashvars.relative_dir="'.$relative_dir.'";';
-
-if ($devOptions['swf_text']) {
-  $elements = split("&",$devOptions['swf_text']);
-  foreach ($elements as $element) {
-    echo "flashvars." . str_replace("=", "=\"", $element) . "\";";
-  }
-}
-echo '
-swfobject.embedSWF("../wp-content/plugins/wordpress-flash-uploader/tfu/tfu_212.swf", "flashcontent", "650", "340", "8.0.0", "", flashvars, params, attributes);
- 
-</script>
-';
-            echo '<br>&nbsp;';
-
-            if (true) { // file_exists($reg_path)
-                echo '<div id="status" name="status"><strong>Synchronisation status:</strong> <span id="status_text">Files will be automatically synchronized after upload.</span></div><br>
-    <div id="statusframediv" style="display:none;" name="statusframediv"><iframe id="statusframe" name="statusfame" src="about:blank"></iframe></div>';
-                echo '<script type="text/javascript">';
-                echo 'function uploadFinished(loc) {';
-                echo 'document.getElementById("statusframe").src="upload.php?page=wordpress-flash-uploader.php?printSync=true&import_media_library=true"';
-                echo '}';
-                echo 'function deleteFile(loc) {';
-                echo 'document.getElementById("statusframe").src="upload.php?page=wordpress-flash-uploader.php?printSync=true&clean_media_library=true"';
-                echo '} </script>';
-            } else {
-                echo '<div id="status" name="status"><strong>Synchronisation status:</strong> Please synchronize the files manually.</div><br>';
-            }
-
-            if (!$istab && current_user_can('manage_options') && $devOptions['hide_htaccess'] == 'false') {
-                if (!file_exists($htaccess_path)) {
-                    echo '<div class="setting-description" style="float:left">If you get the error message in the flash that you have to copy the provided <br>.htaccess file please click on the button on the right to create this file.</div>';
-                    echo '<div class="submit" style="padding:5px; style="float:left">&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="create_htaccess" value="';
-                    echo _e('Create .htaccess', 'WFU');
-                    echo  '" />';
-                } else {
-                    echo '<div class="howto" style="float:left">You have a .htaccess file in your flash directory. If your upload <br>still not work please remove this file by clicking on the right button.<br>Please go to <a target="blank" class="nounderline" href="http://blog.tinywebgallery.com/wfu/wfu-faq/">blog.tinywebgallery.com/wfu/wfu-faq/</a> for more help.</div>';
-                    echo '<div class="submit" style="padding:5px; margin-left:20px; float:left;">&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="delete_htaccess" value="';
-                    echo _e('Delete .htaccess', 'WFU');
-                    echo  '" />';
-                }
-            }
-            echo '</div></form><div style="clear:both" />';
-
-            if (!$istab && $devOptions['hide_donate'] == 'false') {
-                echo '<br><table><tr><td>You like this plugin? Support the development with a small donation. </td><td>&nbsp;&nbsp;&nbsp;<A target="_blank" HREF="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=paypal%40mdempfle%2ede&item_name=WP%20Flash%20Uploader&item_number=Support%20Open%20Source&no_shipping=0&no_note=1&tax=0&currency_code=EUR&lc=EN&bn=PP%2dDonationsBF&charset=UTF%2d8"><img src="../wp-content/plugins/wordpress-flash-uploader/img/btn_donate_SM.gif"></A></td></tr></table>';
-            }
-        }
-
-        function create_htaccess() {
-            $filename = dirname(__FILE__) . "/../tfu/.htaccess";
-            ob_start();
-            $file = @fopen($filename, 'w');
-            @fputs($file, "SecFilterEngine Off\nSecFilterScanPOST Off");
-            @fclose($file);
-            ob_end_clean();
-            if (file_exists($filename)) {
-                echo '<div class="updated"><p><strong>';
-                echo 'The .htaccess file was created successfully.';
-
-            } else {
-                echo '<div class="error"><p><strong>';
-                echo 'The .htaccess file could not be created. Please make the folder wp-content/plugins/tfu writable. You can change this permission back after the file was created.';
-            }
-            echo '</p></strong></div>';
-        }
-
-        function delete_htaccess() {
-            $file = dirname(__FILE__) . "/../tfu/.htaccess";
-            @unlink($file);
-            echo '<div class="updated"><p><strong>';
-            echo 'The .htaccess file was deleted.';
-            echo '</p></strong></div>';
-
-        }
-
-        function storeSettingsToSession($devOptions) {
-            global $current_user;
-
-            if (!empty($devOptions)) {
-                foreach ($devOptions as $key => $option) {
-                    $_SESSION['TFU_' . strtoupper($key)] = $option;
-                }
-            }
-            get_currentuserinfo();
-            $_SESSION['TFU_USER'] =  $current_user->user_login;
-            $_SESSION['TFU_USER_EMAIL'] = $current_user->user_email;
-            $_SESSION['TFU_USER_ID'] = $current_user->ID;
-        }
+     
+     
         
-        function mkdir_recursive($pathname)
-        { 
-            is_dir(dirname($pathname)) || WFUFlash::mkdir_recursive(dirname($pathname));
-            return is_dir($pathname) || @mkdir($pathname);
-        }
+        
         
     }}
 ?>

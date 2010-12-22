@@ -72,6 +72,9 @@ flush();
             echo '<script type="text/javascript">
       if (window.parent.frames[window.name] && (parent.document.getElementsByTagName(\'frameset\').length <= 0)) {
         window.parent.document.getElementById("status_text").innerHTML = "Synchronisation finished.";
+        if (window.parent.refreshFileList) {
+          window.parent.refreshFileList();
+        }
       }</script>';
 
             if (isset($_POST['synchronize_media_library'])

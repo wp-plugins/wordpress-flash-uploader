@@ -24,7 +24,7 @@ defined( '_VALID_TWG' ) or die( 'Direct Access to this location is not allowed.'
 if (isset($_SESSION["IS_ADMIN"])) {
   $wp_path = "../wp-content/plugins/wordpress-flash-uploader/tfu/";
 } else if (isset($_SESSION["IS_FRONTEND"])) {
-  // $joomla_path = "administrator/components/com_joomla_flash_uploader/tfu/";
+  $wp_path = "wp-content/plugins/wordpress-flash-uploader/tfu/";
 } else { // we only show the info.
   return;
 }

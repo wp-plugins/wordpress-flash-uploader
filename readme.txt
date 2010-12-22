@@ -3,10 +3,10 @@ Contributors: mdempfle, Michael Dempfle
 Tags: admin, media, upload, synchronize, flash, 2.7, folder, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
 Tested up to: 3.0.3
-Stable tag: 2.12
+Stable tag: 2.12.1
 Donate link: Please check the settings of Wordpress Flash Uploader
 
-'Wordpress Flash Uploader' is a flash uploader which let you additionally manage your whole Wordpress installation and synchronize your media library. 
+'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you additionally manage your whole Wordpress installation and synchronize your media library. 
 
 == Description ==
 
@@ -14,7 +14,8 @@ Donate link: Please check the settings of Wordpress Flash Uploader
 and let you manage your whole Wordpress installation. 
 The Wordpress Flash Uploader does contain 2 plugins: 'Wordpress Flash Uploader' and 'Sync Media Library'. 
 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your 
-upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library. 
+upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library.
+Since WFU 2.12.1 it is also possible to add the flash to the site! See the frontend settings for details. 
 
 = Motivation: =
 Wordpress has a flash uploader which was not working on any of my servers. So I decided to write a 
@@ -51,6 +52,7 @@ only restricted by their servers. And most if the problems can be solved!
 == Screenshots ==
 1. The Wordpress Flash Uploader page where you can upload images
 2. The Synch Media Library page where you can synchronize your upload folder with the Media Library
+3. The Wordpress Flash Uploader included in the site directly with the shortapi
 
 == Donation ==
 
@@ -58,6 +60,9 @@ Please go to the settings page of Wordpress Flash Uploader. There you find a sma
 
 == Changelog ==
 
+= 2.12.1 =
+* The flash can now be included into the site by [wfu securitykey=<see settings>] - See the settings page for details and the new screenshot.
+* Updated the flash to TFU 2.12.1
 
 = 2.12 =
  * Updated the flash to TFU 2.12
