@@ -1749,7 +1749,7 @@ function tfu_rename_file($dir, $file, $enable_file_rename, $keep_file_extension,
     if ($keep_file_extension == 'true') {
         $newNameEx = getExtension($newName);
         $fileEx = getExtension($file);
-        if ($newNameEx != $fileEx) {
+        if (strtolower($newNameEx) != strtolower($fileEx)) {
             echo 'This action is not allowed. Changing file extensions is disabled because of security issues!';
             exit(0);
         }

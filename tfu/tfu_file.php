@@ -48,6 +48,10 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['
     // if you have more complex filenames you can use the index
     $action = parseInputParameter($_GET['action']);
     
+    if ($enable_enhanced_debug) {
+      tfu_debug("Action:" . $action . "; Directory: " . $dir);
+    }
+    
     // The extra functionality for twg is on an exern class to make updating much easier
     if (file_exists('twg_plugin.php')) {
       include_once('twg_plugin.php');
@@ -177,7 +181,7 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['
         } 
         store_temp_session();
         $size = $nrFiles . " files (" . formatSize($size) . ")"; // formating of the display can be done here!
-        echo "&tfufiles=" . $size . "|" . $files . "&tfudirs=" . $dirs . $status . "&dirtext=" . $dirsub . $mem_errors . $upload_ok . $baseurl;
+       echo "&tfufiles=" . $size . "|" . $files . "&tfudirs=" . $dirs . $status . "&dirtext=" . $dirsub . $mem_errors . $upload_ok . $baseurl;
     } else {
         // shows an error message that the expected index was not send
         echo '&result=index'; 

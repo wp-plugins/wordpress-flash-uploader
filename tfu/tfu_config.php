@@ -36,7 +36,7 @@ if (defined('_VALID_TWG')) {
     $resize_data = '100000,1280,1024,800'; // The data for the resize dropdown
     $resize_label = 'Original,1280,1024,800'; // The labels for the resize dropdown
     $resize_default = '0';               // The preselected entry in the dropdown (1st = 0)
-    $allowed_file_extensions = 'all'; // 'jpeg,gif,png,jpg';    // Allowed file extensions! 'all' allowes all types - this list is the supported files in the browse dropdown! If this field is empty then the upload grid is removed and the server only view is enabled. Please note: The filter of the file chooser dialog is limited. Don't use more than ~25 extensions. If you specify more TFU automatically uses 'All Files' - Then all files are listed and not supported extensions are checked by the flash after pressing 'Open'.
+    $allowed_file_extensions = 'jpg'; // 'jpeg,gif,png,jpg';    // Allowed file extensions! 'all' allowes all types - this list is the supported files in the browse dropdown! If this field is empty then the upload grid is removed and the server only view is enabled. Please note: The filter of the file chooser dialog is limited. Don't use more than ~25 extensions. If you specify more TFU automatically uses 'All Files' - Then all files are listed and not supported extensions are checked by the flash after pressing 'Open'.
     $forbidden_file_extensions = 'php';  // Forbidden file extensions! - only usefull if you use 'all' and you want to skip some exensions! php e.g. means php* ! then php4 and so on is covered as well!
     // Enhanced features - this are only defaults! if TFU detects that this is not possible this functions are disabled!
     $hide_remote_view = '';              // If you want to disable the remote view set 'true' as value!
