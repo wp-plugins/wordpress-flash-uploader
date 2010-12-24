@@ -1756,7 +1756,7 @@ function tfu_rename_file($dir, $file, $enable_file_rename, $keep_file_extension,
     }
 
     $newName = $dir . '/' . $newName;
-    if (!file_exists($newName)) {
+    if (!file_exists($newName) || ($file != $newName && strtolower($file) == strtolower($newName) )) {  // file_exists does not check case sensitive on windows
         if (is_writeable($file)) {
             $result = @rename($file, $newName);
             if ($result) {
