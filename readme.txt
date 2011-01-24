@@ -2,8 +2,8 @@
 Contributors: mdempfle, Michael Dempfle
 Tags: admin, media, upload, synchronize, flash, 2.7, folder, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
-Tested up to: 3.0.3
-Stable tag: 2.12.1
+Tested up to: 3.0.4
+Stable tag: 2.12.2
 Donate link: Please check the settings of Wordpress Flash Uploader
 
 'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you additionally manage your whole Wordpress installation and synchronize your media library. 
@@ -60,6 +60,9 @@ Please go to the settings page of Wordpress Flash Uploader. There you find a sma
 
 == Changelog ==
 
+= 2.12.2 =
+* Fix for permalinks. Enabling this was not showing the flash in the frontend because relative dirs where used. Now I se the absolute path.
+* 
 = 2.12.1 =
 * The flash can now be included into the site by [wfu securitykey=<see settings>] - See the settings page for details and the new screenshot.
 * Updated the flash to TFU 2.12.1
