@@ -61,8 +61,8 @@ Please go to the settings page of Wordpress Flash Uploader. There you find a sma
 == Changelog ==
 
 = 2.12.2 =
-* Fix for permalinks. Enabling this was not showing the flash in the frontend because relative dirs where used. Now I se the absolute path.
-* 
+* Fix for permalinks. Enabling this was not showing the flash in the frontend because relative dirs where used. Now the absolute path is used.
+
 = 2.12.1 =
 * The flash can now be included into the site by [wfu securitykey=<see settings>] - See the settings page for details and the new screenshot.
 * Updated the flash to TFU 2.12.1
