@@ -2,7 +2,7 @@
 Contributors: mdempfle, Michael Dempfle
 Tags: admin, media, upload, synchronize, flash, 2.7, folder, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
-Tested up to: 3.0.4
+Tested up to: 3.0.5
 Stable tag: 2.12.2
 Donate link: Please check the settings of Wordpress Flash Uploader
 
