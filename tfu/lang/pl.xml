@@ -98,7 +98,7 @@ TWG Flash Uploader 2.8 - polish language file
 	<LANG><KEY>folder_rename</KEY><VALUE>Nazwa aktualnego katalogu została zmieniona na '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>Nazwa katalogu nie może być pusta.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>Nazwa katalogu nie może być zmieniona ponieważ jest to katalog główny.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Katalog '%s' istnieje. Proszę wybrać inną nazwę</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Katalog '%s' istnieje. Proszę wybrać inną nazwę</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>Nazwa pliku nie może być pusta.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>Nazwa pliku '%s' nie może być zmieniona. Plik już istnieje.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>Nazwa pliku '%s' nie może być zmieniona.</VALUE></LANG>

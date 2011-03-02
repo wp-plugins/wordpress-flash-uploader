@@ -101,7 +101,7 @@ are not displayed properly!
 	<LANG><KEY>folder_rename</KEY><VALUE>Pasta actual renomeada para '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>O nome da pasta não pode permanecer vazio.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>A pasta de origem não pode ser renomeada.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>A pasta '%s' já existe. escolha outro nome.</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>A pasta '%s' já existe. escolha outro nome.</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>O nome do ficheiro não pode permanecer vazio.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>O ficheiro '%s' não pode ser renomeado. O ficheiro já existe.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>O ficheiro '%s' não pode ser renomeado.</VALUE></LANG>

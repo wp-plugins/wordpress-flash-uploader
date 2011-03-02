@@ -100,7 +100,7 @@ Updated 2008-09-11
 	<LANG><KEY>folder_rename</KEY><VALUE>Namnet på aktuell mapp har ändrats till '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>Ett mappnamn måste anges.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>Namnet på mappen kan inte ändras eftersom den är huvudmapp.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Mappen '%s' finns redan. Välj ett annat namn.</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Mappen '%s' finns redan. Välj ett annat namn.</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>Ett filnamn måste anges.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>Namnet på filen '%s' kan inte ändras. En fil med det nya namnet finns redan.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>Namnet på filen '%s' kan inte ändras.</VALUE></LANG>

@@ -98,7 +98,7 @@ TWG Flash Uploader 2.10.x - Hungarian (formal) language file
 	<LANG><KEY>folder_rename</KEY><VALUE>A mappa átnevezése megtörtént, új neve: '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>A mappa új neve nem lehet üres.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>A mappát nem lehet átnevezni, mert az a gyökérmappa.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>A(z) '%s' mappa már létezik. Kérem válasszon más nevet.</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>A(z) '%s' mappa már létezik. Kérem válasszon más nevet.</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>Az új fájlnév nem lehet üres.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>A(z) '%s' fájl átnevezése sikertelen, a célfájl már létezik.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>A(z) '%s' fájl átnevezése sikertelen.</VALUE></LANG>

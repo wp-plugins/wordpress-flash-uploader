@@ -1,7 +1,12 @@
 <?php
 /**
+ *   Wordpress Flash uploader 2.13.x  
+ *
  *   This file contains the methods used by the synch part from the WFU class
  *
+ *   Copyright (c) 2004-2011 TinyWebGallery
+ *   Author: Michael Dempfle
+ *   Author URI: http://www.tinywebgallery.com 
  */
 
 if (!class_exists("WFUSync")) {
@@ -9,12 +14,21 @@ if (!class_exists("WFUSync")) {
 
         function printSync($devOptions, $istab) {
 
+            // now we check all possible actions if the correct nonce is set.
+            if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library'])  || isset($_GET['clean_media_library']) ) {
+                $nonce=$_POST['wfunonce'];
+                if (! wp_verify_nonce($nonce, 'wfu-nonce') ) die('Security check failed!');
+            } 
+            // nounce is set porperly - we continue...   
+            
+            echo '<div class="wrap wfupadding">';
+            $nonce= wp_create_nonce ('wfu-nonce'); 
+            echo '<form method="post" action="'. $_SERVER["REQUEST_URI"] . '">';       
+            echo '<input type="hidden" name="wfunonce" value="'.$nonce.'">';
             // this is printed first to get a header while generating thumbnails.
-            echo '<div class="wrap wfupadding">
-<form method="post" action="'. $_SERVER["REQUEST_URI"] . '">
-<div id="icon-upload" class="icon_jfu"><br></div>
-<h2>Synchronize Media Library</h2>';
-flush();
+            echo '<div id="icon-upload" class="icon_jfu"><br></div>
+                  <h2>Synchronize Media Library</h2>';
+            flush();
             $mlf = WFUSync::getMediaLibraryFiles();
             $uff = WFUSync::getUploadFolderFiles('../' . WFUSync::getUploadPath());
             $enable_sych = ($uff !== false);
@@ -152,9 +166,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
             if (!$istab && $devOptions['hide_donate'] == 'false') {
                 echo '
     <br>&nbsp;
-    <table><tr><td>You like this plugin? Support the development with a small donation. </td><td>&nbsp;&nbsp;&nbsp;<A target="_blank" HREF="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=paypal%40mdempfle%2ede&item_name=WP%20Flash%20Uploader&item_number=Support%20Open%20Source&no_shipping=0&no_note=1&tax=0&currency_code=EUR&lc=EN&bn=PP%2dDonationsBF&charset=UTF%2d8"><img src="../wp-content/plugins/wordpress-flash-uploader/img/btn_donate_SM.gif"></A></td></tr></table>
-    
-            
+    <table><tr><td>You like this plugin? Support the development with a small donation. </td><td>&nbsp;&nbsp;&nbsp;<A target="_blank" HREF="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=paypal%40mdempfle%2ede&item_name=WP%20Flash%20Uploader&item_number=Support%20Open%20Source&no_shipping=0&no_note=1&tax=0&currency_code=EUR&lc=EN&bn=PP%2dDonationsBF&charset=UTF%2d8"><img src="../wp-content/plugins/wordpress-flash-uploader/img/btn_donate_SM.gif"></A></td></tr></table>          
     ';    
             }
             }

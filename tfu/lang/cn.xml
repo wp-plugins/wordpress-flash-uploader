@@ -99,7 +99,7 @@ TWG Flash Uploader 2.8 - chinese language file,  by baijianpeng ( http://www.joo
 	<LANG><KEY>folder_rename</KEY><VALUE>原目录名称更名为 '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>新目录名称不能是空白！</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>目录不能被更名，因为是根目录</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>目录 '%s' 已存在，请选择其他名称</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>目录 '%s' 已存在，请选择其他名称</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>新文件名称不能是空白！</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>文件 '%s' 不能被更名，文件已经存在</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>文件 '%s 不能被更名</VALUE></LANG>

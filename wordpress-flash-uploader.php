@@ -3,7 +3,7 @@
 Plugin Name: Wordpress Flash Uploader
 Plugin URI: http://www.tinywebgallery.com/blog/wfu
 Description: The Wordpress Flash Uploader does contain 2 plugins: '<strong>Wordpress Flash Uploader</strong>' and '<strong>Sync Media Library</strong>'. The Wordpress Flash Uploader is a flash uploader that replaces the existing flash uploader and let you manage your whole  WP installation. 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library. 
-Version: 2.12.2
+Version: 2.13
 Author: Michael Dempfle
 Author URI: http://www.tinywebgallery.com
 */
@@ -22,6 +22,7 @@ if (!class_exists("WFU")) {
         var $wfu_flash;
         var $wfu_settings;
         var $wfu_sync;
+        var $nonce;
 
         function WFU() { //constructor
             $wfu_flash = new WFUFlash();
@@ -160,9 +161,15 @@ if (!class_exists("WFU")) {
         function printAdminPage() {
             $wfuOptions = $this->getAdminOptions();
 
+             // now we check all possible actions if the correct nonce is set.
+            if (isset($_POST['update_WFUSettings']) || isset($_POST['register_WFU'])  || isset($_GET['unregister_WFU']) ) {
+                $nonce=$_POST['wfunonce'];
+                if (! wp_verify_nonce($nonce, 'wfu-nonce') ) die('Security check failed!');
+            } 
+            // nounce is set porperly - we continue... 
+ 
             // we save all settings
-            if (isset($_POST['update_WFUSettings'])) {
-                // we check all settings if they contain any incorrect elements
+            if (isset($_POST['update_WFUSettings'])) {             
                 $failure = false;
                 // simple fields
                 foreach ($wfuOptions as $key => $option) {
@@ -223,8 +230,10 @@ if (!class_exists("WFU")) {
                 echo '</strong></p></div>';
             }
 
-
+            // the new nonce tocken!
+            $nonce= wp_create_nonce ('wfu-nonce'); 
             echo '<div class=wrap><form method="post" action="'. $_SERVER["REQUEST_URI"] . '">';
+            echo '<input type="hidden" name="wfunonce" value="'.$nonce.'">';
             WFUSettings::printWordpressOptions($wfuOptions);
             WFUSettings::printFrontendOptions($wfuOptions); 
             WFUSettings::printOptions($wfuOptions);
@@ -239,7 +248,7 @@ if (!class_exists("WFU")) {
 
             echo '
 <p>&nbsp;</p>
-<center><div class="howto">WFU - WP Flash Uploader - Copyright (c) 2004-2010 TinyWebGallery.</div></center>
+<center><div class="howto">WFU - WP Flash Uploader - Copyright (c) 2004-2011 TinyWebGallery.</div></center>
 </form>
 </div>';
         }//End function printAdminPage()

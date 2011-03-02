@@ -101,7 +101,7 @@ are not displayed properly!
 	<LANG><KEY>folder_rename</KEY><VALUE>Aktuálny adresár premenovaný na '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>Nový adresár musí mať udané meno.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>Adresár nemôžno premenovať, lebo je to koreňový adresár.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Adresár '%s' už existuje. Zvoľte iné meno.</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Adresár '%s' už existuje. Zvoľte iné meno.</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>Nový adresár musí mať udané meno.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>Súbor '%s' nemožno premenovať. Súbor už existuje.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>Súbor '%s' nemožno premenovať.</VALUE></LANG>

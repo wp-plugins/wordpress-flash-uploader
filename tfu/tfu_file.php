@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.12.x
+ * TWG Flash uploader 2.13.x
  *
- * Copyright (c) 2004-2009 TinyWebGallery
+ * Copyright (c) 2004-2011 TinyWebGallery
  * written by Michael Dempfle
  *
  *     This file does all file functions of TFU
@@ -58,7 +58,7 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['
       reset_twg_cache($action);
     }
     // end plugin
-     
+        
     if (isset($_GET['index']) && $action != 'dir') {
         // file functions!
         if ((isset($_GET['copyfolder']) && ($_GET['copyfolder'] == "true")) || isset($_GET['createfile']) ) {
@@ -67,7 +67,7 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['
             $file = getFileName($dir); // returns an array if more than one is selected!
         }  
         
-        // plugin check for file operations after they are done!   
+        // plugin check for file operations before they are done!   
         $plugins = glob("*_plugin.php");
         if ($plugins) {
           foreach ($plugins as $f) {   
@@ -96,13 +96,24 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['
             tfu_savetext($file);
         } else if ($action == 'download') { // download a file - we set the header !
             tfu_download($file, $enable_file_download);
+        } else if ($action == 'createThumb') { // download a file - we set the header !
+            tfu_createThumb($file);       
         } else if ($action == 'zipdownload') { // download multipe files as zip!
             tfu_zip_download($file, $enable_file_download);
         } else if ($action == 'createfile') { // creates an empty 
             $file = $dir . "/" . parseInputParameterFile(trim(my_basename(' ' . $_GET['newfile'])));
             tfu_savetext($file); 
             $_SESSION["TFU_LAST_UPLOADS"][] = $file; 
-        }       
+        }  
+         // plugin check for file operations after they are done!   
+        if ($plugins) {
+          foreach ($plugins as $f) {   
+            include_once($f);
+            if (function_exists(basename ($f,".php"). "_after_process_file")) {
+              call_user_func(basename ($f,".php"). "_after_process_file" , $action, $file, $dir);
+            }
+          }   
+        }           
         
     } else if ($action == 'uploadcheck') {
         echo '&uploadcheck=' . ((isset($_SESSION['TFU_UPLOAD_REMAINING'])) ? $_SESSION['TFU_UPLOAD_REMAINING'] : '0'); 

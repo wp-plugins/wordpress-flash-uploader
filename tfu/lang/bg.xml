@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 TWG Flash Uploader 2.7 - english language file 
 
 Please note - This is only the template for translation!
@@ -108,7 +108,7 @@ are not displayed properly!
 	<LANG><KEY>folder_rename</KEY><VALUE>Папката преименувана на '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>Името на новата папка не може да бъде празно.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>Папката не може да бъде преименувана, тъй като тя е в главната папка.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Папка '%s' вече съществува. Моля, изберете друго име.</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Папка '%s' вече съществува. Моля, изберете друго име.</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>Новото име на файла не може да бъде празно.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>Файл '%s' не може да се преименува. Файла съществува вече.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>Файл '%s' не може да се преименува.</VALUE></LANG>

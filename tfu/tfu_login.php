@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.12.x
+ * TWG Flash uploader 2.13.x
  *
- * Copyright (c) 2004-2010 TinyWebGallery
+ * Copyright (c) 2004-2011 TinyWebGallery
  * written by Michael Dempfle
  *
  *    This file is the login and stetup file of the flash.
@@ -108,13 +108,8 @@ if (isset($_POST['twg_user']) && isset($_POST['twg_pass'])) { // twg_user and tw
     if (file_exists($license_file)) {
         ob_start();
         include $license_file;
-        ob_end_clean();
-        // we encrypt the license data since 1.7 to enhance security!
-        $d = tfu_enc($d, $rn);
-        $l = tfu_enc($l, $rn);
-        $m = tfu_enc($m, $rn);
-        $s = tfu_enc($s, $rn, 50);
-        $reg_infos = "&d=" . $d . "&s=" . $s . "&m=" . $m . "&l=" . $l;
+        ob_end_clean();   
+        $reg_infos = "&d=" . $d . "&s=" . $s . "&l=" . $l; 
     } else {
         $reg_infos = ""; // means freeware version!
     }

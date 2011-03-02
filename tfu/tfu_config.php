@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.12.x
+ * TWG Flash uploader 2.13.x
  *
- * Copyright (c) 2004-2009 TinyWebGallery
+ * Copyright (c) 2004-2010 TinyWebGallery
  * written by Michael Dempfle
  *
  *    This file is the main configuration file of the flash.
@@ -36,7 +36,7 @@ if (defined('_VALID_TWG')) {
     $resize_data = '100000,1280,1024,800'; // The data for the resize dropdown
     $resize_label = 'Original,1280,1024,800'; // The labels for the resize dropdown
     $resize_default = '0';               // The preselected entry in the dropdown (1st = 0)
-    $allowed_file_extensions = 'jpg'; // 'jpeg,gif,png,jpg';    // Allowed file extensions! 'all' allowes all types - this list is the supported files in the browse dropdown! If this field is empty then the upload grid is removed and the server only view is enabled. Please note: The filter of the file chooser dialog is limited. Don't use more than ~25 extensions. If you specify more TFU automatically uses 'All Files' - Then all files are listed and not supported extensions are checked by the flash after pressing 'Open'.
+    $allowed_file_extensions = 'all'; // 'jpeg,gif,png,jpg';    // Allowed file extensions! 'all' allowes all types - this list is the supported files in the browse dropdown! If this field is empty then the upload grid is removed and the server only view is enabled. Please note: The filter of the file chooser dialog is limited. Don't use more than ~25 extensions. If you specify more TFU automatically uses 'All Files' - Then all files are listed and not supported extensions are checked by the flash after pressing 'Open'.
     $forbidden_file_extensions = 'php';  // Forbidden file extensions! - only usefull if you use 'all' and you want to skip some exensions! php e.g. means php* ! then php4 and so on is covered as well!
     // Enhanced features - this are only defaults! if TFU detects that this is not possible this functions are disabled!
     $hide_remote_view = '';              // If you want to disable the remote view set 'true' as value!
@@ -114,9 +114,9 @@ if (defined('_VALID_TWG')) {
     $edit_textfile_extensions = 'txt,css';   // This are the files that can be edited in the flash. But you can restrict is to single files as well by using the full name. e.g. foldername.txt. * is supported as wildcard! Only available for registered users.
     $allowed_view_file_extensions = 'all'; // You can define the file extensions that are shown on the server view. If you set 'all' all files except the one from $forbidden_view_file_extensions are shown. If you define a list of extensions here only these are shown - Only available for registered users.
     $forbidden_view_file_extensions = ''; // If you have set $allowed_view_file_extensions = 'all' then you can define a list of file extensions that are not shown - Only available for registered users.
-    $description_mode = 'false';         // You can enable a description mode where the size and the date is replaced by a description field. The data of this field is sent to the server and stored in a txt file called <filename>.txt or sent by e-mail to you. Only available for professional license or above.
+    $description_mode = 'true';         // You can enable a description mode where the size and the date is replaced by a description field. The data of this field is sent to the server and stored in a txt file called <filename>.txt or sent by e-mail to you. Only available for professional license or above.
     $description_mode_show_default = 'true'; // Shows/hides a 'Enter description' in the description field if you like. The text is stored in the language file if you want to change it. Only available for professional license or above.
-    $description_mode_store = 'email';   // ('txt','email') The description is either saved to a textfile called <filename>.txt or is added to the notification e-mail. Only available for professional license or above.
+    $description_mode_store = 'txt';   // ('txt','email') The description is either saved to a textfile called <filename>.txt or is added to the notification e-mail. Only available for professional license or above.
     
     // New 2.9  
     $overwrite_files='true';             // true - Existing files are overwritten; false - existing files are not overwritten.  
@@ -158,6 +158,16 @@ if (defined('_VALID_TWG')) {
     $forbidden_view_file_filter = '';    // New 2.12.x - If you have set $allowed_view_file_extensions = 'all' then you can define a list filters which are not shown! This is the enhanced version of $forbidden_view_file_extensions which will be removed in the next main version! A filter can have full file names and * or ?. e.g. sp*.*, test*.gif. Seperate different filters by , a filter looks maybe like this:  '*.gif,test*.png,hide.txt', if you have a windows server you need php > 5.3 to use this. - Only available for registered users.
     $zip_file_pattern = 'download-{number}-files_{date}.zip'; // New 2.12.x - zip file pattern can have the following patterns {number} = number of files in the zip, {date} = currenty date with year,month,day. Please provide the name WITH extension. If the pattern is empty <first filename>.zip is used. 
    
+    // Watermark text on the images when you click on the small thumb - will display some information about the image.
+    $info_text = '{dimension} | {size} | {date}'; // New 2.13 - Defines if a info text is shown and which info is printed. You can define your own string here: {dimension}, {size} and {date} are place holders you can use.
+    $info_textcolor_R = 255;             // New 2.13 - The color of the info text. Define the red value of a RGB color in decimal here.
+    $info_textcolor_G = 60;              // New 2.13 - The color of the info text. Define the green value of a RGB color in decimal here.   
+    $info_textcolor_B = 60;              // New 2.13 - The color of the info text. Define the blue value of a RGB color in decimal here. 
+    $info_font = "verdana.ttf";          // New 2.13 - The font which should be used. By default verdana is included in the install package. 
+    $info_fontsize = 8;                  // New 2.13 - The font size of the info text
+
+    $has_post_processing= "false";       // New 2.13 - The flash waits 10 sec after the upload it to 100% if it has finished. If you do a lot of processing like generating thumbnails and .... this can be too short. By setting this to true you get additional 10 sec :). This is the default e.g. in TWG where the thumbnails and small images are generated right after the upload.
+
     // special extension - a post upload panel - this is only implemented for JFU and not documented yet!
     $post_upload_panel='false';
     /*  This is example data for the post upload panel - this is not documented yet!
@@ -171,6 +181,10 @@ if (defined('_VALID_TWG')) {
     $post_upload_panel.="&post_telephone=my_telephone";
     $post_upload_panel.="&post_fax=my_fax";
     */
+    
+    // internal variable - please do NOT change
+    $is_jfu_plugin = 'false';
+    
     
 /* Includes your configuration file! Then updatin is easier because your settings are not overwritten. No my_tfu_config.php is included in the download! */
 if (file_exists(dirname(__FILE__) . '/my_' . basename(__FILE__))) {

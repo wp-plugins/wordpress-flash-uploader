@@ -108,7 +108,7 @@ are not displayed properly!
 	<LANG><KEY>folder_rename</KEY><VALUE>Ο φάκελος μετονομάστηκε σε '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>Το νέο όνομα φακέλου δεν μπορεί να είναι κενό.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>Ο φάκελος δεν μπορεί να μετονομαστεί γιατί είναι ο βασικός φάκελος.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Ο φάκελος '%s' ήδη υπάρχει. Παρακαλώ επιλέξτε ένα άλλο όνομα.</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Ο φάκελος '%s' ήδη υπάρχει. Παρακαλώ επιλέξτε ένα άλλο όνομα.</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>Το νέο όνομα αρχείου δεν μπορεί να είναι κενό.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>Το αρχείο '%s' δεν μπορεί να μετονομαστεί. Το όνομα αυτό ήδη υπάρχει.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>Το αρχείο '%s' δεν μπορεί να μετονομαστεί.</VALUE></LANG>

@@ -101,7 +101,7 @@ are not displayed properly!
 	<LANG><KEY>folder_rename</KEY><VALUE>Répertoire actuel renommé en '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>Le nom du répertoire ne peut être vide.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>Le répertoire racine ne peut être renommé.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Le répertoire '%s' existe déjà. Veillez choisir un autre nom.</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Le répertoire '%s' existe déjà. Veillez choisir un autre nom.</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>Le nom de fichier ne peut être vide.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>Le fichier '%s' ne peut être renommé. Le fichier existe déjà.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>Le fichier '%s' ne peut être renommé.</VALUE></LANG>

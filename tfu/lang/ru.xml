@@ -108,7 +108,7 @@ are not displayed properly!
 	<LANG><KEY>folder_rename</KEY><VALUE>Папка переименована в '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>Имя новой папки не может быть пустым.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>Корневая папка не может быть переименована.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Папка '%s' уже существует. Выберите другое имя</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Папка '%s' уже существует. Выберите другое имя</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>Имя файла не может быть пустым.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>Файл '%s' не может быть переименован. Файл с таким именем уже существует.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>Файл '%s' не может быть переименован.</VALUE></LANG>

@@ -101,7 +101,7 @@ are not displayed properly!
 	<LANG><KEY>folder_rename</KEY><VALUE>Mappen er omdøbt til '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>Nye mapper kan ikke være tomme.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>Mappen kan ikke omdøbes, da den ligger i rodbiblioteket.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Mappen '%s' eksisterer allerede. Vælg venligst et andet navn.</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Mappen '%s' eksisterer allerede. Vælg venligst et andet navn.</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>Nye filer kan ikke være tomme.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>Filen '%s' kan ikke omdøbes. Filen eksisterer allerede.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>Filen '%s' kan ikke omdøbes.</VALUE></LANG>
@@ -146,7 +146,7 @@ are not displayed properly!
 	<LANG><KEY>progress_time_m</KEY><VALUE>min</VALUE></LANG>
 	<LANG><KEY>progress_time_s</KEY><VALUE>sec</VALUE></LANG>
 	<LANG><KEY>copymove_dest</KEY><VALUE>Selected destination folder: %s.</VALUE></LANG>
-	<LANG><KEY>menu_delete_file</KEY><VALUE>Delete File(s)</VALUE></LANG>
+	<LANG><KEY>menu_delete_file</KEY><VALUE>Slet billede</VALUE></LANG>
 	<!-- new 2.7 -->
 	<LANG><KEY>bt_save</KEY><VALUE>Save</VALUE></LANG>
 	<LANG><KEY>bt_view</KEY><VALUE>View</VALUE></LANG>

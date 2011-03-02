@@ -1,9 +1,9 @@
 === Wordpress Flash Uploader ===
 Contributors: mdempfle, Michael Dempfle
-Tags: admin, media, upload, synchronize, flash, 2.7, folder, ftp, media library, sync, uploader, images, gallery, image upload, image preview
+Tags: admin, media, upload, synchronize, flash, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
-Tested up to: 3.0.4
-Stable tag: 2.12.2
+Tested up to: 3.1
+Stable tag: 2.13
 Donate link: Please check the settings of Wordpress Flash Uploader
 
 'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you additionally manage your whole Wordpress installation and synchronize your media library. 
@@ -59,6 +59,11 @@ only restricted by their servers. And most if the problems can be solved!
 Please go to the settings page of Wordpress Flash Uploader. There you find a small donation section. Thank you for your support.
 
 == Changelog ==
+= 2.13 =
+* Updated the flash to TFU 2.13
+* Enhanced security because wp_nonce is now used everywhere
+* Direct call of the tfu_login.php does not show any servers info anymore to avoid server info disclosure.
+* Config variables are sent encrypted now. Avoids config info disclosure.
 
 = 2.12.2 =
 * Fix for permalinks. Enabling this was not showing the flash in the frontend because relative dirs where used. Now the absolute path is used.

@@ -1,9 +1,9 @@
 <!--
-TWG Flash Uploader 2.8 - netherland language file 
+TWG Flash Uploader 2.10 - netherland language file 
 
 If you make any changes make sure to save the file as UTF-8! Otherwise special characters
 are not displayed properly!
- -->
+-->
 <TFU>
 	<!-- Menu items -  - be carefull with the length - menu is not resized if the text is too long! -->
 	<LANG><KEY>menu_refresh</KEY><VALUE>Verversen</VALUE></LANG>
@@ -48,15 +48,15 @@ are not displayed properly!
 	<LANG><KEY>login_titel</KEY><VALUE>Inloggen</VALUE></LANG>
 	<LANG><KEY>login_username</KEY><VALUE>Gebruikersnaam</VALUE></LANG>
 	<LANG><KEY>login_password</KEY><VALUE>Wachtwoord</VALUE></LANG>
-	<LANG><KEY>login_message</KEY><VALUE>U probeert de TWG Upload Flash te gebruiken zonder bevestiging, het inloggen bij de server is niet gelukt, de sessie is verlopen of de configuratie kan niet worden bevestigd!</VALUE></LANG>
-	<LANG><KEY>login_message_server</KEY><VALUE>Uw registratiebestand is niet geldig voor dit domein (%s). Zorg voor een registratebestand voor dit domein. TWG Flash Uploader draait nu in freeware modus!</VALUE></LANG>
-	<LANG><KEY>login_message_lic</KEY><VALUE>Uw registratiebestand is corrupt of niet geldig meer. Zorg voor een geldig registratiebestand voor %s. TWG Flash Uploader draait nu in freeware modus!</VALUE></LANG>
+	<LANG><KEY>login_message</KEY><VALUE>U probeert de TWG Upload Flash te gebruiken zonder authentificatie, het inloggen bij de server is niet gelukt, de sessie is verlopen of de configuratie kan niet worden gevonden!</VALUE></LANG>
+	<LANG><KEY>login_message_server</KEY><VALUE>Uw registratiebestand is niet geldig voor dit domein (%s). Zorg voor een registratiebestand voor dit domein. TWG Flash Uploader draait nu in freeware modus!</VALUE></LANG>
+	<LANG><KEY>login_message_lic</KEY><VALUE>Uw registratiebestand is beschadigd of niet geldig meer. Zorg voor een geldig registratiebestand voor %s. TWG Flash Uploader draait nu in freeware modus!</VALUE></LANG>
 	<!-- info dialog -->
 	<LANG><KEY>message</KEY><VALUE>Bestanden op de Uploadlijst staan al op de server. Indien u ze daadwerkelijk upload worden de bestaande bestanden overschreven. De reeds bestaande bestanden zijn ge-highlite. Indien u 'bestanden verplaatsen' kiest kunt u deze verwijderen.</VALUE></LANG>
 	<LANG><KEY>please_login</KEY><VALUE>Inloggen alstublieft</VALUE></LANG>
 	<LANG><KEY>wrong_username</KEY><VALUE>Verkeerde gebruikersnaam/wachtwoord.</VALUE></LANG>
 	<!-- dropdown of the file select dialog -->
-	<LANG><KEY>dropdown_all_supported</KEY><VALUE>geaccepteerde bestandstypen</VALUE></LANG>
+	<LANG><KEY>dropdown_all_supported</KEY><VALUE>toegestane bestandstypen</VALUE></LANG>
 	<LANG><KEY>dropdown_all</KEY><VALUE>Alle bestanden</VALUE></LANG>
 	<!-- everything below here shows up in the status line! -->
 	<!-- status messages - please keep all spaces because some text is merged sometimes -->
@@ -66,7 +66,7 @@ are not displayed properly!
 	<LANG><KEY>max_file_size</KEY><VALUE> Maximale bestandgrootte upload(per bestand): %s. </VALUE></LANG>
 	<LANG><KEY>select_files</KEY><VALUE>Selecteer de bestanden om te uploaden.</VALUE></LANG>
 	<LANG><KEY>upload_started</KEY><VALUE>Gestart met uploaden. Wachten alstublieft...</VALUE></LANG>
-	<LANG><KEY>upload_started_resize</KEY><VALUE>Gestart met uploaden. De afbeeldingen verkleinen duurt even na het uploaden . Wachten alstublieft...</VALUE></LANG>
+	<LANG><KEY>upload_started_resize</KEY><VALUE>Gestart met uploaden. De afbeeldingen verkleinen duurt even na het uploaden. Wachten alstublieft...</VALUE></LANG>
 	<LANG><KEY>download_completed</KEY><VALUE>Klaar met downloaden.</VALUE></LANG>
 	<LANG><KEY>download_started</KEY><VALUE>Gestart met download. Wachten alstublieft...</VALUE></LANG>
 	<LANG><KEY>upload_files_in_queue</KEY><VALUE>%s bestanden stonden al klaar om te uploaden.</VALUE></LANG>
@@ -97,17 +97,17 @@ are not displayed properly!
 	<LANG><KEY>action_cancled</KEY><VALUE>Actie afgebroken.</VALUE></LANG>
 	<LANG><KEY>action_cancled_upload</KEY><VALUE>Actie afgebroken. Ververs de lijst met bestanden. U kunt de deels geüploade bestanden verwijderen!</VALUE></LANG>
 	<LANG><KEY>files_added</KEY><VALUE>%s bestand(en) toegevoegd. </VALUE></LANG>
-	<LANG><KEY>folder_rename_to</KEY><VALUE>map kon niet worden hernoemt naar '%s'.</VALUE></LANG>
-	<LANG><KEY>folder_rename</KEY><VALUE>Huidige map is hernoemt naar '%s'.</VALUE></LANG>
+	<LANG><KEY>folder_rename_to</KEY><VALUE>map kon niet worden hernoemd naar '%s'.</VALUE></LANG>
+	<LANG><KEY>folder_rename</KEY><VALUE>Huidige map is hernoemd naar '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>Naamveld voor nieuwe map mag niet leeg zijn.</VALUE></LANG>
-	<LANG><KEY>folder_rename_root</KEY><VALUE>map kan niet worden hernoemt want het is de root(hoofd)map.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Deze map '%s' bestaat reeds. Kies een andere naam</VALUE></LANG>
+	<LANG><KEY>folder_rename_root</KEY><VALUE>map kan niet worden hernoemd want het is de root(hoofd)map.</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Deze map '%s' bestaat reeds. Kies een andere naam</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>U dient een nieuwe bestandsnaam op te geven.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Het bestand '%s' kan niet worden hernoemt. Dit bestand bestaat reeds.</VALUE></LANG>
-	<LANG><KEY>file_rename_error</KEY><VALUE>Het bestand '%s' kan niet worden hernoemt.</VALUE></LANG>
-	<LANG><KEY>file_rename_permissions</KEY><VALUE>Het bestand '%s' kan niet worden hernoemt. Controleer rechten.</VALUE></LANG>
-	<LANG><KEY>file_extension_error_rename</KEY><VALUE>Het bestand kan niet worden hernoemt. Het is niet toegestaan de extensie te wijzigen!</VALUE></LANG>
-	<LANG><KEY>file_rename_to</KEY><VALUE>Bestand '%s' hernoemt naar '%s'.</VALUE></LANG>
+	<LANG><KEY>file_rename_exists</KEY><VALUE>Het bestand '%s' kan niet worden hernoemd. Dit bestand bestaat reeds.</VALUE></LANG>
+	<LANG><KEY>file_rename_error</KEY><VALUE>Het bestand '%s' kan niet worden hernoemd.</VALUE></LANG>
+	<LANG><KEY>file_rename_permissions</KEY><VALUE>Het bestand '%s' kan niet worden hernoemd. Controleer rechten.</VALUE></LANG>
+	<LANG><KEY>file_extension_error_rename</KEY><VALUE>Het bestand kan niet worden hernoemd. Het is niet toegestaan de extensie te wijzigen!</VALUE></LANG>
+	<LANG><KEY>file_rename_to</KEY><VALUE>Bestand '%s' hernoemd naar '%s'.</VALUE></LANG>
 	<LANG><KEY>dir_limit</KEY><VALUE>Het maximale aantal bestanden in een map is %s. Verwijder %s bestand(en) uit de uploadlijst.</VALUE></LANG>
 	<LANG><KEY>dir_limit_2</KEY><VALUE>Het maximale aantal bestanden in een map is %s. Verwijder %s niet bestaande bestand(en).</VALUE></LANG>
 	<LANG><KEY>loading_preview</KEY><VALUE>Bezig met laden voorvertoning van '%s'.</VALUE></LANG>
@@ -120,7 +120,7 @@ are not displayed properly!
 	<LANG><KEY>download_progress</KEY><VALUE>Gedownload %s / %s</VALUE></LANG>
 	<LANG><KEY>upload_progress</KEY><VALUE>%s / %s</VALUE></LANG>
 	<LANG><KEY>big_preview</KEY><VALUE> Klik op de miniatuur afbeelding voor een vergroting.</VALUE></LANG>
-	<LANG><KEY>download_wait</KEY><VALUE>Eén moment; voorbereiden download.</VALUE></LANG>
+	<LANG><KEY>download_wait</KEY><VALUE>Een ogenblik. Download wordt voorbereid.</VALUE></LANG>
 	<!-- new 2.6 -->
 	<LANG><KEY>files_deleted</KEY><VALUE>%s bestanden verwijders.</VALUE></LANG>
 	<LANG><KEY>files_not_deleted</KEY><VALUE>%s bestanden konden niet worden verwijderd.</VALUE></LANG>
@@ -169,6 +169,23 @@ are not displayed properly!
 	<LANG><KEY>dir_not_exists</KEY><VALUE>De map op de server bestaat niet. Controleer aub de instellingen</VALUE></LANG>
 	<LANG><KEY>no_file_extensions</KEY><VALUE>Het uploaden is niet toegestaan. De map op de server wordt weergegeven.</VALUE></LANG>
     <!--  new 2.9 --> 
-    <LANG><KEY>message_not_overwrite</KEY><VALUE>Eén of meerder bestande bestaan al op de server. Het overschrijven van bestaande bestanden is uitgeschakeld en zodoende zijn deze bestanden verwijderd van de uploadlijst.</VALUE></LANG>
+    <LANG><KEY>message_not_overwrite</KEY><VALUE>Één of meerder bestande bestaan al op de server. Het overschrijven van bestaande bestanden is uitgeschakeld en zodoende zijn deze bestanden verwijderd van de uploadlijst.</VALUE></LANG>
     <LANG><KEY>description_mandatory</KEY><VALUE>Voer aub een beschrijving in voor ieder bestand.</VALUE></LANG>	
+    <!--  new 2.9.2 --> 
+     <!-- special extensions - not documented yet -->
+    <LANG><KEY>bt_finish</KEY><VALUE>Finish</VALUE></LANG>
+		<LANG><KEY>post_template</KEY><VALUE>Hallo %name%. Voeg hier aub extra details in vóór u uw bestanden upload.</VALUE></LANG>
+    <!-- end extension -->
+    <!--   new 2.10  -->
+		<LANG><KEY>download_again</KEY><VALUE>Selecteer 'Download' opnieuw om het volgende bestand te downloaden.</VALUE></LANG>	  
+		<!--   new 2.10.2 -->
+		<LANG><KEY>upload_cached</KEY><VALUE>Het lijkt erop dat de upload gecached is door een lokale proxy of firewall. Lees aub de informatie box.</VALUE></LANG>
+		<!-- you have to use &lt; &lg; -->
+    <LANG><KEY>upload_cached_box</KEY><VALUE>Het lijkt erop dat de upload gecached is door een lokale proxy of firewall. Gelieve even te wachten tot 'Upload voltooid' wordt weergegeven. Als de upload mislukt moet u uw firewall/proxy/security suite configureren. Klik &lt;a target="_blank" href="http://www.tinywebgallery.com/en/tfu/web_faq.php#18"&gt;&lt;b&gt;here&lt;/b&gt;&lt;/a&gt; voor details hoe dit te doen.</VALUE></LANG>
+    <!--   new 2.10.4 -->
+    <LANG><KEY>session_error_ok</KEY><VALUE>Deze server gaat niet goed om met de sessie van de flash. Een interne oplossing is succesvol geactiveerd. Wilt u meer informatie over wat er gedaan is? Klik &lt;a target='_blank' href="http://www.tinywebgallery.com/en/tfu/web_faq.php#12"&gt;&lt;b&gt;here&lt;/b&gt;&lt;/a&gt; om naar de TFU FAQ te gaan.</VALUE></LANG>
+		<LANG><KEY>session_error_ok_status</KEY><VALUE>Svp re-load de pagina en upload opnieuw.</VALUE></LANG>
+		<LANG><KEY>session_error_man</KEY><VALUE>Deze server gaat niet goed om met de sessie van de flash. Het is NIET mogelijk om automatisch een interne oplossing te activeren. Klik &lt;a target='_blank' href="http://www.tinywebgallery.com/en/tfu/web_faq.php#12"&gt;&lt;b&gt;here&lt;/b&gt;&lt;/a&gt;  om naar de TFU FAQ te gaan, die u laat zien hoe u dit probleem kunt oplossen.</VALUE></LANG>
+		<LANG><KEY>session_error_man_status</KEY><VALUE>Dit probleem kan niet automatisch worden opgelost. Lees de info box.</VALUE></LANG>
+	
 </TFU>

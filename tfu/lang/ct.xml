@@ -101,7 +101,7 @@ are not displayed properly!
 	<LANG><KEY>folder_rename</KEY><VALUE>Carpeta actual reanomenada a '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>El nou nom de carpeta no pot estar buit.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>La carpeta no es pot reanomenar ja que és la carpeta rel.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Carpeta '%s' ja existeix. Sisplau utilitza un altre nom</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Carpeta '%s' ja existeix. Sisplau utilitza un altre nom</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>El nou nom d'arxiu no pot estar buit.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>Arxiu '%s' no es pot reanomenar. L'arxiu ja existeix.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>Arxiu '%s' no es pot reanomenar.</VALUE></LANG>

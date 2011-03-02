@@ -100,7 +100,7 @@ If you make any changes make sure to save the file as UTF-8! Otherwise special c
 	<LANG><KEY>folder_rename</KEY><VALUE>Aktuální adresář přejmenovaný na '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>Nový adresář musí mít zadané jméno.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>Adresář není možné přejmenovat, protože je to kořenový adresář.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Adresář '%s' už existuje. Zvolte jiné jméno.</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Adresář '%s' už existuje. Zvolte jiné jméno.</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>Nový adresář musí mít zadané jméno.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>soubor '%s' nemožno premenovať. soubor už existuje.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>soubor '%s' nemožno premenovať.</VALUE></LANG>

@@ -101,7 +101,7 @@ are not displayed properly!
 	<LANG><KEY>folder_rename</KEY><VALUE>Mappens navn er endret til '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>Nytt mappenavn kan ikke være tomt.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>Mappen kan ikke tildeles nytt navn fordi den er rot-mappen.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Mappen '%s' eksisterer allerede. Vennligst velg et annet navn.</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Mappen '%s' eksisterer allerede. Vennligst velg et annet navn.</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>Nytt filnavn kan ikke være tomt.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>Filen '%s' kan ikke tildeles nytt navn. Fila fins fra før.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>Filen '%s' kan ikke tildeles nytt navn.</VALUE></LANG>

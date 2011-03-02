@@ -101,7 +101,7 @@ are not displayed properly!
 		<LANG><KEY>folder_rename</KEY><VALUE>Diretório atual renomeado para '%s'.</VALUE></LANG>
 		<LANG><KEY>folder_rename_empty</KEY><VALUE>O nome para o novo diretório não pode ficar vazio.</VALUE></LANG>
 		<LANG><KEY>folder_rename_root</KEY><VALUE>O Diretório não pode ser renomeado porque é o diretório root.</VALUE></LANG>
-		<LANG><KEY>file_rename_exists</KEY><VALUE>O Diretório '%s' já existe. Escolha outro nome</VALUE></LANG>
+		<LANG><KEY>folder_rename_exists</KEY><VALUE>O Diretório '%s' já existe. Escolha outro nome</VALUE></LANG>
 		<LANG><KEY>file_rename_empty</KEY><VALUE>O nome para o novo arquivo não pode ficar vazio.</VALUE></LANG>
 		<LANG><KEY>file_rename_exists</KEY><VALUE>O arquivo '%s' não pode ser renomeado, pois o arquivo já existe.</VALUE></LANG>
 		<LANG><KEY>file_rename_error</KEY><VALUE>O arquivo '%s' não pode ser renomeado.</VALUE></LANG>

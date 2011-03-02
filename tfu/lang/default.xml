@@ -1,5 +1,5 @@
 <!--
-TWG Flash Uploader 2.10.x - default language file 
+TWG Flash Uploader 2.11.x - default language file 
 
 Please note - This is only the template for translation!
 English, German and Spanisch are build into the flash already!
@@ -108,7 +108,7 @@ are not displayed properly!
 	<LANG><KEY>folder_rename</KEY><VALUE>Actual folder renamed to '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>New folder name cannot be empty.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>Folder cannot be renamed because it is the root folder.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Folder '%s' already exists. Please choose another name</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Folder '%s' already exists. Please choose another name</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>New file name cannot be empty.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>File '%s' can not be renamed. File already exists.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>File '%s' can not be renamed.</VALUE></LANG>
@@ -186,9 +186,9 @@ are not displayed properly!
     <!--   new 2.10  -->
 		<LANG><KEY>download_again</KEY><VALUE>Please select 'Download' again to download the next file.</VALUE></LANG>	  
 		<!--   new 2.10.2 -->
-		<LANG><KEY>upload_cached</KEY><VALUE>The upload is maybe cached by a lokal proxy or firewall. Please read the info box.</VALUE></LANG>
+		<LANG><KEY>upload_cached</KEY><VALUE>The upload is maybe cached by a local proxy or firewall. Please read the info box.</VALUE></LANG>
 		<!-- you have to use &lt; &lg; -->
-    <LANG><KEY>upload_cached_box</KEY><VALUE>It seems that the upload is cached by a lokal proxy or firewall. Please wait until 'Upload finished' is shown. If the uploads fails you have to configure your firewall/proxy/security suite. Please click &lt;a target="_blank" href="http://www.tinywebgallery.com/en/tfu/web_faq.php#18"&gt;&lt;b&gt;here&lt;/b&gt;&lt;/a&gt; for details how to do this.</VALUE></LANG>
+    <LANG><KEY>upload_cached_box</KEY><VALUE>It seems that the upload is cached by a local proxy or firewall. Please wait until 'Upload finished' is shown. If the uploads fails you have to configure your firewall/proxy/security suite. Please click &lt;a target="_blank" href="http://www.tinywebgallery.com/en/tfu/web_faq.php#18"&gt;&lt;b&gt;here&lt;/b&gt;&lt;/a&gt; for details how to do this.</VALUE></LANG>
     <!--   new 2.10.4 -->
     <LANG><KEY>session_error_ok</KEY><VALUE>This server does not handle the session of the flash properly. An internal workaround was activated successfully. For more information what was done please click &lt;a target='_blank' href="http://www.tinywebgallery.com/en/tfu/web_faq.php#12"&gt;&lt;b&gt;here&lt;/b&gt;&lt;/a&gt; to go to the TFU FAQ.</VALUE></LANG>
 		<LANG><KEY>session_error_ok_status</KEY><VALUE>Please reload the page and upload again.</VALUE></LANG>

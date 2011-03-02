@@ -26,7 +26,21 @@ if (isset($_SESSION["IS_ADMIN"])) {
 } else if (isset($_SESSION["IS_FRONTEND"])) {
   $wp_path = "wp-content/plugins/wordpress-flash-uploader/tfu/";
 } else { // we only show the info.
-  return;
+  tfu_debug("Config call, illegal direct access or missing session settings - your browser has to be closed to get a new session. Please check your session_save_path if you get this error all the time or create the folder session_cache in the tfu folder to activate the session workaround.");
+  echo '
+  <style type="text/css">
+  body { 	font-family : Arial, Helvetica, sans-serif; font-size: 12px; background-color:#ffffff; }
+  td { vertical-align: top; font-size: 12px; }
+  .install { text-align:center; margin-left: auto;  margin-right: auto;  margin-top: 3em;  margin-bottom: 3em; padding: 10px; border: 1px solid #cccccc;  width: 450px; background: #F1F1F1; }
+  </style>';
+  echo '<div class="install">';
+  echo 'You server is configured properly to access the needed files of WFU.<br>Please go to the Administration of Wordpress to see your server limits.';
+  echo '</div>';
+  // maybe the session is lost - we try to do the workaround if the file was called by a parameter!
+  if (strlen($_SERVER['QUERY_STRING']) > 5) {
+    checkSessionTempDir();
+  }
+  die();
 }
 
 /*

@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 TWG Flash Uploader 2.8 - default language file 
 
 Please note - This is only the template for translation!
@@ -108,7 +108,7 @@ are not displayed properly!
 	<LANG><KEY>folder_rename</KEY><VALUE>新フォルダ名'%s'に変更しました。</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>新フォルダ名を空白の名前にする事は出来ません。</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>親フォルダのため名前変更は出来ません。</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>フォルダ名'%s'は既に存在しております。別のファルダ名を使って下さい。</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>フォルダ名'%s'は既に存在しております。別のファルダ名を使って下さい。</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>新ファイル名を空白の名前にする事は出来ません。</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>ファイル名が既に存在するため'%s'のファイル名変更が出来ません。</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>'%s'のファイル名変更が出来ません。</VALUE></LANG>

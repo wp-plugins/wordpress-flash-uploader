@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 TWG Flash Uploader 2.10.x - default language file 
 
 Please note - This is only the template for translation!
@@ -110,7 +110,7 @@ Translated/išvertė: Mindaugas Murza, 1:50 AM 12/9/2009
 	<LANG><KEY>folder_rename</KEY><VALUE>Aplankas pervadintas į '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>Naujas aplanko pavadinimas negali būti tuščias.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>Aplankas negali būti pervadintas - nes jis šakninis.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Aplankas '%s' jau yra. Prašome pasirinkti kitą pavadinimą.</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Aplankas '%s' jau yra. Prašome pasirinkti kitą pavadinimą.</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>Naujas bylos vardas negali būti tuščias.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>Byla '%s' jau yra. Prašome pasirinkti kitą pavadinimą.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>Nepavyko pervadinti bylos '%s'.</VALUE></LANG>

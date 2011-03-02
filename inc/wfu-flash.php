@@ -1,7 +1,11 @@
 <?php
 /**
+ *   Wordpress Flash uploader 2.13.x  
  *   This file contains all methods used on the main wfu page from the WFU class
  *
+ *   Copyright (c) 2004-2011 TinyWebGallery
+ *   Author: Michael Dempfle
+ *   Author URI: http://www.tinywebgallery.com 
  */
 
 if (!class_exists("WFUFlash")) {
@@ -12,6 +16,13 @@ if (!class_exists("WFUFlash")) {
             $htaccess_path = dirname(__FILE__) . '/../tfu/.htaccess';
             $reg_path = dirname(__FILE__) . '/../tfu/twg.lic.php';
            
+            // now we check all possible actions if the correct nonce is set.
+            if (isset($_POST['upload_media'])|| isset($_POST['upload_wordpress']) || isset($_POST['create_htaccess']) || isset($_POST['delete_htaccess']) ) {
+                $nonce=$_POST['wfunonce'];
+                if (! wp_verify_nonce($nonce, 'wfu-nonce') ) die('Security check failed!');
+            } 
+            // nounce is set porperly - we continue...   
+               
             ob_start();
             @session_start();
             ob_end_clean();
@@ -22,7 +33,9 @@ if (!class_exists("WFUFlash")) {
             if ($istab) {
                 echo '<div style="clear: both;"></div>';
             }
-            echo '<form method="post" action="' . $_SERVER["REQUEST_URI"] . '">';
+            $nonce= wp_create_nonce ('wfu-nonce'); 
+            echo '<form method="post" action="'. $_SERVER["REQUEST_URI"] . '">';       
+            echo '<input type="hidden" name="wfunonce" value="'.$nonce.'">';
             echo '<div class="wrap wfupadding">';
             echo '<div id="icon-upload" class="icon_jfu"><br></div>';
             echo '<h2>WP Flash Uploader</h2>';
@@ -184,7 +197,7 @@ if (!class_exists("WFUFlash")) {
           if ($height > 390) $height = floor($height * 0.95);
           
           $output .= '
-          swfobject.embedSWF("'.$rel_dir.'wp-content/plugins/wordpress-flash-uploader/tfu/tfu_212.swf", "flashcontent", "'.$width.'", "'.$height.'", "8.0.0", "", flashvars, params, attributes);
+          swfobject.embedSWF("'.$rel_dir.'wp-content/plugins/wordpress-flash-uploader/tfu/tfu_213.swf", "flashcontent", "'.$width.'", "'.$height.'", "8.0.0", "", flashvars, params, attributes);
 
           </script>
           ';          
@@ -203,7 +216,8 @@ if (!class_exists("WFUFlash")) {
             if (stristr($upload_path, 'wp-content') !== false) {
                 $upload_path = stristr($upload_path, 'wp-content');
             }
-
+                     
+            // this is the default where no form is set.
             if (!isset($_POST['upload_wordpress'])) {
 
                 $upload_base_dir = '../../../../'. $upload_path;
@@ -251,7 +265,7 @@ if (!class_exists("WFUFlash")) {
                     }
                 }
             }
-
+                    
             if (isset($_POST['upload_wordpress'])) {
                 $folder = '../../../../';
                 $path = '../';
@@ -287,10 +301,5 @@ if (!class_exists("WFUFlash")) {
 
             $_SESSION["TFU_FOLDER"] =  $folder;
             }
-     
-     
-        
-        
-        
     }}
 ?>

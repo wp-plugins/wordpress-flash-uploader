@@ -1,6 +1,13 @@
 <?php
 /**
+ *   Wordpress Flash uploader 2.13.x  
  *   This file contains all the methods for the settings screen from the WFU class
+ *  
+ *
+ *  Copyright (c) 2004-2011 TinyWebGallery
+ *  Author: Michael Dempfle
+ *  Author URI: http://www.tinywebgallery.com    
+ *  
  */
 if (!class_exists("WFUSettings")) {
     class WFUSettings {
@@ -318,7 +325,7 @@ If you have a professional license then the following features are available. Ad
 <p>WFU is the wrapper of the TWG Flash Uploader. For most users the limitations of the freeware version of the TWG Flash Uploader should not be a problem. But if, you can register the flash for a small fee. The registration does also include TinyWebGallery, TWG Flash Uploader and Joomla Flash Uploader!</p>
 There are 2 versions of WFU available:<br><ul>
   <li>Freeware: Has almost everything you need. The main restriction is the 3 MB limit of the upload queue. Please go to <a href="http://www.tinywebgallery.com/en/tfu/web_overview.php">www.tinywebgallery.com</a> for a full list of all the features.</li><li>Registered: See below for the extras you get.</li></ul>
-      <div class="install" style="width: 600px; margin-left: 50px;">If you register WFU you get the following extra features: <br><ul>  <li>Unlimited version of the TWG Flash Uploader. No 3 MB limit anymore! </li> <li style="margin-top: 3px;">Registration of TinyWebGallery, TWG Flash Uploader, Joomla Flash Uploader</li> <li style="margin-top: 3px;">Download of files </li>  <li style="margin-top: 3px;">View and Edit of text files </li>  <li style="margin-top: 3px;">Javascript events</li>  <li style="margin-top: 3px;">Titel and some text labels can be changed by configuration. *</li>  <li style="margin-top: 3px;">Limit the number of files that can be uploaded to a directory of the server *</li>  <li style="margin-top: 3px;"><strong>Professional license and above:</strong>  <ul>  <li style="margin-top: 3px;">The colors of the flash can be configured.</li>  <li style="margin-top: 3px;">Copy/move files and move folders</li>  <li style="margin-top: 3px;">Description mode.<!-- A caption can be entered directly for each file.--> *</li>  <li style="margin-top: 3px;">Completely anonymous flash: The ? can be turned off</li> <li style="margin-top: 3px;">Big progress bar. Go <a href="http://www.tinywebgallery.com/en/tfu/web_progressbar.php" target="_blank">here</a> for additional progress bars.</li> </ul>  </li>  </ul></div>
+      <div class="install" style="width: 600px; margin-left: 50px;">If you register WFU you get the following extra features: <br><ul>  <li>Unlimited version of the TWG Flash Uploader. No 3 MB limit anymore! </li> <li style="margin-top: 3px;">Registration of TinyWebGallery, TWG Flash Uploader, Joomla Flash Uploader</li> <li style="margin-top: 3px;">Download of files </li>  <li style="margin-top: 3px;">View and Edit of text files </li>  <li style="margin-top: 3px;">Javascript events</li>  <li style="margin-top: 3px;">Titel and some text labels can be changed by configuration. *</li>  <li style="margin-top: 3px;">Limit the number of files that can be uploaded to a directory of the server *</li>  <li style="margin-top: 3px;"><strong>Professional license and above:</strong>  <ul>  <li style="margin-top: 3px;">The colors of the flash can be configured.</li>  <li style="margin-top: 3px;">Copy/move files and move folders</li>  <li style="margin-top: 3px;">Description mode.<!-- A caption can be entered directly for each file.--> *</li>  <li style="margin-top: 3px;">Completely anonymous flash: The ? can be turned off</li><li style="margin-top: 3px;">Reading of html form fields.</li><li style="margin-top: 3px;">Big progress bar. Go <a href="http://www.tinywebgallery.com/en/tfu/web_progressbar.php" target="_blank">here</a> for additional progress bars.</li> </ul>  </li>  </ul></div>
       <div class="howto">* This features are currently not directly used in this version of WFU. They can be enabled through the advanced configuration or by extending the WFU plugin. Depending on the feature requests I will add direct support of them in one of the next updates.</div>
 ';
                 echo '

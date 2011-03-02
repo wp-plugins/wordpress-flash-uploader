@@ -101,7 +101,7 @@ are not displayed properly!
 	<LANG><KEY>folder_rename</KEY><VALUE>原目錄名稱被名為 '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>新目錄名稱不能是空白！</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>目錄不能被更名，因為是根目錄</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>目錄 '%s' 已存在，請選擇其他名稱</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>目錄 '%s' 已存在，請選擇其他名稱</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>新檔案名稱不能是空白！</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>檔案 '%s' 不能被更名，檔案已經存在</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>檔案 '%s 不能被更名</VALUE></LANG>

@@ -1,13 +1,14 @@
 <?php
 /**
- * TWG Flash uploader 2.12.x
+ * TWG Flash uploader 2.13.x
  *
- * Copyright (c) 2004-2009 TinyWebGallery
+ * Copyright (c) 2004-2010 TinyWebGallery
  * written by Michael Dempfle
  *
  *
  *        This file has all the helper functions.
  *        Normally you don't have to modify anything here.
+ *        Only the timezone can be interesting for you: $timezone 
  */
 /**
  * * ensure this file is being included by a parent file
@@ -167,6 +168,7 @@ function resize_file($image, $size, $compression, $image_name, $dest_image = fal
       return 1;
     }
 
+
     $srcx = 0;
     $srcy = 0;
     if ($enable_upload_debug) { tfu_debug('Resize: Preparing to resize "' . $image . ' with size: '.$size.'"'); }
@@ -178,23 +180,26 @@ function resize_file($image, $size, $compression, $image_name, $dest_image = fal
         }
         $oldsizex = $oldsize[0];
         $oldsizey = $oldsize[1];
-
-        if (($oldsizex < $size) && ($oldsizey < $size)) {
-            if ($enable_upload_debug) { tfu_debug('Resize: Image ('. $oldsizex .'x' .$oldsizey. ') is not resized with setting "' . $size . '"'); }
-            return 1;
+             
+        if (strpos($size, "x") !== false) {
+           $s = explode("x", $size);        
+           $width =  $s[0];  
+           $height = $s[1] ;
+        } else {
+             if (($oldsizex < $size) && ($oldsizey < $size)) {
+                 if ($enable_upload_debug) { tfu_debug('Resize: Image ('. $oldsizex .'x' .$oldsizey. ') is not resized with setting "' . $size . '"'); }
+                 return 1;
+             }   
+             if ($oldsizex > $oldsizey) { // querformat - this keeps the dimension between horzonal and vertical
+                 $width = $size;
+                 $height = ($width / $oldsizex) * $oldsizey;
+             } else { // hochformat - this keeps the dimension between horzonal an vertical
+                 $height = $size;
+                 $width = ($height / $oldsizey) * $oldsizex;
+             }
+             $width =  round($width);
+             $height = round($height);
         }
-
-        if ($oldsizex > $oldsizey) { // querformat - this keeps the dimension between horzonal and vertical
-            $width = $size;
-            $height = ($width / $oldsizex) * $oldsizey;
-        } else { // hochformat - this keeps the dimension between horzonal an vertical
-            $height = $size;
-            $width = ($height / $oldsizey) * $oldsizex;
-        }
-
-        $height = round($height);
-        $width =  round($width);
-
         if ($use_image_magic) {
             if ($enable_upload_debug) {
               tfu_debug("Resize: Image magick is used");
@@ -298,6 +303,7 @@ function resize_file($image, $size, $compression, $image_name, $dest_image = fal
 function send_thumb($image, $compression, $sizex, $sizey, $generateOnly = false)
 {
     global $bg_color_preview_R, $bg_color_preview_G, $bg_color_preview_B;
+    global $info_text, $info_textcolor_R, $info_textcolor_G, $info_textcolor_B, $info_font, $info_fontsize;   
 
     set_error_handler('on_error_no_output');
     ini_set('gd.jpeg_ignore_warning', 1); // since php 5.1.3 this leads that corrupt jpgs are read much better!
@@ -307,7 +313,7 @@ function send_thumb($image, $compression, $sizex, $sizey, $generateOnly = false)
     $dimx = $sizex;
     $dimy = $sizey;
     $usethumbs = false;
-
+    
     if (file_exists(dirname(__FILE__) . '/thumbs') && is_writable(dirname(__FILE__) . '/thumbs')) { // is a caching dir available and writeable?
         $cachename = dirname(__FILE__) . '/thumbs/' . sha1($image . $sizex) . '.jpg';
         $usethumbs = true;
@@ -393,7 +399,16 @@ function send_thumb($image, $compression, $sizex, $sizey, $generateOnly = false)
             imagecolorset ($src, $trans, 255, 255, 255);
             imagecolortransparent($src, imagecolorallocate($src, 0, 0, 0));
             imagecopyresampled($dst, $src, $offsetx, $offsety, $srcx, $srcy, $width - $offsetx_b, $height - $offsety_b, $oldsizex, $oldsizey);
-
+      
+            if (function_exists("imagettftext") && $dimx > 100 && $info_text != '' ) {
+               // some extra info at the bottom of the image. Available parameters: {date} {size} {dimension} 			   
+                  $text = str_replace('{dimension}', $oldsizex."x".$oldsizey, $info_text);
+                  $text = str_replace('{size}', formatSize(filesize($image)), $text);
+                  $text = str_replace('{date}', date("d.m.Y",filemtime($image)), $text);                            
+			   $color = imagecolorclosest ($dst, $info_textcolor_R, $info_textcolor_G, $info_textcolor_B);
+			   imagettftext($dst, $info_fontsize, 0, 8, $dimy-8, $color, $info_font, $text);  
+            }
+           
             header('Content-type: image/jpg');
             if ($usethumbs) { // we save the thumb
                 imagejpeg($dst, $cachename, $compression);
@@ -677,15 +692,16 @@ function getFileName($dir)
 function get_decoded_string($dir, $string)
 {
     global $fix_utf8;
-    if ($fix_utf8 == '') {
+    if ($fix_utf8 == 'none') {
+        return $dir . '/' . $string;
+    } else if ($fix_utf8 == '') {
         return $dir . '/' . utf8_decode(remove_sort_prefix($string));
     } else {
         return $dir . '/' . iconv('UTF-8', $fix_utf8, remove_sort_prefix($string));
     }
 }
 
-function remove_sort_prefix($string)
-{
+function remove_sort_prefix($string) {
     global $sort_files_by_date;
     if ($sort_files_by_date) {
         return substr($string, 10);
@@ -694,15 +710,14 @@ function remove_sort_prefix($string)
     }
 }
 
-function getRootUrl()
-{
+function getRootUrl() {
     if (isset($_SERVER)) {
         $GLOBALS['__SERVER'] = &$_SERVER;
     } elseif (isset($HTTP_SERVER_VARS)) {
         $GLOBALS['__SERVER'] = &$HTTP_SERVER_VARS;
     }
     $dirn = dirname ($GLOBALS['__SERVER']['PHP_SELF']);
-    if ($dirn == '\\') $dirn = '';
+    if ($dirn == '\\' || $dirn == '/') $dirn = '';
     return 'http' . (isset($GLOBALS['__SERVER']['HTTPS']) ? 's' : '') . '://' . $GLOBALS['__SERVER']['HTTP_HOST'] . $dirn . '/';
 }
 
@@ -1206,7 +1221,7 @@ function tfu_enc($str, $id, $length = false)
     $code = '';
     $keylen = strlen($id);
     for ($i = 0; $i < strlen($str); $i++) {
-        $code .= chr(ord($str{$i}) + ord($id{($i%$keylen)}));
+        $code .= chr(ord($str{$i}) + ord($id{$i%$keylen}));
     }
     return utf8_encode($code);
 }
@@ -1251,16 +1266,15 @@ function sendConfigData()
     global $description_mode_show_default, $description_mode, $download_multiple_files_as_zip;
     global $overwrite_files, $description_mode_mandatory, $post_upload_panel, $form_fields;
     global $big_progressbar,$img_progressbar,$img_progressbar_back,$img_progressbar_anim, $big_server_view;
-    global $zip_file_pattern;
+    global $zip_file_pattern, $is_jfu_plugin, $has_post_processing;
     
     // the sessionid is mandatory because upload in flash and Firefox would create a new session otherwise - sessionhandled login would fail then!
-    $output = '&session_id=' . session_id() . '&login=' . tfu_enc($login, $rn);
-    $output .= '&maxfilesize=' . tfu_enc('' . $maxfilesize, $rn); // ;  . '&dir=' . $folder; // folder not sent anymore - only session is used!
+    $output = '&login=' . $login .  '&maxfilesize=' . '' . $maxfilesize;
     // $output .= '&maxfilesize_split=' . tfu_enc('' . $maxfilesize_split, $rn);
     // $output .= '&maxfilesize_php=' . getMaximumUploadSize();
     $output .= '&resize_show=' . $resize_show . '&resize_data=' . $resize_data;
     $output .= '&resize_label=' . urlencode($resize_label) . '&resize_default=' . $resize_default;
-    $output .= '&allowed_file_extensions=' . tfu_enc($allowed_file_extensions, $rn) . '&forbidden_file_extensions=' . $forbidden_file_extensions;
+    $output .= '&allowed_file_extensions=' . $allowed_file_extensions . '&forbidden_file_extensions=' . $forbidden_file_extensions;
     $output .= '&show_delete=' . $show_delete . '&enable_folder_browsing=' . $enable_folder_browsing;
     $output .= '&enable_folder_creation=' . $enable_folder_creation . '&enable_folder_deletion=' . $enable_folder_deletion ;
     $output .= '&enable_file_download=' . $enable_file_download . '&keep_file_extension=' . $keep_file_extension;
@@ -1291,8 +1305,13 @@ function sendConfigData()
     $output .= '&big_progressbar=' . $big_progressbar . '&img_progressbar=' .$img_progressbar;
     $output .= '&img_progressbar_back=' . $img_progressbar_back . '&img_progressbar_anim=' .$img_progressbar_anim;
     $output .= '&big_server_view=' . $big_server_view . '&zip_file_pattern=' . $zip_file_pattern;
-
-    echo $output;
+    $output .= '&is_jfu_plugin=' . $is_jfu_plugin . '&has_post_processing=' . $has_post_processing; 
+    
+    // all parameters are sent encrypted to the client.    
+    $parameters = "&parameters=" . urlencode(tfu_enc($output, $rn));  
+    
+    // we generate a nonce for this request
+    echo '&tfu_nonce=' . create_tfu_nonce() . $parameters;
 }
 
 /**
@@ -1417,6 +1436,12 @@ function restore_temp_session($checkrn = false)
     }
 }
 
+// creates a nonce see http://en.wikipedia.org/wiki/Cryptographic_nonce
+// just some random parts and then a hash of it.
+function create_tfu_nonce() {
+    return nhash(date("is") . session_id() . rand());
+}
+
 // checks if the extension is allowed to be viewed!
 function check_view_extension($name)
 {
@@ -1477,9 +1502,10 @@ function t($l, $s)
 }
 // Checks if the uploaded extension is o.k. on the server side!
 // Trailing . are removed because of security issues.
-function check_valid_extension($name)
+function check_valid_extension($name, $die_if_invalid = true)
 {
     global $forbidden_file_extensions, $allowed_file_extensions;
+      
     $afe = str_replace(' ', '', strtolower($allowed_file_extensions));
     $name = rtrim($name, ".,; \t\n\r\0\x0B");
     $path_info = pathinfo($name);
@@ -1503,19 +1529,19 @@ function check_valid_extension($name)
         if ($nafe != '') {
             $extension_blacklist = explode(',', $nafe);
             foreach ($extension_blacklist as $extension) {
-                if (strpos($file_extension, $extension) === true) {
+                if (strpos($file_extension, $extension) !== false) {    
                     $is_valid_extension = false;
                     break;
                 }
             }
         }
     }
-    if (!$is_valid_extension) {
+    if (!$is_valid_extension && $die_if_invalid) {
         header('HTTP/1.1 500 Internal Server Error');
         echo 'No valid extension - upload not permitted.';
         exit(0);
     }
-    return true;
+    return $is_valid_extension;
 }
 // Validate the file size (Warning the largest files supported by this code is 2GB)
 function check_valid_filesize($name)
@@ -1569,7 +1595,7 @@ function printServerInfo()
     echo '<br><p><center>Some info\'s about your server. This limits are not TFU limits. You have to change this in the php.ini.</center></p>';
     echo '<div class="install">';
     echo '<table><tr><td>';
-    echo '<tr><td width="400">TFU version:</td><td width="250">2.11&nbsp;';
+    echo '<tr><td width="400">TFU version:</td><td width="250">2.13&nbsp;';
     // simply output the license type by checking the strings in the license. No real check like in the flash is done here.
     if ($m != "" && $m != "s" && $m !="w" ) {
         ob_start();
@@ -1933,6 +1959,12 @@ function tfu_preview($file) {
     }
 }
 
+function tfu_createThumb($file) {
+      global $compression;        
+      $name = removeExtension($file) . "-" . $_GET['tfu_width'] . 'x' . $_GET['tfu_height'] . "." . getExtension($file);
+      resize_file($file, $_GET['tfu_width'] . 'x' . $_GET['tfu_height'], $compression, basename($file), $name);      
+}
+
 function tfu_info($file) {
     global $use_image_magic;
     unset($_SESSION['TFU_LAST_UPLOADS']);
@@ -2096,7 +2128,6 @@ function create_dir($dir, $enable_folder_creation, $fix_utf8) {
         if (file_exists($createdir)) {
             $status = '&create_dir=exists';
         } else {
-              // check if we should create directories by ftp. - not ready yet - will come in 2.11
             if (isset($ftp_enable) && $ftp_enable) {
               $ftp_createdir = substr($createdir,strlen($_SESSION['TFU_ROOT_DIR'].'/'));
               $conn_id = ftp_connect($ftp_host, $ftp_port); 
@@ -2233,11 +2264,7 @@ function read_dir($dir, &$myFiles, &$myDirs, $fix_utf8, $exclude_directories, $s
         if ($file != "." && $file != ".." && !in_array($file, $exclude_directories) && (!($hide_hidden_files && (strpos($file, '.') === 0)))) {
             $filepath = $dir . '/' . $file;
             if (is_dir($filepath)) {
-                if ($fix_utf8 == "") {
-                    array_push($myDirs, "" . urlencode(utf8_encode($file)) . "");
-                } else {
-                    array_push($myDirs, "" . urlencode(iconv($fix_utf8, "UTF-8", $file)) . "");
-                }
+                array_push($myDirs,  fix_encoding($file, $fix_utf8));
             } else if (check_view_extension($file)) {
                 set_error_handler("on_error_no_output");
                 $current_size = sprintf("%u", @filesize($dir . '/' . $file));
@@ -2346,7 +2373,8 @@ function  my_basename($name) {
   if ((strpos($name, '\\') === false) && (strpos($name, '/') === false)) {
     return $name;
   } else {
-    return basename($name);
+    return ltrim(substr($name, strrpos($name, DIRECTORY_SEPARATOR) ), DIRECTORY_SEPARATOR); 
+    // return basename($name);
   }
 }
 
@@ -2357,12 +2385,20 @@ function  my_basename($name) {
  * chinese Characters are used.
 */
 function fix_decoding($encoded_filename, $fix_utf8) {
-  $temp = str_replace("\\'", "'", $encoded_filename ); // we change escaped ' to normal '
-  return ($fix_utf8 == '') ? utf8_decode($temp ) :  iconv('UTF-8', $fix_utf8, $temp);
+  if ($fix_utf8 == 'none') {
+    return $encoded_filename;
+  } else {
+    $temp = str_replace("\\'", "'", $encoded_filename ); // we change escaped ' to normal '
+    return ($fix_utf8 == '') ? utf8_decode($temp ) :  iconv('UTF-8', $fix_utf8, $temp);
+  }
 }
 
 function fix_encoding($decoded_filename, $fix_utf8) {
+  if ($fix_utf8 == 'none') {
+    return $decoded_filename;
+  } else {
     return ($fix_utf8 == '') ? utf8_encode($decoded_filename) : iconv($fix_utf8, 'UTF-8', $decoded_filename);
+  }
 }
 
 // Specifiy the file_put_contents() function for PHP version 4

@@ -101,7 +101,7 @@ are not displayed properly!
 	<LANG><KEY>folder_rename</KEY><VALUE>Directory corrente rinominata in '%s'.</VALUE></LANG>
 	<LANG><KEY>folder_rename_empty</KEY><VALUE>Nome directory non puo' essere vuoto.</VALUE></LANG>
 	<LANG><KEY>folder_rename_root</KEY><VALUE>Impossibile rinominare la Directory principale.</VALUE></LANG>
-	<LANG><KEY>file_rename_exists</KEY><VALUE>Directory '%s' esiste gia'. Scegli un altro nome</VALUE></LANG>
+	<LANG><KEY>folder_rename_exists</KEY><VALUE>Directory '%s' esiste gia'. Scegli un altro nome</VALUE></LANG>
 	<LANG><KEY>file_rename_empty</KEY><VALUE>Nome file non puo' essere vuoto.</VALUE></LANG>
 	<LANG><KEY>file_rename_exists</KEY><VALUE>File '%s' non puo' essere rinominato. File esiste gia'.</VALUE></LANG>
 	<LANG><KEY>file_rename_error</KEY><VALUE>File '%s' non puo' essere rinominato.</VALUE></LANG>

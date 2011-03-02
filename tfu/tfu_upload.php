@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.12.x
+ * TWG Flash uploader 2.13.x
  *
- * Copyright (c) 2004-2010 TinyWebGallery
+ * Copyright (c) 2004-2011 TinyWebGallery
  * written by Michael Dempfle
  *
  *
@@ -137,9 +137,25 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
                   resize_file($filename, $size, $compression, $base_filename);
                 }
                 
-                // check if php code is in images.
-                
-                
+                $filename_save = $filename;   
+                /* handles the description which can be sent with each file */
+                if (isset ($_GET['description'])) {
+                    $description = stripslashes($_GET['description']);
+                    if ($enable_upload_debug) tfu_debug('6a. Processing description: ' . $description);
+                    // we have an additional description - stored as image name.txt
+                    if ($description_mode_store == 'txt') {
+                        if (!$handle = fopen($filename . '.txt', "w")) {
+                            tfu_debug('Cannot create ' . $filename . '. The following data was sent: ' . $description );
+                        } else {
+                            fwrite($handle, $description);
+                            fclose($handle);
+                        }
+                    } else { // we add the descritption to the upload that is added to the e-mail
+                        $filename_save .= ' : ' . $description;
+                    }
+                }
+                /* end description */
+
                 // plugins are loaded here to do something after the upload - currently this is used for TWG. Other
                 // plugins can be found on the website.
                 if ($enable_upload_debug) tfu_debug('7. Internal processing done.');
@@ -164,21 +180,6 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
                 }   
                 
                 $filename_save = $filename;   
-                /* handles the description which can be sent with each file */
-                if (isset ($_GET['description'])) {
-                    // we have an additional description - stored as image name.txt
-                    if ($description_mode_store == 'txt') {
-                        if (!$handle = fopen($filename . '.txt', "w")) {
-                            tfu_debug('Cannot create ' . $filename . '. The following data was sent: ' . $_GET['description']);
-                        } else {
-                            fwrite($handle, $_GET['description']);
-                            fclose($handle);
-                        }
-                    } else { // we add the descritption to the upload that is added to the e-mail
-                        $filename_save .= ' : ' . $_GET['description'];
-                    }
-                }
-                /* end description */
                 array_push($_SESSION['TFU_LAST_UPLOADS'], $filename_save);
                 removeCacheThumb($filename);
                 // this generates the two thumbnails of the preview
