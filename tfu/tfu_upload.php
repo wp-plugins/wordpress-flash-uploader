@@ -118,9 +118,18 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
             if (!$uploaded) { 
                 // we normalize even if not selected because saving with the default name failed!
                 $filename = $dir . '/' . (fix_decoding(normalizeFileNames($base_filename),$fix_utf8)); 
-                if ($enable_upload_debug) tfu_debug('5b. Retry move_uploaded_file : ' . $file['tmp_name'] . ' -> ' . $filename);
+                if ($enable_upload_debug) {
+                   tfu_debug('5b. Retry move_uploaded_file : ' . $file['tmp_name'] . ' -> ' . $filename);
+                   // I try to enable the display error and set the error reporting higher 
+                   // if the move fails here I want to know the reason!
+                   @ini_set('display_errors','On');
+                   $old_error = error_reporting(E_ALL);   
+                }
                 if (move_uploaded_file($file['tmp_name'], $filename)) {
                     $uploaded = file_exists($filename);
+                }
+                if ($enable_upload_debug) {           
+                   error_reporting($old_error);   
                 }
             }
             

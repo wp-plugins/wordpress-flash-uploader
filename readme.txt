@@ -6,7 +6,7 @@ Tested up to: 3.1
 Stable tag: 2.13
 Donate link: Please check the settings of Wordpress Flash Uploader
 
-'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you additionally manage your whole Wordpress installation and synchronize your media library. 
+'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you also manage your whole Wordpress installation and synchronize your media library. 
 
 == Description ==
 

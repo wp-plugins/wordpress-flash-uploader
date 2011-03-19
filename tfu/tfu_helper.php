@@ -2092,7 +2092,8 @@ function tfu_zip_download($files, $enable_file_download) {
       $zipName = parseInputParameterFile(trim(my_basename(' ' . $_GET['zipname']))); // fixes that file can be renamed to an upper dir.    
       $fileName = $zip_folder . '/' . $zipName;
     } else {
-      // zip file pattern can have the following patterns {number}, {date} e.g. "download-{number}-files_{date}.zip"
+      // zip file pattern can have the following patterns {folder}, {number}, {date} e.g. "download-{number}-files_{date}.zip"
+      // but here I only use {number} and {date} because this is enough to be unique. The filename itself is build in the flash.
       $newName = str_replace('{number}', $nrfiles, $zip_file_pattern);
       $newName = str_replace('{date}', date("Y-m-d"), $newName);
       $fileName = $zip_folder . '/' . $newName;

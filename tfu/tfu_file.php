@@ -186,13 +186,14 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['
         $files = implode('|', $myFiles);
         $dirs = ($enable_folder_browsing == "true") ? implode("|", $myDirs) : "";
         $dirsub = create_directory_title($dir, $hide_directory_in_title, $truncate_dir_in_title , $fix_utf8);
+        $currentdir = basename($dir); // currently only the last folder is shown
         $baseurl = "&baseurl=" . getRootUrl() . $dir . "/"; // the baseurl
         if ($fix_utf8 == "") {
             $baseurl = utf8_encode($baseurl); // the baseurl
         } 
         store_temp_session();
         $size = $nrFiles . " files (" . formatSize($size) . ")"; // formating of the display can be done here!
-       echo "&tfufiles=" . $size . "|" . $files . "&tfudirs=" . $dirs . $status . "&dirtext=" . $dirsub . $mem_errors . $upload_ok . $baseurl;
+       echo "&tfufiles=" . $size . "|" . $files . "&tfudirs=" . $dirs . $status . "&currentDir=".$currentdir."&dirtext=" . $dirsub . $mem_errors . $upload_ok . $baseurl;
     } else {
         // shows an error message that the expected index was not send
         echo '&result=index'; 
