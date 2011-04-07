@@ -2,7 +2,7 @@
 /**
  * TWG Flash uploader 2.13.x
  *
- * Copyright (c) 2004-2010 TinyWebGallery
+ * Copyright (c) 2004-2011 TinyWebGallery
  * written by Michael Dempfle
  *
  *
@@ -36,6 +36,7 @@ $bg_color_preview_G = 255;
 $bg_color_preview_B = 255;
 $input_invalid = false;
 $old_error_handler = false;
+$master_profile = false;
 $debug_file = dirname(__FILE__) . "/tfu.log"; // can be overwritten in the config!
 
 tfu_setHeader();
@@ -1266,7 +1267,7 @@ function sendConfigData()
     global $description_mode_show_default, $description_mode, $download_multiple_files_as_zip;
     global $overwrite_files, $description_mode_mandatory, $post_upload_panel, $form_fields;
     global $big_progressbar,$img_progressbar,$img_progressbar_back,$img_progressbar_anim, $big_server_view;
-    global $zip_file_pattern, $is_jfu_plugin, $has_post_processing;
+    global $zip_file_pattern, $is_jfu_plugin, $has_post_processing, $directory_file_limit_size;
     
     // the sessionid is mandatory because upload in flash and Firefox would create a new session otherwise - sessionhandled login would fail then!
     $output = '&login=' . $login .  '&maxfilesize=' . '' . $maxfilesize;
@@ -1306,12 +1307,14 @@ function sendConfigData()
     $output .= '&img_progressbar_back=' . $img_progressbar_back . '&img_progressbar_anim=' .$img_progressbar_anim;
     $output .= '&big_server_view=' . $big_server_view . '&zip_file_pattern=' . $zip_file_pattern;
     $output .= '&is_jfu_plugin=' . $is_jfu_plugin . '&has_post_processing=' . $has_post_processing; 
+    $output .= '&directory_file_limit_size = ' . $directory_file_limit_size;
     
     // all parameters are sent encrypted to the client.    
     $parameters = "&parameters=" . urlencode(tfu_enc($output, $rn));  
     
     // we generate a nonce for this request
-    echo '&tfu_nonce=' . create_tfu_nonce() . $parameters;
+    // last=true is added for such websites who add their own code to each page!
+    echo '&tfu_nonce=' . create_tfu_nonce() . $parameters . "&last=true";
 }
 
 /**
@@ -1452,9 +1455,9 @@ function check_view_extension($name)
 
     $isAllowed = true;
     
-    if (strlen($check_server_file_extensions) > 10) {
+    if ($check_server_file_extensions == 'v') {
          if ($allowed_view_file_extensions != 'all' || $forbidden_view_file_extensions != '') {
-             if (strpos($name, '.') === false) {
+             if ($allowed_view_file_extensions != 'all' && strpos($name, '.') === false) {
                  $isAllowed = false;
              } else {
                  $ext = strtolower(getExtension($name));
@@ -2114,7 +2117,7 @@ function tfu_zip_download($files, $enable_file_download) {
 */
 function create_dir($dir, $enable_folder_creation, $fix_utf8) {
     global $normalise_directory_names, $dir_chmod;
-    global $ftp_enable, $ftp_host, $ftp_port, $ftp_user, $ftp_pass, $ftp_root;
+    global $ftp_enable, $ftp_host, $ftp_port, $ftp_user, $ftp_pass, $ftp_root, $master_profile;
     if ($enable_folder_creation != 'true') {
             echo 'This action is not enabled!';
             exit(0);
@@ -2130,7 +2133,13 @@ function create_dir($dir, $enable_folder_creation, $fix_utf8) {
             $status = '&create_dir=exists';
         } else {
             if (isset($ftp_enable) && $ftp_enable) {
-              $ftp_createdir = substr($createdir,strlen($_SESSION['TFU_ROOT_DIR'].'/'));
+               if ($master_profile) {              
+                 // we have to remove one level from the TFU_ROOT_DIR that was added automatically by the jfu wrapper
+                 $parent_root = dirname($_SESSION['TFU_ROOT_DIR']);
+                 $ftp_createdir = substr($createdir,strlen($parent_root)+1);
+              } else {
+               $ftp_createdir = substr($createdir,strlen($_SESSION['TFU_ROOT_DIR'])+1); 
+              }
               $conn_id = ftp_connect($ftp_host, $ftp_port); 
               $login_result = ftp_login($conn_id, $ftp_user, $ftp_pass); 
               ftp_chdir($conn_id, $ftp_root); 
@@ -2142,7 +2151,7 @@ function create_dir($dir, $enable_folder_creation, $fix_utf8) {
             } else {
               $result = mkdir ($createdir);
               if ($result && $dir_chmod != 0) {
-              @chmod($createdir, $dir_chmod);
+                @chmod($createdir, $dir_chmod);
               }
             }
             $status = ($result) ? '&create_dir=true':'&create_dir=false';
@@ -2453,6 +2462,86 @@ function check_multiple_extensions($image, $remove_multiple_php_extension) {
   return $image;
 }
 
-@ob_end_clean();
 
+function getFolderSizeCached($path) {
+$md = md5($path);
+
+if (isset($_SESSION['TFU_TMP']) && isset($_SESSION['TFU_TMP']['FS' . $md] )) {
+   echo "c";
+   return $_SESSION['TFU_TMP']['FS' . $md];
+} else {
+  echo "b";
+  if (!isset($_SESSION['TFU_TMP'])) {
+     $_SESSION['TFU_TMP'] = array();
+  }
+  $size = getFoldersize($path);
+  $_SESSION['TFU_TMP']['FS' . $md] = $size;
+  return $size;
+}
+
+
+}
+
+/**
+ *   Optimized way to the the size of a directoy.
+ *   
+ *    First the windows or Unix way is tried. If this fails
+ *    the php internal stuff is used.   
+ *    
+ *    if you select legacy = false only the pure php 
+ *    version is used.   
+ */ 
+function getFoldersize($path, $legacy = true) {
+   
+   $size = -1;
+  //ob_start();
+  //set_error_handler('on_error_no_output');
+  if ($legacy) {
+       if (substr(@php_uname(), 0, 7) == "Windows"){
+          // we have to make the path absolute !
+          $path_ab = realpath($path);
+          $obj = new COM ( 'scripting.filesystemobject' );
+          if ( is_object ( $obj ) ) {
+         	  $ref = $obj->getfolder ( $path_ab );
+         	  $size = $ref->size;
+         	  $obj = null;
+         }
+       } else { // hopefully unix -  du has to be in the path. If it is not you have to adjust the path.
+         $io = popen ( 'du -sk ' . $path, 'r' );
+         $usize = fgets ( $io, 4096);
+         $usize = substr ( $usize, 0, strpos ( $usize, ' ' ) );
+         pclose ( $io );
+         if (is_numeric($usize)) {
+           $size = $usize;
+         }
+       }
+  }
+  // backup if both ways fail. It is ~ 18 times slower than one of the solutions above.
+  if ($size == -1) {
+    $size = foldersize($path);
+  }
+  return $size;
+}
+
+/**
+ *  The basic php way to go through all directories and adding the file sizes.
+ */ 
+function foldersize($p) {
+    $size = 0;
+    $fs = scandir($p);
+    foreach($fs as $f) {
+        if (is_dir(rtrim($p, '/') . '/' . $f)) {
+            if ($f!='.' && $f!='..') {
+                $size += foldersize(rtrim($p, '/') . '/' . $f);      
+            }
+        } else {
+            $size += filesize(rtrim($p, '/') . '/' . $f);    
+        }   
+    }
+    return $size;
+}
+
+
+
+@ob_end_clean();
 ?>

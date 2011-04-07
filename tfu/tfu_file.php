@@ -190,13 +190,13 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['
         $baseurl = "&baseurl=" . getRootUrl() . $dir . "/"; // the baseurl
         if ($fix_utf8 == "") {
             $baseurl = utf8_encode($baseurl); // the baseurl
-        } 
+        }
         store_temp_session();
         $size = $nrFiles . " files (" . formatSize($size) . ")"; // formating of the display can be done here!
-       echo "&tfufiles=" . $size . "|" . $files . "&tfudirs=" . $dirs . $status . "&currentDir=".$currentdir."&dirtext=" . $dirsub . $mem_errors . $upload_ok . $baseurl;
+       echo "&tfufiles=" . $size . "|" . $files . "&tfudirs=" . $dirs . $status . "&currentDir=".$currentdir."&dirtext=" . $dirsub . $mem_errors . $upload_ok . $baseurl . '&last=true';
     } else {
         // shows an error message that the expected index was not send
-        echo '&result=index'; 
+        echo '&result=index&last=true'; 
     }
     store_temp_session();
 } else if (isset($_GET['tfu_rn']) && isset($_GET['tfu_ut']) && ($_GET['tfu_ut'] == "-1" || $_GET['tfu_ut'] == "5")) {

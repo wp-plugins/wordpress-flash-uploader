@@ -3,13 +3,13 @@
 Plugin Name: Wordpress Flash Uploader
 Plugin URI: http://www.tinywebgallery.com/blog/wfu
 Description: The Wordpress Flash Uploader does contain 2 plugins: '<strong>Wordpress Flash Uploader</strong>' and '<strong>Sync Media Library</strong>'. The Wordpress Flash Uploader is a flash uploader that replaces the existing flash uploader and let you manage your whole  WP installation. 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library. 
-Version: 2.13
+Version: 2.13.1
 Author: Michael Dempfle
 Author URI: http://www.tinywebgallery.com
 */
 // all parts are in an extra file in the inc folder.
 
-ini_set("display_errors","1");
+// @ini_set("display_errors","1");
 
 include 'inc/wfu-flash.php';		
 include 'inc/wfu-settings.php';
