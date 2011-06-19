@@ -1,6 +1,6 @@
 <?php
 /**
- * TWG Flash uploader 2.13.x
+ * TWG Flash uploader 2.14.x
  *
  * Copyright (c) 2004-2011 TinyWebGallery
  * written by Michael Dempfle
@@ -8,13 +8,13 @@
  *
  *        This file has all the helper functions.
  *        Normally you don't have to modify anything here.
- *        Only the timezone can be interesting for you: $timezone 
+ *        Only the timezone can be interesting for you: $timezone
  */
 /**
  * * ensure this file is being included by a parent file
  */
 defined('_VALID_TWG') or die('Direct Access to this location is not allowed.');
-
+$tfu_help_version = '2.14';
 // some globals you can change
 $check_safemode = true;              // New 2.12.x - By default TFU checks if you have a safe mode problem. On some server this test does not work. There you can try to turn it off and test if you can e.g. create directories, upload files to new created directories.
 $session_double_fix = false; // this is only needed if you get errors because of corrupt sessions. If you turn this on a backup is made and checked if the first one is corrupt
@@ -42,8 +42,14 @@ $debug_file = dirname(__FILE__) . "/tfu.log"; // can be overwritten in the confi
 tfu_setHeader();
 
 @ob_start();
-// neede to be here because of possible depreciate warning!
+
 include dirname(__FILE__) . '/tfu_zip.class.php';
+
+// check if all included files have the same version to avoid problems during update!
+if ($tfu_zip_version != '2.14') {
+  tfu_debug('Not all files belong to this version. Please update all files.');
+}
+
 /**
  * * Needed for Https and IE!
  */
@@ -60,16 +66,16 @@ function tfu_setHeader()
       header('Cache-Control: private');
     }
     else
-    {   
-      header('Pragma: public'); 
+    {
+      header('Pragma: public');
       header('Cache-Control: no-store, no-cache, must-revalidate' );
-      header('Cache-Control: post-check=0, pre-check=0', false );    
-    } 
-    
+      header('Cache-Control: post-check=0, pre-check=0', false );
+    }
+
     header('Expires: Sat, 26 Jul 1997 05:00:00 GMT' );
     header('Last-Modified: ' . gmdate( 'D, d M Y H:i:s' ) . ' GMT' );
     header('Vary: User-Agent');
-    
+
 }
 /**
  * function:tfu_debug()
@@ -89,8 +95,8 @@ function tfu_debug($data)
             $debug_string .= '      Stack: ' . basename($element['file']) . ":" . $element['line'] . ":" . $element['function'];
             foreach ($element['args'] as $par) {
               if (is_array($par)) {
-                $par = str_replace("\n", "", print_r($par, true));  
-              }    
+                $par = str_replace("\n", "", print_r($par, true));
+              }
               $debug_string .= ":" . substr($par, 0, 100); // max 100 chars
             }
             $debug_string .= "\n";
@@ -181,16 +187,16 @@ function resize_file($image, $size, $compression, $image_name, $dest_image = fal
         }
         $oldsizex = $oldsize[0];
         $oldsizey = $oldsize[1];
-             
+
         if (strpos($size, "x") !== false) {
-           $s = explode("x", $size);        
-           $width =  $s[0];  
+           $s = explode("x", $size);
+           $width =  $s[0];
            $height = $s[1] ;
         } else {
              if (($oldsizex < $size) && ($oldsizey < $size)) {
                  if ($enable_upload_debug) { tfu_debug('Resize: Image ('. $oldsizex .'x' .$oldsizey. ') is not resized with setting "' . $size . '"'); }
                  return 1;
-             }   
+             }
              if ($oldsizex > $oldsizey) { // querformat - this keeps the dimension between horzonal and vertical
                  $width = $size;
                  $height = ($width / $oldsizex) * $oldsizey;
@@ -304,7 +310,7 @@ function resize_file($image, $size, $compression, $image_name, $dest_image = fal
 function send_thumb($image, $compression, $sizex, $sizey, $generateOnly = false)
 {
     global $bg_color_preview_R, $bg_color_preview_G, $bg_color_preview_B;
-    global $info_text, $info_textcolor_R, $info_textcolor_G, $info_textcolor_B, $info_font, $info_fontsize;   
+    global $info_text, $info_textcolor_R, $info_textcolor_G, $info_textcolor_B, $info_font, $info_fontsize;
 
     set_error_handler('on_error_no_output');
     ini_set('gd.jpeg_ignore_warning', 1); // since php 5.1.3 this leads that corrupt jpgs are read much better!
@@ -314,7 +320,7 @@ function send_thumb($image, $compression, $sizex, $sizey, $generateOnly = false)
     $dimx = $sizex;
     $dimy = $sizey;
     $usethumbs = false;
-    
+
     if (file_exists(dirname(__FILE__) . '/thumbs') && is_writable(dirname(__FILE__) . '/thumbs')) { // is a caching dir available and writeable?
         $cachename = dirname(__FILE__) . '/thumbs/' . sha1($image . $sizex) . '.jpg';
         $usethumbs = true;
@@ -400,21 +406,21 @@ function send_thumb($image, $compression, $sizex, $sizey, $generateOnly = false)
             imagecolorset ($src, $trans, 255, 255, 255);
             imagecolortransparent($src, imagecolorallocate($src, 0, 0, 0));
             imagecopyresampled($dst, $src, $offsetx, $offsety, $srcx, $srcy, $width - $offsetx_b, $height - $offsety_b, $oldsizex, $oldsizey);
-      
+
             if (function_exists("imagettftext") && $dimx > 100 && $info_text != '' ) {
-               // some extra info at the bottom of the image. Available parameters: {date} {size} {dimension} 			   
+               // some extra info at the bottom of the image. Available parameters: {date} {size} {dimension}
                   $text = str_replace('{dimension}', $oldsizex."x".$oldsizey, $info_text);
                   $text = str_replace('{size}', formatSize(filesize($image)), $text);
-                  $text = str_replace('{date}', date("d.m.Y",filemtime($image)), $text);                            
+                  $text = str_replace('{date}', date("d.m.Y",filemtime($image)), $text);
 			   $color = imagecolorclosest ($dst, $info_textcolor_R, $info_textcolor_G, $info_textcolor_B);
-			   imagettftext($dst, $info_fontsize, 0, 8, $dimy-8, $color, $info_font, $text);  
+			   imagettftext($dst, $info_fontsize, 0, 8, $dimy-8, $color, $info_font, $text);
             }
-           
+
             header('Content-type: image/jpg');
             if ($usethumbs) { // we save the thumb
                 imagejpeg($dst, $cachename, $compression);
             }
-            if (!$generateOnly) { 
+            if (!$generateOnly) {
                 ob_start();
                 if (imagejpeg($dst, '', $compression)) {
                     $buffer = ob_get_contents();
@@ -436,10 +442,10 @@ function send_thumb($image, $compression, $sizex, $sizey, $generateOnly = false)
 // we check if we can get a memory problem!
 function isMemoryOk($oldsize, $newsize, $image_name, $debug = true)
 {
-    $memory_read = ($oldsize[0] * $oldsize[1] * 6) + 1048576; // mem and we add 1 MB for safty
-    $memory_orig = $newsize * $newsize * 4;
-    $memory = $memory_read + $memory_orig; 
-       
+    $memory_read = (($oldsize[0] * $oldsize[1] * 6) + 2048576) * 1.1; // mem and we add 2 MB + 10% for safty
+    $memory_orig = ($newsize * $newsize * 6) * 1.1; // 10% overhead.
+    $memory = $memory_read + $memory_orig;
+
     // I try to increase the memory if more is needed and if it is possible.
     if (function_exists("memory_get_usage")) {
       $InUse=memory_get_usage();
@@ -642,7 +648,6 @@ function getCurrentDir()
 function getFileName($dir)
 {
     global $fix_utf8, $exclude_directories, $sort_files_by_date, $hide_hidden_files, $enable_enhanced_debug;
-    $sort_by_date = $sort_files_by_date;
 
     if (!isset($_GET['index']) || $_GET['index'] == '') {
         return '';
@@ -654,7 +659,7 @@ function getFileName($dir)
     while (($file = readdir($dirhandle)) !== false) {
         if ($file != '.' && $file != '..' && !in_array($file, $exclude_directories)&& (!($hide_hidden_files && (strpos($file, '.') === 0)))) {
             if (!is_dir($dir . '/' . $file) && check_view_extension($file)) {
-                if ($sort_by_date) {
+                if ($sort_files_by_date) {
                     $file = filemtime(($dir . '/' . $file)) . $file;
                 }
                 array_push($myFiles, fix_encoding($file, $fix_utf8));
@@ -662,7 +667,7 @@ function getFileName($dir)
         }
     }
     closedir ($dirhandle);
-    if ($sort_by_date) {
+    if ($sort_files_by_date) {
         usort ($myFiles, 'mycmp_date');
     } else {
         usort ($myFiles, 'mycmp');
@@ -774,7 +779,7 @@ function has_safemode_problem_global()
     $isWindows = substr(PHP_OS, 0, 3) == 'WIN';
     $no_cgi = runsNotAsCgi();
 
-    if (function_exists('posix_getpwuid') && function_exists('posix_getpwuid')) {     
+    if (function_exists('posix_getpwuid') && function_exists('posix_getpwuid')) {
         if (!isset($_SESSION['tfu_posix_geteuid_works'])) {
           $_SESSION['tfu_posix_geteuid_works'] = 'check';
           $userid = @posix_geteuid();
@@ -783,7 +788,7 @@ function has_safemode_problem_global()
           if (in_array ($userinfo['name'], $def_user)) {
             $no_cgi = true;
           }
-          unset($_SESSION['tfu_posix_geteuid_works']);       
+          unset($_SESSION['tfu_posix_geteuid_works']);
         }
     }
     if (ini_get('safe_mode') == 1 && $no_cgi && !$isWindows) {
@@ -1268,7 +1273,8 @@ function sendConfigData()
     global $overwrite_files, $description_mode_mandatory, $post_upload_panel, $form_fields;
     global $big_progressbar,$img_progressbar,$img_progressbar_back,$img_progressbar_anim, $big_server_view;
     global $zip_file_pattern, $is_jfu_plugin, $has_post_processing, $directory_file_limit_size;
-    
+    global $show_server_date_instead_size, $enable_file_creation, $enable_file_creation_extensions;
+
     // the sessionid is mandatory because upload in flash and Firefox would create a new session otherwise - sessionhandled login would fail then!
     $output = '&login=' . $login .  '&maxfilesize=' . '' . $maxfilesize;
     // $output .= '&maxfilesize_split=' . tfu_enc('' . $maxfilesize_split, $rn);
@@ -1306,12 +1312,14 @@ function sendConfigData()
     $output .= '&big_progressbar=' . $big_progressbar . '&img_progressbar=' .$img_progressbar;
     $output .= '&img_progressbar_back=' . $img_progressbar_back . '&img_progressbar_anim=' .$img_progressbar_anim;
     $output .= '&big_server_view=' . $big_server_view . '&zip_file_pattern=' . $zip_file_pattern;
-    $output .= '&is_jfu_plugin=' . $is_jfu_plugin . '&has_post_processing=' . $has_post_processing; 
-    $output .= '&directory_file_limit_size = ' . $directory_file_limit_size;
+    $output .= '&is_jfu_plugin=' . $is_jfu_plugin . '&has_post_processing=' . $has_post_processing;
+    $output .= '&directory_file_limit_size=' . $directory_file_limit_size . '&show_server_date_instead_size=' . $show_server_date_instead_size;
+    $output .= '&enable_file_creation=' . $enable_file_creation . '&enable_file_creation_extensions=' . $enable_file_creation_extensions;
     
-    // all parameters are sent encrypted to the client.    
-    $parameters = "&parameters=" . urlencode(tfu_enc($output, $rn));  
-    
+
+    // all parameters are sent encrypted to the client.
+    $parameters = "&parameters=" . urlencode(tfu_enc($output, $rn));
+
     // we generate a nonce for this request
     // last=true is added for such websites who add their own code to each page!
     echo '&tfu_nonce=' . create_tfu_nonce() . $parameters . "&last=true";
@@ -1361,7 +1369,7 @@ function checkSessionTempDir($type = 0)
     } else if ($type == 5) { // the upload check has to fail because the whole session data is gone.
       echo 'int_session_handling=true';
     } else {
-        tfu_debug('It seems that the session handling of the server is not o.k. TFU already tried a workaround that does not seem to work. TFU deleted the session_cache folder. Maybe it was created because of a wrong request! Please go to http://www.tinywebgallery.com/de/tfu/web_faq.php#12. If this does not help please report this in the forum to find a solution!');
+        tfu_debug('It seems that the session handling of the server is not o.k. TFU already tried a workaround that does not seem to work. TFU deleted the session_cache folder. Maybe it was created because of a wrong request! Please go to http://www.tinywebgallery.com/de/tfu/tfu_faq_12.php. If this does not help please report this in the forum to find a solution!');
         if (!$keep_internal_session_handling) {
             remove(dirname(__FILE__) . '/session_cache');
         }
@@ -1454,7 +1462,7 @@ function check_view_extension($name)
     $forbidden_view_file_filter = str_replace(' ', '', strtolower($forbidden_view_file_filter));
 
     $isAllowed = true;
-    
+
     if ($check_server_file_extensions == 'v') {
          if ($allowed_view_file_extensions != 'all' || $forbidden_view_file_extensions != '') {
              if ($allowed_view_file_extensions != 'all' && strpos($name, '.') === false) {
@@ -1478,14 +1486,14 @@ function check_view_extension($name)
                      if (fnmatch ($filter, $name)) {
                        $isAllowed = false;
                        break;
-                     } 
+                     }
                    }
               }
          }
     }
-  
+
     return $isAllowed;
-    
+
 }
 
 function t($l, $s)
@@ -1508,11 +1516,16 @@ function t($l, $s)
 function check_valid_extension($name, $die_if_invalid = true)
 {
     global $forbidden_file_extensions, $allowed_file_extensions;
-      
+
     $afe = str_replace(' ', '', strtolower($allowed_file_extensions));
     $name = rtrim($name, ".,; \t\n\r\0\x0B");
     $path_info = pathinfo($name);
-    $file_extension = strtolower($path_info['extension']);
+    if (isset($path_info['extension'])) {
+      $file_extension = strtolower($path_info['extension']);
+    } else {
+      $file_extension = '';
+    }
+    
     if ($afe == '') { // this can be useful if you don't allow to upload - only to download!
         return false;
     }
@@ -1532,7 +1545,7 @@ function check_valid_extension($name, $die_if_invalid = true)
         if ($nafe != '') {
             $extension_blacklist = explode(',', $nafe);
             foreach ($extension_blacklist as $extension) {
-                if (strpos($file_extension, $extension) !== false) {    
+                if (strpos($file_extension, $extension) !== false) {
                     $is_valid_extension = false;
                     break;
                 }
@@ -1584,7 +1597,7 @@ function parseInputParameterFile($value, $def = '')
 }
 
 function printServerInfo()
-{   
+{
    global $check_image_magic;                                                                                                                                                                                   global $m;
     echo '
   <style type="text/css">
@@ -1598,14 +1611,14 @@ function printServerInfo()
     echo '<br><p><center>Some info\'s about your server. This limits are not TFU limits. You have to change this in the php.ini.</center></p>';
     echo '<div class="install">';
     echo '<table><tr><td>';
-    echo '<tr><td width="400">TFU version:</td><td width="250">2.13&nbsp;';
+    echo '<tr><td width="400">TFU version:</td><td width="250">2.14&nbsp;';
     // simply output the license type by checking the strings in the license. No real check like in the flash is done here.
     if ($m != "" && $m != "s" && $m !="w" ) {
         ob_start();
         $ff = dirname(__FILE__) . "/twg.lic.php";
         if (!file_exists($ff)) { // we are in TWG
-          $ff = dirname(__FILE__) . "/../../twg.lic.php";  
-        } 
+          $ff = dirname(__FILE__) . "/../../twg.lic.php";
+        }
         include  $ff;
         ob_end_clean();
         if ($l == $d) {
@@ -1634,7 +1647,7 @@ function printServerInfo()
     if (!$limit) {
         echo '<font color="green">No limit</font>';
     } else {
-        $xy = $limit * 1024 / 6;
+        $xy = $limit * 1024 / 6.6;  // 10 % overhead. 
         $x = floor(sqrt ($xy / 0.75));
         $y = floor(sqrt($xy / 1.33));
         if ($x > 4000) {
@@ -1685,7 +1698,7 @@ function check_image_magic($path = "", $check_image_magic = true) {
        }
      }
      set_error_handler('on_error');
-  
+
      if ($path != "") {
        $image_magic_path = $path;
      }
@@ -1704,9 +1717,9 @@ function check_image_magic($path = "", $check_image_magic = true) {
        $ok = '0';
      }
      return $ok;
-   } else { 
+   } else {
     return '-1';
-   } 
+   }
 }
 
 /**
@@ -1925,7 +1938,7 @@ function tfu_copy_move($dir, $file, $enable_file_copymove, $enable_folder_copymo
 }
 
 function tfu_preview($file) {
-    global $use_image_magic, $image_magic_path;
+    global $use_image_magic, $image_magic_path, $pdf_thumb_format;
     $pdf_preview = false;
     if (file_exists(dirname(__FILE__) . '/thumbs') && is_writable(dirname(__FILE__) . '/thumbs')) { // is a caching dir available and writeable?
         $pdf_preview = true;
@@ -1942,11 +1955,11 @@ function tfu_preview($file) {
             send_thumb($file, 90, 80, 55); // small preview
         }
     } else if (preg_match("/.*\.(p|P)(d|D)(f|F)$/", $file) && $use_image_magic && $pdf_preview) {
-            $cachename = dirname(__FILE__) . '/thumbs/' . sha1($file) . '.jpg';
+            $cachename = dirname(__FILE__) . '/thumbs/' . sha1($file) . '.' . $pdf_thumb_format;
             if (!file_exists($cachename)) {
               $ima = realpath($file);
               $resize = '1000x1000';
-              $command = $image_magic_path . ' "' . $ima . '[0]" -border 1x1 -quality 80 -thumbnail ' . $resize . ' "' . $cachename . '"';
+              $command = $image_magic_path . ' -colorspace rgb "' . $ima . '[0]" -border 1x1 -quality 80 -thumbnail ' . $resize . ' "' . $cachename . '"';
               execute_command ($command);
             }
             if (isset($_GET['big'])) {
@@ -1963,9 +1976,21 @@ function tfu_preview($file) {
 }
 
 function tfu_createThumb($file) {
-      global $compression;        
-      $name = removeExtension($file) . "-" . $_GET['tfu_width'] . 'x' . $_GET['tfu_height'] . "." . getExtension($file);
-      resize_file($file, $_GET['tfu_width'] . 'x' . $_GET['tfu_height'], $compression, basename($file), $name);      
+      global $compression, $use_image_magic, $image_magic_path, $pdf_thumb_format;
+      if (!(preg_match("/.*\.(p|P)(d|D)(f|F)$/", $file) && $use_image_magic)) {
+        $name = removeExtension($file) . "-" . $_GET['tfu_width'] . 'x' . $_GET['tfu_height'] . "." . getExtension($file);
+        resize_file($file, $_GET['tfu_width'] . 'x' . $_GET['tfu_height'], $compression, basename($file), $name); 
+      } else {
+        $name = dirname(__FILE__) . '/' . removeExtension($file) . "-" . $_GET['tfu_width'] . '.' . $pdf_thumb_format;
+        // create a pdf thumbnail
+          $ima = realpath($file);
+          if (!file_exists($name)) {
+            $ima = realpath($file);
+            $resize = $_GET['tfu_width'] . 'x' . $_GET['tfu_height'];
+            $command = $image_magic_path . ' -colorspace rgb "' . $ima . '[0]" -border 1x1 -quality 80 -thumbnail ' . $resize . ' "' . $name . '"';
+            execute_command ($command);
+          }
+      }     
 }
 
 function tfu_info($file) {
@@ -1982,7 +2007,7 @@ function tfu_info($file) {
             if (isMemoryOk($oldsize, 400, "")) {
                 echo '&hasPreview=true&tfu_x=' . $oldsize[0] . '&tfu_y=' . $oldsize[1] ; // has preview!
             } else {
-                echo '&hasPreview=error'; // too big! - same error massage as hasPreview=false
+                echo '&hasPreview=error&tfu_x=0&tfu_y=0'; // too big! - same error massage as hasPreview=false
             }
             return;
         }
@@ -1993,7 +2018,7 @@ function tfu_info($file) {
        echo '&hasPreview=true&tfu_x=1000&tfu_y=1000'; // has preview! - pdfs are max 1000x1000';
        return;
     }
-    echo '&hasPreview=false';
+    echo '&hasPreview=false&tfu_x=0&tfu_y=0';
 }
 
 function  tfu_text($file) {
@@ -2006,7 +2031,10 @@ function  tfu_text($file) {
     $enc = 'UTF-8';
     $format = 'UNIX';
     $fp = fopen($file, 'rb');
-    $content = fread ($fp, filesize ($file));
+    $content = '';
+    if (filesize ($file) > 0) {
+      $content = fread ($fp, filesize ($file));
+    }
     // we replace \r with nothing
     $content_new = str_replace("\r", "", $content);
     if ($content_new != $content) {
@@ -2022,23 +2050,33 @@ function  tfu_text($file) {
     fclose($fp);
 }
 
-function tfu_savetext($file) {
-    $content = urldecode($_POST['data']);
-    if ($_POST['encoding'] == 'ANSI') {
-        $content = utf8_to_cp1252($content);
-    }
-    if ($_POST['format'] == 'DOS') {
-        $content = preg_replace("/\r\n|\r|\n/", chr(13) . chr(10), $content);
+function tfu_savetext($file, $overwrite=true) {
+    if (file_exists($file) && !$overwrite) {
+      echo "&create_file=exists";
     } else {
-        $content = preg_replace("/\r\n|\r|\n/", chr(10), $content);
-    }
-    // now we write the file again
-    $file_local = fopen($file, 'w');
-    if (getExtension($file) == 'php') { // we remove leading and trailing spaces returns if it is a php file!
-        $content = trim($content);
-    }
-    fputs($file_local, $content);
-    fclose($file_local);
+      $content = urldecode($_POST['data']);
+      if ($_POST['encoding'] == 'ANSI') {
+          $content = utf8_to_cp1252($content);
+      }
+      if ($_POST['format'] == 'DOS') {
+          $content = preg_replace("/\r\n|\r|\n/", chr(13) . chr(10), $content);
+      } else {
+          $content = preg_replace("/\r\n|\r|\n/", chr(10), $content);
+      }
+      // now we write the file again
+      $file_local = fopen($file, 'w');
+      if (getExtension($file) == 'php') { // we remove leading and trailing spaces returns if it is a php file!
+          $content = trim($content);
+      }
+      fputs($file_local, $content);
+      fclose($file_local);
+      
+      if (file_exists($file)) {
+        echo "&create_file=true";
+      } else {
+        echo "&create_file=false";
+      }
+    }  
 }
 
 function tfu_download($file, $enable_file_download) {
@@ -2052,23 +2090,23 @@ function tfu_download($file, $enable_file_download) {
        if (file_exists($cachename)) {
          $file = $cachename;
        }
-    }  
-    ini_set('zlib.output_compression','Off');      
+    }
+    ini_set('zlib.output_compression','Off');
     header("Content-Transfer-Encoding: binary");
     header('Content-type: application/octet-stream');
     header('Content-Length: ' . filesize($file));
-    
-    // small chunk size is used for IE! 1024 would be better but has only half the dl speed - 2048 seems to be the best trade off. 
+
+    // small chunk size is used for IE! 1024 would be better but has only half the dl speed - 2048 seems to be the best trade off.
     $fp = fopen($file, 'rb');
     while ($content = fread($fp, 2048)) {
         echo $content;
         set_error_handler('on_error_no_output');
         @set_time_limit(20);
         @flush();
-        @ob_flush(); // some server need this althou on some server this throws a warning 
+        @ob_flush(); // some server need this althou on some server this throws a warning
         set_error_handler('on_error');
     }
-    fclose($fp);  
+    fclose($fp);
 }
 
 function tfu_zip_download($files, $enable_file_download) {
@@ -2090,9 +2128,9 @@ function tfu_zip_download($files, $enable_file_download) {
     fclose ($fd);
     */
     $nrfiles = count($files);
-    
+
     if ($zip_file_pattern == '') {
-      $zipName = parseInputParameterFile(trim(my_basename(' ' . $_GET['zipname']))); // fixes that file can be renamed to an upper dir.    
+      $zipName = parseInputParameterFile(trim(my_basename(' ' . $_GET['zipname']))); // fixes that file can be renamed to an upper dir.
       $fileName = $zip_folder . '/' . $zipName;
     } else {
       // zip file pattern can have the following patterns {folder}, {number}, {date} e.g. "download-{number}-files_{date}.zip"
@@ -2101,15 +2139,24 @@ function tfu_zip_download($files, $enable_file_download) {
       $newName = str_replace('{date}', date("Y-m-d"), $newName);
       $fileName = $zip_folder . '/' . $newName;
     }
-    $fd = fopen ($fileName, "wb");
-    $createZip = new TFUZipFile($fd);
-    for ($i = 0; $i < $nrfiles; $i++) {
-      $createZip -> addFile($files[$i], my_basename($files[$i]));
+    
+    if (!is_writeable($zip_folder)) {
+      tfu_debug("ERROR: The folder '" . $zip_folder . "' is not writeable. Please set the permissions properly to enable the download of multiple files.");
     }
-    $createZip -> close();
-
-    tfu_download($fileName, $enable_file_download);
-    @unlink($fileName);
+    
+    $fd = @fopen ($fileName, "wb");
+    if ($fd) {
+      $createZip = new TFUZipFile($fd);
+      for ($i = 0; $i < $nrfiles; $i++) {
+        $createZip -> addFile($files[$i], my_basename($files[$i]));
+      }
+      $createZip -> close();
+  
+      tfu_download($fileName, $enable_file_download);
+      @unlink($fileName);
+    } else {
+      tfu_debug("ERROR: The file '" . $fileName . "' could not be created. Please set the permissions properly to enable the download of multiple files.");
+    }
 }
 
 /*
@@ -2133,16 +2180,16 @@ function create_dir($dir, $enable_folder_creation, $fix_utf8) {
             $status = '&create_dir=exists';
         } else {
             if (isset($ftp_enable) && $ftp_enable) {
-               if ($master_profile) {              
+               if ($master_profile) {
                  // we have to remove one level from the TFU_ROOT_DIR that was added automatically by the jfu wrapper
                  $parent_root = dirname($_SESSION['TFU_ROOT_DIR']);
                  $ftp_createdir = substr($createdir,strlen($parent_root)+1);
               } else {
-               $ftp_createdir = substr($createdir,strlen($_SESSION['TFU_ROOT_DIR'])+1); 
+               $ftp_createdir = substr($createdir,strlen($_SESSION['TFU_ROOT_DIR'])+1);
               }
-              $conn_id = ftp_connect($ftp_host, $ftp_port); 
-              $login_result = ftp_login($conn_id, $ftp_user, $ftp_pass); 
-              ftp_chdir($conn_id, $ftp_root); 
+              $conn_id = ftp_connect($ftp_host, $ftp_port);
+              $login_result = ftp_login($conn_id, $ftp_user, $ftp_pass);
+              ftp_chdir($conn_id, $ftp_root);
               $result = ftp_mkdir ($conn_id , $ftp_createdir);
               if ($result && $dir_chmod != 0) {
                 @ftp_chmod($conn_id, $dir_chmod, $ftp_createdir);
@@ -2219,7 +2266,7 @@ function delete_folder(&$dir, $enable_folder_deletion, $fix_utf8) {
 
 function change_folder($dir, $show_root, $enable_folder_browsing, $exclude_directories) {
     global $hide_hidden_files;
-    
+
     if ($enable_folder_browsing != 'true') {
         echo 'This action is not enabled!';
         exit(0);
@@ -2263,8 +2310,8 @@ function create_directory_title($dir, $hide_directory_in_title, $truncate_dir_in
     return $dirsub;
 }
 
-function read_dir($dir, &$myFiles, &$myDirs, $fix_utf8, $exclude_directories, $sort_files_by_date) {
-    global $hide_hidden_files;
+function read_dir($dir, &$myFiles, &$myDirs, $fix_utf8, $exclude_directories, $sort_files_by_date, $sort_directores_by_date) {
+    global $hide_hidden_files, $show_server_date_instead_size;
     $size = 0;
     if (!file_exists($dir)) {
       return;
@@ -2274,14 +2321,25 @@ function read_dir($dir, &$myFiles, &$myDirs, $fix_utf8, $exclude_directories, $s
         if ($file != "." && $file != ".." && !in_array($file, $exclude_directories) && (!($hide_hidden_files && (strpos($file, '.') === 0)))) {
             $filepath = $dir . '/' . $file;
             if (is_dir($filepath)) {
-                array_push($myDirs,  fix_encoding($file, $fix_utf8));
+                $dirname = fix_encoding($file, $fix_utf8);
+                if ($sort_directores_by_date) {
+                  $dirname = filemtime($filepath) . $dirname;
+                }
+                array_push($myDirs, urlencode($dirname));
             } else if (check_view_extension($file)) {
                 set_error_handler("on_error_no_output");
                 $current_size = sprintf("%u", @filesize($dir . '/' . $file));
-                $file = $file . "**" . $current_size;
                 $size += $current_size;
+                if ($show_server_date_instead_size=='true' || $sort_files_by_date) {
+                   $fdate = filemtime($filepath);
+                }
+                if ($show_server_date_instead_size=='true') {
+                   $current_size = $fdate;
+                }
+                // size or date is added.
+                $file = $file . "**" . $current_size;
                 if ($sort_files_by_date) {
-                    $file = filemtime(($filepath)) . $file;
+                    $file = $fdate . $file;
                 }
                 set_error_handler("on_error");
                 array_push($myFiles, urlencode(fix_encoding($file, $fix_utf8)));
@@ -2292,7 +2350,7 @@ function read_dir($dir, &$myFiles, &$myDirs, $fix_utf8, $exclude_directories, $s
     return $size;
 }
 
-function sort_data (&$myFiles, &$myDirs, $sort_files_by_date) {
+function sort_data (&$myFiles, &$myDirs, $sort_files_by_date, $sort_directores_by_date) {
     if ($sort_files_by_date) {
         usort ($myFiles, "cmp_date_dec");
         $i = 0;
@@ -2304,7 +2362,18 @@ function sort_data (&$myFiles, &$myDirs, $sort_files_by_date) {
         usort ($myFiles, "cmp_dec");
     }
     reset($myFiles);
-    usort ($myDirs, "cmp_dir_dec");
+
+    if ($sort_directores_by_date) {
+        usort ($myDirs, "cmp_date_dec");
+        $i = 0;
+        foreach ($myDirs as $fieldName) {
+            $myDirs[$i] = substr($myDirs[$i], 10);
+            $i++;
+        }
+    } else {
+        usort ($myDirs, "cmp_dir_dec");
+    }
+    reset($myDirs);
 }
 
 function check_restrictions($dir, $show_root, &$myFiles, $fix_utf8, $status) {
@@ -2379,12 +2448,12 @@ function tfu_urlencode($data)
 
 // only executes basename if a / or \ is in the filename.
 // Fixes the problem that basename e.g. destroys chinese filename encoded in utf-8
-function  my_basename($name) {
+function my_basename($name) {
   if ((strpos($name, '\\') === false) && (strpos($name, '/') === false)) {
     return $name;
   } else {
-    return ltrim(substr($name, strrpos($name, DIRECTORY_SEPARATOR) ), DIRECTORY_SEPARATOR); 
-    // return basename($name);
+    $sep = ((strpos($name, '/') === false)) ?  '\\' : '/';
+    return ltrim(substr($name, strrpos($name, $sep) ), $sep);
   }
 }
 
@@ -2464,38 +2533,35 @@ function check_multiple_extensions($image, $remove_multiple_php_extension) {
 
 
 function getFolderSizeCached($path) {
-$md = md5($path);
+     $md = md5($path);
 
-if (isset($_SESSION['TFU_TMP']) && isset($_SESSION['TFU_TMP']['FS' . $md] )) {
-   echo "c";
-   return $_SESSION['TFU_TMP']['FS' . $md];
-} else {
-  echo "b";
-  if (!isset($_SESSION['TFU_TMP'])) {
-     $_SESSION['TFU_TMP'] = array();
-  }
-  $size = getFoldersize($path);
-  $_SESSION['TFU_TMP']['FS' . $md] = $size;
-  return $size;
-}
-
-
+     if (isset($_SESSION['TFU_TMP']) && isset($_SESSION['TFU_TMP']['FS' . $md] )) {
+        echo "c";
+        return $_SESSION['TFU_TMP']['FS' . $md];
+     } else {
+       echo "b";
+       if (!isset($_SESSION['TFU_TMP'])) {
+          $_SESSION['TFU_TMP'] = array();
+       }
+       $size = getFoldersize($path);
+       $_SESSION['TFU_TMP']['FS' . $md] = $size;
+       return $size;
+     }
 }
 
 /**
- *   Optimized way to the the size of a directoy.
- *   
+ *   Optimized way to read the the size of a directoy.
+ *
  *    First the windows or Unix way is tried. If this fails
- *    the php internal stuff is used.   
- *    
- *    if you select legacy = false only the pure php 
- *    version is used.   
- */ 
+ *    the php internal stuff is used.
+ *
+ *    if you select legacy = false only the pure php
+ *    version is used.
+ */
 function getFoldersize($path, $legacy = true) {
-   
-   $size = -1;
-  //ob_start();
-  //set_error_handler('on_error_no_output');
+  $size = -1;
+  ob_start();
+  set_error_handler('on_error_no_output');
   if ($legacy) {
        if (substr(@php_uname(), 0, 7) == "Windows"){
           // we have to make the path absolute !
@@ -2507,16 +2573,19 @@ function getFoldersize($path, $legacy = true) {
          	  $obj = null;
          }
        } else { // hopefully unix -  du has to be in the path. If it is not you have to adjust the path.
-         $io = popen ( 'du -sk ' . $path, 'r' );
-         $usize = fgets ( $io, 4096);
-         $usize = substr ( $usize, 0, strpos ( $usize, ' ' ) );
+         $io = popen ( 'du -sb ' . $path, 'r' );
+         $usize = trim(fgets ( $io, 4096));
+         $split = preg_split('/\s+/', $usize);
+         $usize = $split[0];
          pclose ( $io );
          if (is_numeric($usize)) {
            $size = $usize;
          }
        }
   }
-  // backup if both ways fail. It is ~ 18 times slower than one of the solutions above.
+  set_error_handler('on_error');
+  @ob_end_clean();
+  // backup if both ways fail. It is ~ 18 times slower (tested on windows) than one of the solutions above.
   if ($size == -1) {
     $size = foldersize($path);
   }
@@ -2525,23 +2594,59 @@ function getFoldersize($path, $legacy = true) {
 
 /**
  *  The basic php way to go through all directories and adding the file sizes.
- */ 
+ *  It does also check the parameters $exclude_directories and $hide_hidden_files
+ */
 function foldersize($p) {
+    global $exclude_directories, $hide_hidden_files;
     $size = 0;
     $fs = scandir($p);
     foreach($fs as $f) {
         if (is_dir(rtrim($p, '/') . '/' . $f)) {
             if ($f!='.' && $f!='..') {
-                $size += foldersize(rtrim($p, '/') . '/' . $f);      
+                $size += foldersize(rtrim($p, '/') . '/' . $f);
             }
         } else {
-            $size += filesize(rtrim($p, '/') . '/' . $f);    
-        }   
+            if ($f != '.' && $f != '..' && !in_array($f, $exclude_directories)&&
+                (!($hide_hidden_files && (strpos($f, '.') === 0)))) {
+              $size += filesize(rtrim($p, '/') . '/' . $f);
+            }
+        }
     }
     return $size;
 }
 
+function check_syntax($file)
+{
+// load file
+$code = file_get_contents($file);
+// remove non php blocks
+$code = preg_replace('/(^|\?>).*?(<\?php|$)/i', '', $code);
+// create lambda function
+$f = @create_function('', $code);
+// return function error status
+return !empty($f);
+}
 
+function file_upload_error_message($error_code) {
+    switch ($error_code) {
+        case UPLOAD_ERR_INI_SIZE:
+            return 'The uploaded file exceeds the upload_max_filesize directive in php.ini';
+        case UPLOAD_ERR_FORM_SIZE:
+            return 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form';
+        case UPLOAD_ERR_PARTIAL:
+            return 'The uploaded file was only partially uploaded. Please check your timeouts.';
+        case UPLOAD_ERR_NO_FILE:
+            return 'No file was uploaded';
+        case UPLOAD_ERR_NO_TMP_DIR:
+            return 'Missing a temporary folder';
+        case UPLOAD_ERR_CANT_WRITE:
+            return 'Failed to write file to disk';
+        case UPLOAD_ERR_EXTENSION:
+            return 'File upload stopped by extension';
+        default:
+            return 'Unknown upload error';
+    }
+}
 
 @ob_end_clean();
 ?>

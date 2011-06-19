@@ -1,6 +1,6 @@
 <?php
 /**
- *   Wordpress Flash uploader 2.13.x  
+ *   Wordpress Flash uploader 2.14.x  
  *   This file contains all methods used on the main wfu page from the WFU class
  *
  *   Copyright (c) 2004-2011 TinyWebGallery
@@ -140,11 +140,28 @@ if (!class_exists("WFUFlash")) {
             $_SESSION['TFU_USER_ID'] = $current_user->ID;
         }
         
-        function mkdir_recursive($pathname)
+        /*
+        function mkdir_recursive($pathname, $dir_chmod=0)
         { 
             is_dir(dirname($pathname)) || WFUFlash::mkdir_recursive(dirname($pathname));
+            return is_dir($pathname) || @my_mkdir($pathname,$dir_chmod);
+        }
+        */
+        function mkdir_recursive($pathname, $dir_chmod=0)
+        {             
+            is_dir(dirname($pathname)) || WFUFlash::mkdir_recursive(dirname($pathname), $dir_chmod);
             return is_dir($pathname) || @mkdir($pathname);
         }
+        
+        /*
+        function my_mkdir($pathname, $dir_chmod=0) {
+        $result = mkdir($pathname);        
+          if ($result && $dir_chmod != 0) {
+             @chmod($pathname, $dir_chmod);
+          }  
+        return $result;    
+        }
+        */
         
         function printFlash($devOptions, $rel_dir = "../", $admin = 'true') {    
             $htaccess_path = dirname(__FILE__) . '/../tfu/.htaccess'; 
@@ -197,14 +214,14 @@ if (!class_exists("WFUFlash")) {
           if ($height > 390) $height = floor($height * 0.95);
           
           $output .= '
-          swfobject.embedSWF("'.$rel_dir.'wp-content/plugins/wordpress-flash-uploader/tfu/tfu_213.swf", "flashcontent", "'.$width.'", "'.$height.'", "8.0.0", "", flashvars, params, attributes);
+          swfobject.embedSWF("'.$rel_dir.'wp-content/plugins/wordpress-flash-uploader/tfu/tfu_214.swf", "flashcontent", "'.$width.'", "'.$height.'", "8.0.0", "", flashvars, params, attributes);
 
           </script>
           ';          
           return $output;
      }
      
-     function setUploadFolder() {
+     function setUploadFolder($subdir='', $dir_chmod = 0) {
 
             // the options we need from Wordpress:
             $uploads_use_yearmonth_folders = get_option('uploads_use_yearmonth_folders');
@@ -219,7 +236,6 @@ if (!class_exists("WFUFlash")) {
                      
             // this is the default where no form is set.
             if (!isset($_POST['upload_wordpress'])) {
-
                 $upload_base_dir = '../../../../'. $upload_path;
 
                 if ($uploads_use_yearmonth_folders) {
@@ -233,7 +249,7 @@ if (!class_exists("WFUFlash")) {
                     $path = dirname(__FILE__) . '/' . $upload_base_dir;
                 }
                 if (!file_exists($path)) {  
-                    if (!@WFUFlash::mkdir_recursive($path)) {
+                    if (!@WFUFlash::mkdir_recursive($path,$dir_chmod)) {
                         // default handling is not possible we show the message what to do
                         if (!file_exists(dirname(__FILE__) . '/' . $upload_base_dir)) {
                             echo '<p><br></p><div class="error wfu_reg"><p>';

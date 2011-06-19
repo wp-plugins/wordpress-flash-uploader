@@ -1,6 +1,6 @@
 <?php
 /**
- * TWG Flash uploader 2.13.x
+ * TWG Flash uploader 2.14.x
  *
  * Copyright (c) 2004-2011 TinyWebGallery
  * written by Michael Dempfle
@@ -10,6 +10,7 @@
  *    Have fun using TWG Flash Uploader
  */
 define('_VALID_TWG', '42');
+
 if (isset($_GET['TFUSESSID'])) { // this is a workaround if you set php_flag session.use_trans_sid=off + a workaround for some servers that don't handle sessions correctly if you open 2 instances of TFU
     session_id($_GET['TFUSESSID']);
 }
@@ -58,6 +59,12 @@ if (isset($_POST['twg_user']) && isset($_POST['twg_pass'])) { // twg_user and tw
     $rn = substr(session_id(), 0, 5) . $rn . session_id();
 
     include $install_path . "tfu_config.php";
+    
+    // check if all included files have the same version to avoid problems during update!
+    if ($tfu_config_version != '2.14' || $tfu_help_version != '2.14') {
+      tfu_debug('Not all files belong to this version. Please update all files.');
+    }
+
     /**
      * end parameters - now you can implement your own authentification and autorisation
     */

@@ -3,7 +3,7 @@
 Plugin Name: Wordpress Flash Uploader
 Plugin URI: http://www.tinywebgallery.com/blog/wfu
 Description: The Wordpress Flash Uploader does contain 2 plugins: '<strong>Wordpress Flash Uploader</strong>' and '<strong>Sync Media Library</strong>'. The Wordpress Flash Uploader is a flash uploader that replaces the existing flash uploader and let you manage your whole  WP installation. 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library. 
-Version: 2.13.1
+Version: 2.14
 Author: Michael Dempfle
 Author URI: http://www.tinywebgallery.com
 */
@@ -69,6 +69,7 @@ if (!class_exists("WFU")) {
                 'show_size' => 'true',
                 'normalize' => 'true', // don#t change this - wordpress cannot handle unnormalized files !!!
                 'file_chmod' => '',
+                'dir_chmod' => '',
                 'language_dropdown' => 'de,en,es',
                 'use_image_magic' => 'false',
                 'image_magic_path' => 'convert',
@@ -93,7 +94,10 @@ if (!class_exists("WFU")) {
                 'file_filter' => $unique_sizes_filter,
                 'flash_size' => '650', // default in the backend - can be owerwritten by the frontend
                 'securitykey' => sha1(session_id()),
-                'frontend_upload_folder' => ''    
+                'frontend_upload_folder' => '',
+                // new 2.14
+                'master_profile' => 'false',
+                'master_profile_type' => 'master_profile_type_username'                     
             );
 
             $wfuOptions = get_option($this->adminOptionsName);
@@ -330,25 +334,55 @@ if (!class_exists("WFU")) {
                $devOptions = $this->getAdminOptions();
                
                if ($devOptions['securitykey'] == $securitykey) {
+                  global $current_user;
+                  wp_get_current_user();
+                  $logged_id = (0 != $current_user->ID );              
+                  $showflash = $logged_id || $devOptions['master_profile'] =='false';
+                 if ($showflash) {
+                
                  if (is_numeric ($width)) {
                    $devOptions['flash_size'] = $width;
                  }
                  WFUFlash::storeSettingsToSession($devOptions); 
                  unset($_SESSION["IS_ADMIN"]);
 	            $_SESSION["IS_FRONTEND"] = "true";
+	            $dir_chmod=($devOptions['dir_chmod'] == '') ? 0 : octdec($devOptions['dir_chmod']);
 	            
-	            if ($devOptions['frontend_upload_folder'] == '') {
-	              WFUFlash::setUploadFolder();
+                if ($devOptions['frontend_upload_folder'] == '') {
+	              WFUFlash::setUploadFolder('', $dir_chmod);
 	            } else {
-                   $_SESSION["TFU_FOLDER"] =  '../../../../'. $devOptions['frontend_upload_folder'];
+	               $pathprefix = '../../../../';
+                   if ($devOptions['master_profile'] =='true') {
+                     // get type
+                     if ($devOptions['master_profile_type'] == 'master_profile_type_username') {
+                       $subdir = $current_user->user_login; 
+                     } else if ($devOptions['master_profile_type'] == 'master_profile_type_display') {  
+                       $subdir = $current_user->display_name;
+                     } else {
+                       $subdir = $current_user->ID;
+                     }
+                     // check folder, create if not exists
+                     $userdir = $pathprefix . $devOptions['frontend_upload_folder'] . '/' . $subdir;
+                     $work_userdir = $devOptions['frontend_upload_folder'] . '/' . $subdir;
+                     if (!file_exists($work_userdir)) {                       
+                        WFUFlash::mkdir_recursive($work_userdir, $dir_chmod);
+                     }
+                     $_SESSION["TFU_FOLDER"] = $userdir;
+                   } else {
+                     $_SESSION["TFU_FOLDER"] =  $pathprefix . $devOptions['frontend_upload_folder'];
+                   }                           
                  }           
                   $js = '<script type="text/javascript">function uploadFinished(loc) {}; function deleteFile(loc) {} </script>';
 
                   
                   // Fix 2.12.1 - relative path was not good because of permurls !
-                  $domain = get_option('siteurl');
+                    $domain = get_option('siteurl');
                             
-                 return WFUFlash::printFlash($devOptions , $domain . '/', 'frontend') . $js;
+                   return WFUFlash::printFlash($devOptions , $domain . '/', 'frontend') . $js;
+                 } else {
+                    return '<div style="padding:10px; margin:10px; border: 1px solid #555555; background-color: #f8f8f8; text-align:center; width:330px;">Please login. The flash is configured that a user has to be logged in to use it.</div>';
+                 
+                 }
                } else {
                  return '<div style="padding:10px; margin:10px; border: 1px solid #555555; background-color: #f8f8f8; text-align:center; width:330px;">A wrong security key is used - please read the documentation how to use the flash in the frontend.</div>';
                }

@@ -2,8 +2,8 @@
 Contributors: mdempfle, Michael Dempfle
 Tags: admin, media, upload, synchronize, flash, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
-Tested up to: 3.1
-Stable tag: 2.13.1
+Tested up to: 3.1.3
+Stable tag: 2.14
 Donate link: Please check the settings of Wordpress Flash Uploader
 
 'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you also manage your whole Wordpress installation and synchronize your media library. 
@@ -59,6 +59,11 @@ only restricted by their servers. And most if the problems can be solved!
 Please go to the settings page of Wordpress Flash Uploader. There you find a small donation section. Thank you for your support.
 
 == Changelog ==
+= 2.14 =
+* Updated the flash to TFU 2.14
+* Added Master mode support - This means that each user gets his own directory automatically.
+* Added chmod for creating directories.
+
 = 2.13.1 =
 * Updated the flash to TFU 2.13
 * ini_set removed because so server do not allow this.

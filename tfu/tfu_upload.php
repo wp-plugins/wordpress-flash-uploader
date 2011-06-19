@@ -1,6 +1,6 @@
 <?php
 /**
- * TWG Flash uploader 2.13.x
+ * TWG Flash uploader 2.14.x
  *
  * Copyright (c) 2004-2011 TinyWebGallery
  * written by Michael Dempfle
@@ -32,6 +32,7 @@ session_start();
 $install_path = ''; // do not change!
 $path_fix = '';     // do not change!
 $store = 0;         // do not change!
+$email_plugin = false; // do not change!
 
 include 'tfu_helper.php';
 
@@ -39,12 +40,16 @@ restore_temp_session(); // this restores a lost session if your server handles s
 
 include 'tfu_config.php';
 
+// check if all included files have the same version to avoid problems during update!
+if ($tfu_config_version != '2.14' || $tfu_help_version != '2.14') {
+  tfu_debug('Not all files belong to this version. Please update all files.');
+}
+
 if ($enable_upload_debug) tfu_debug('1. Config loaded');
 /*
 PLEASE ADD OWN CODE AFTER THIS POINT. 
-Otherwise the session is maybe not started proplery!
+Otherwise the session is maybe not started properly!
 */
-
 
 /**
  * This is some debug information - please uncomment this if I ask for it in a debug session ;).
@@ -70,10 +75,16 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
         $_SESSION['TFU_LAST_UPLOADS'] = array();
     }
     $_SESSION['TFU_UPLOAD_REMAINING'] = $_GET['remaining'];
-    
     if ($enable_upload_debug) tfu_debug("3a. \$_FILES content:\n" . print_r($_FILES, true) );
-    
-    foreach ($_FILES as $fieldName => $file) {
+  
+    if (count($_FILES) == 0) {
+      tfu_debug("ERROR: No file data was found. Most likely the upload failed before the script was executed. Make sure that your server limits can handle the file you tried to upload. Please check the phperror.log for details.");
+    } else {    
+      foreach ($_FILES as $fieldName => $file) {
+        // check of the upload error. Only a message is displayed and the upload 
+        if ($file['error'] != UPLOAD_ERR_OK) {
+             tfu_debug('4. ERROR: Php upload error: ' . file_upload_error_message($file['error']));
+        } else {
         // we check the uploaded files first because we don't know if it's the flash or any other script!
         if ($enable_upload_debug) tfu_debug('4. Check valid extension: ' . $file['name']);
         check_valid_extension($file['name']);
@@ -146,7 +157,7 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
                   resize_file($filename, $size, $compression, $base_filename);
                 }
                 
-                $filename_save = $filename;   
+                $current_desc = '';  
                 /* handles the description which can be sent with each file */
                 if (isset ($_GET['description'])) {
                     $description = stripslashes($_GET['description']);
@@ -160,7 +171,7 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
                             fclose($handle);
                         }
                     } else { // we add the descritption to the upload that is added to the e-mail
-                        $filename_save .= ' : ' . $description;
+                        $current_desc = ' : ' . $description;
                     }
                 }
                 /* end description */
@@ -182,14 +193,12 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
                     if ($filename != $exchangefilename) { // The plugin has changed the filename.
                       $filename = $exchangefilename; 
                       $image = my_basename($exchangefilename);
-                    }
-                    
+                    }                    
                   }
                   if ($enable_upload_debug) tfu_debug('8a. End plugins');
                 }   
-                
-                $filename_save = $filename;   
-                array_push($_SESSION['TFU_LAST_UPLOADS'], $filename_save);
+   
+                array_push($_SESSION['TFU_LAST_UPLOADS'], $filename . $current_desc);
                 removeCacheThumb($filename);
                 // this generates the two thumbnails of the preview
                 // set this to true if you like this to be done at the upload an not on the fly.
@@ -204,18 +213,18 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
             }
         }
     }
+    }
+    }
     if (count($_SESSION['TFU_LAST_UPLOADS']) > 0 && $remaining == 0 && $split_extension != 'FALSE') { // last item in the upload AND we have stored stuff!
         restore_split_files($_SESSION['TFU_LAST_UPLOADS']);
         resize_merged_files($_SESSION['TFU_LAST_UPLOADS'], $size);
     }
     // E-mail section
-    // we only send an email for the last item of an upload cycle    
-    if ($upload_notification_email != '' && $remaining == 0) {
-        $youremail = $upload_notification_email_from;
-        $email = $upload_notification_email;
-        $submailheaders = "From: $youremail\n";
-        $submailheaders .= "Reply-To: $youremail\n";
-        $submailheaders .= "Return-Path: $youremail\n"; 
+    // we only send an email for the last item of an upload cycle and if the e-mail plugin is not used.   
+    if ($upload_notification_email != '' && $remaining == 0 && !$email_plugin) {
+        $submailheaders = "From: $upload_notification_email_from\n";
+        $submailheaders .= "Reply-To: $upload_notification_email_from\n";
+        $submailheaders .= "Return-Path: $upload_notification_email_from\n"; 
         if ($fix_utf8 != '') {
           $submailheaders .= 'Content-Type: text/plain; charset=' . $fix_utf8;
         }
@@ -236,7 +245,7 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
         if (isset ($_SESSION['TFU_PRE_UPLOAD_DATA'])) {
           $mailtext .= "\n\n" . $_SESSION['TFU_PRE_UPLOAD_DATA'];  
         }
-        @mail ($email, html_entity_decode ($subject), html_entity_decode ($mailtext), $submailheaders); 
+        @mail ($upload_notification_email, html_entity_decode ($subject), html_entity_decode ($mailtext), $submailheaders); 
     }
     if ($remaining == 0) { // cleanup
       unset($_SESSION['TFU_PRE_UPLOAD_DATA']);

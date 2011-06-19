@@ -1,6 +1,6 @@
 <?php
 /**
- * TWG Flash uploader 2.13.x
+ * TWG Flash uploader 2.14.x
  *
  * Copyright (c) 2004-2010 TinyWebGallery
  * written by Michael Dempfle
@@ -13,22 +13,24 @@
  *    - $login  - you can implement your own autentification by setting this flag!
  *                If you use 'auth' a login screen appears. If you use true please read the
  *                'Important' in tfu_login.php
- *            
+ *
  *    - $folder - The folder where your uploads will be saved!
  *
  *    Please edit tfu_login.php and add your authentification there. Read the howto about makeing
  *    the flash secure and/or the help text in tfu_login.php.
- *    
+ *
  *    You should create a file called my_tfu_config.php and copy your changes there.
  *    All setting in this file overwrite the settings here. You can then update
- *    mucheasier to the latest version!    
- *       
+ *    mucheasier to the latest version!
+ *
  *    Have fun using TWG Flash Uploader
  *
  *    CONFIGURATION
  */
 
 if (defined('_VALID_TWG')) {
+$tfu_config_version = '2.14';
+
     $login = 'true';                     // The login flag - has to set by yourself below 'true' is logged in, 'auth' shows the login form, 'reauth' should be set if the authentification has failed. 'false' if the flash should be shown with an eroror message that the authorisation finally failed.
     $folder = 'upload';                  // this is the root upload folder. If you use login='auth' by default the folder from the user profile in .htusers.php is used!
     $maxfilesize = getMaximumUploadSize(); // The max files size limit of the server in KB. You can specify your own limit here e.g. 512. This setting is restricted by your server settings! Please read FAQ 4 of the TFU FAQ how to set upload_max_filesize and post_max_size.
@@ -49,7 +51,7 @@ if (defined('_VALID_TWG')) {
     $enable_folder_rename = 'true';      // Show the menu item to rename folders
     $enable_file_rename = 'true';        // Show the menu item to rename files - default is false because this is a securiy issue - check the point below - should only be activated in very save environments or if you keep the file extension in the registered version.!
     $keep_file_extension = 'true';       // You can disalow to change the file extension! - since 1.7.1 this is available for everyone because this can be a security issue when someone renames files to .php - Every user of TFU should be safe!
-    // 
+    //
     // The default language has to be set at the flash with e.g. ?lang=de
     //
     $language_dropdown = 'de,en,es,br,cn,ct,cz,da,fr,it,jp,nl,no,pl,pt,ru,se,sk,tw'; // New 2.6 - You can enable a dropdown for the language selection. If you leave this empty no selector is shown (you can still change the language with the url parameter). Otherwise you specify the flags here. They are displayed in the given order! The default language is still given by the url parameter!
@@ -57,7 +59,7 @@ if (defined('_VALID_TWG')) {
     $image_magic_path = 'convert';       // This is the image magick command used to convert the images. convert is the default of image magic.
     $check_image_magic = true;           // You can disable if the image magic test is performed at all - because if it fails the rest of the page fails too - especially in JFU this kills the whole page!
     // $timezone - This setting can be found at the top of tfu_helper.php
-    
+
     // some optional things
     $login_text = '';                    // e.g. 'Please login';  // Login Text
     $relogin_text = '';                  // e.g. 'Wrong Username/Password. Please retry'; // Retry login text
@@ -80,11 +82,11 @@ if (defined('_VALID_TWG')) {
     $keep_internal_session_handling = false;  // new 2.7.5 - TFU can detect servers with session problems. And it removes the session_cache folder it it is not needed. If you set this to true the session_Cache folder is not removed automatically. You should set this to true if you have only sometimes problems with the upload!
     $normalise_file_names = false;         // new 2.7.5 - This setting convertes all filenames to lowercase and special characters are removed e.g. !"#$%&'()*+,-- []\^_`öäüß are replaces with an _
     $normalise_directory_names = false;   // new 2.8.1 - This setting convertes all directory names that are created or renamed to lowercase and special characters are removed e.g. !"#$%&'()*+,-- []\^_`öäüß are replaces with an _
-    
+
     // This switch is for supporting filesystems for e.g. chinese characters.
-    $fix_utf8 = ''; // Please read the faq 8 for TFU on the homepage first before change anything here -> http://www.tinywebgallery.com/en/tfu/web_faq.php#10
-    $debug_file = dirname(__FILE__) . "/tfu.log";                     
-    
+    $fix_utf8 = ''; // Please read the faq 8 for TFU on the homepage first before change anything here -> http://www.tinywebgallery.com/en/tfu/tfu_faq_10.php
+    $debug_file = dirname(__FILE__) . "/tfu.log";
+
     /**
      * Extra settings for the registered version
      */
@@ -113,61 +115,70 @@ if (defined('_VALID_TWG')) {
     $preview_textfile_extensions = 'out,log'; // This are the files that are previewed in the flash as textfiles. Right now I only have 'save' extensions. But you can have any extension here. If you don't use a . this settings are extensions. But you can restrict is to single files as well by using the full name. e.g. foldername.txt. * is supported as wildcard! Only available for registered users.
     $edit_textfile_extensions = 'txt,css';   // This are the files that can be edited in the flash. But you can restrict is to single files as well by using the full name. e.g. foldername.txt. * is supported as wildcard! Only available for registered users.
     $allowed_view_file_extensions = 'all'; // You can define the file extensions that are shown on the server view. If you set 'all' all files except the one from $forbidden_view_file_extensions are shown. If you define a list of extensions here only these are shown - Only available for registered users.
-    $forbidden_view_file_extensions = ''; // If you have set $allowed_view_file_extensions = 'all' then you can define a list of file extensions that are not shown - Only available for registered users.
-    $description_mode = 'true';         // You can enable a description mode where the size and the date is replaced by a description field. The data of this field is sent to the server and stored in a txt file called <filename>.txt or sent by e-mail to you. Only available for professional license or above.
+    $forbidden_view_file_extensions = ''; // If you have set $allowed_view_file_extensions = 'all' then you can define a list of file extensions that are not shown. If you set a extra , at the end files with no extension are not viewed as well. - Only available for registered users.
+    $description_mode = 'false';         // You can enable a description mode where the size and the date is replaced by a description field. The data of this field is sent to the server and stored in a txt file called <filename>.txt or sent by e-mail to you. Only available for professional license or above.
     $description_mode_show_default = 'true'; // Shows/hides a 'Enter description' in the description field if you like. The text is stored in the language file if you want to change it. Only available for professional license or above.
     $description_mode_store = 'txt';   // ('txt','email') The description is either saved to a textfile called <filename>.txt or is added to the notification e-mail. Only available for professional license or above.
-    
-    // New 2.9  
-    $overwrite_files='true';             // true - Existing files are overwritten; false - existing files are not overwritten.  
+
+    // New 2.9
+    $overwrite_files='true';             // true - Existing files are overwritten; false - existing files are not overwritten.
     $description_mode_mandatory='false'; // true - a description has to be provided for each file; false - description is optional.
     $normalizeSpaces='false';            // if you enable normalize file names or directory names you can decide here if spaces are replaces with an _ or not.
     $file_chmod=0;                       // by using 0 the default mode of the files is used. Then the creation depend on the umask of the server.  If you want the files to have different permissions please use the octal representation e.g. 0777, 0755, 0644 ...
     $dir_chmod=0;                        // by using 0 the default mode of the directory is used. Then the creation depend on the umask of the server. If you want the directory to have different permissions please use the octal representation e.g. 0777, 0755, 0644 ...
-    
-    // New 2.10 
+
+    // New 2.10
     $enable_upload_debug = false;        // This enables the debuging ouput at the upload. You should only use this after contacting me!
-    $enable_enhanced_debug = false;      // This shows the request to each debug line.  
+    $enable_enhanced_debug = false;      // This shows the request to each debug line.
     // This settings will be added to JFU backend in 2.11 - you can change this directly here if you need to!
     $form_fields = '';                   // You can enable TFU to read form fields from the html page and add then to the upload as 'get' parameters. Please read howto 15 how to configure this. Only available for professional license or above.
-    $hide_hidden_files = false;          // You can hide hidden files and directories in the remote view. All files and folders starting with a . are hidden if you set this to true. 
-    
+    $hide_hidden_files = false;          // You can hide hidden files and directories in the remote view. All files and folders starting with a . are hidden if you set this to true.
+
     // New 2.11
     // For the big progress bar you need a professional license or higher.
-    $big_progressbar='true';             // New 2.11 - Enable/disable the big progress bar
-    $img_progressbar='progressbar.png';  // New 2.11 - The image for the progress bar
-    $img_progressbar_back='progressbar_back.png'; // New 2.11 - The background image for the progress bar
-    $img_progressbar_anim='progressbar_anim.swf'; // New 2.11 - The animation of the big progress bar
-    
+    $big_progressbar='true';             // Enable/disable the big progress bar
+    $img_progressbar='progressbar.png';  // The image for the progress bar
+    $img_progressbar_back='progressbar_back.png'; // The background image for the progress bar
+    $img_progressbar_anim='progressbar_anim.swf'; // The animation of the big progress bar
+
     // By default directories are created by php. On some servers with safe mode on it can then happen that no directores can be created. You can now first try to set $enable_dir_create_detection=false; This detection is not 100% and sometimes turning it off will enable that you can create directories you can upload to.
     // If this does not work you can use ftp to create a directory. Make sure to set $dir_chmod too! You need php 5 to use ftp_chmod!
-    $ftp_enable = false;                 // New 2.11 - Set this to true to use ftp to create directories  
-    $ftp_host   = 'host';                // New 2.11 - Your ftp host
-    $ftp_port   = 21;                    // New 2.11 - Your ftp port
-    $ftp_user   = 'user';                // New 2.11 - Your ftp user
-    $ftp_pass   = 'pass';                // New 2.11 - Your ftp password
-    $ftp_root   = '<full root directory>'; // New 2.11 - The full path to the root upload directory of TFU. e.g. /httpdocs/test/path/upload. If you have $folder dynamic you have to make this variable dynamic too.
-    
-    $enable_dir_create_detection = !$ftp_enable;   // New 2.9.0.2 - (true, false) If you cannot create directories you can try to disable the automatic detection which prevents this. If you set this to 'false' the flash tries to create the directory; maybe it works ;). - try to upload files into the directory and create another subdirectory too. If this works you can leave this to false. This setting is currently not mapped in JFU 2.9 - will be added in 2.11! Please check also the option to create directories by ftp.
-    $big_server_view = 'false';          // New 2.11 - Use this if you want the server side the same size as the upload.     
-    
+    $ftp_enable = false;                 // Set this to true to use ftp to create directories
+    $ftp_host   = 'host';                // Your ftp host
+    $ftp_port   = 21;                    // Your ftp port
+    $ftp_user   = 'user';                // Your ftp user
+    $ftp_pass   = 'pass';                // Your ftp password
+    $ftp_root   = '<full root directory>'; // The full path to the root upload directory of TFU. e.g. /httpdocs/test/path/upload. If you have $folder dynamic you have to make this variable dynamic too.
+
+    $enable_dir_create_detection = !$ftp_enable;   // (true, false) If you cannot create directories you can try to disable the automatic detection which prevents this. If you set this to 'false' the flash tries to create the directory; maybe it works ;). - try to upload files into the directory and create another subdirectory too. If this works you can leave this to false. This setting is currently not mapped in JFU 2.9 - will be added in 2.11! Please check also the option to create directories by ftp.
+    $big_server_view = 'false';          // Use this if you want the server side the same size as the upload.
+
     // New 2.12
-    $compression = 80;                   // New 2.12 - This is the compression used for jpg images when you resize a file  - 100 is no compression. Normally 75 or 80 is used. The value is used for GD-Lib and image magick.
-    $remove_multiple_php_extension = true; // New 2.12 - Some servers execute e.g. file.php.gif files which is a security issue. If you don't allow php files to upload please leave this to true because of security reasons.
-    $scan_images = true;                 // New 2.12 - Scans images (gif,png,jpg) for php code. This is done by default when no size could be detected. By setting this to true all files are scanned because there are gif exploits around that returns valid sizes!   
-    $forbidden_view_file_filter = '';    // New 2.12.x - If you have set $allowed_view_file_extensions = 'all' then you can define a list filters which are not shown! This is the enhanced version of $forbidden_view_file_extensions which will be removed in the next main version! A filter can have full file names and * or ?. e.g. sp*.*, test*.gif. Seperate different filters by , a filter looks maybe like this:  '*.gif,test*.png,hide.txt', if you have a windows server you need php > 5.3 to use this. - Only available for registered users.
-    $zip_file_pattern = 'download-{folder}-{number}-files_{date}.zip'; // New 2.12.x - zip file pattern can have the following patterns {folder} = the current folder name, {number} = number of files in the zip, {date} = currenty date with year,month,day. Please provide the name WITH extension. If the pattern is empty <first filename>.zip is used. 
-   
+    $compression = 80;                   // This is the compression used for jpg images when you resize a file  - 100 is no compression. Normally 75 or 80 is used. The value is used for GD-Lib and image magick.
+    $remove_multiple_php_extension = true; // Some servers execute e.g. file.php.gif files which is a security issue. If you don't allow php files to upload please leave this to true because of security reasons.
+    $scan_images = true;                 // Scans images (gif,png,jpg) for php code. This is done by default when no size could be detected. By setting this to true all files are scanned because there are gif exploits around that returns valid sizes!
+    $forbidden_view_file_filter = '';    // If you have set $allowed_view_file_extensions = 'all' then you can define a list filters which are not shown! This is the enhanced version of $forbidden_view_file_extensions which will be removed in the next main version! A filter can have full file names and * or ?. e.g. sp*.*, test*.gif. Seperate different filters by , a filter looks maybe like this:  '*.gif,test*.png,hide.txt', if you have a windows server you need php > 5.3 to use this. - Only available for registered users.
+    $zip_file_pattern = 'download-{folder}-{number}-files_{date}.zip'; // zip file pattern can have the following patterns {folder} = the current folder name, {number} = number of files in the zip, {date} = currenty date with year,month,day. Please provide the name WITH extension. If the pattern is empty <first filename>.zip is used.
+
     // Watermark text on the images when you click on the small thumb - will display some information about the image.
     $info_text = '{dimension} | {size} | {date}'; // New 2.13 - Defines if a info text is shown and which info is printed. You can define your own string here: {dimension}, {size} and {date} are place holders you can use.
     $info_textcolor_R = 255;             // New 2.13 - The color of the info text. Define the red value of a RGB color in decimal here.
-    $info_textcolor_G = 60;              // New 2.13 - The color of the info text. Define the green value of a RGB color in decimal here.   
-    $info_textcolor_B = 60;              // New 2.13 - The color of the info text. Define the blue value of a RGB color in decimal here. 
-    $info_font = "verdana.ttf";          // New 2.13 - The font which should be used. By default verdana is included in the install package. 
+    $info_textcolor_G = 60;              // New 2.13 - The color of the info text. Define the green value of a RGB color in decimal here.
+    $info_textcolor_B = 60;              // New 2.13 - The color of the info text. Define the blue value of a RGB color in decimal here.
+    $info_font = "verdana.ttf";          // New 2.13 - The font which should be used. By default verdana is included in the install package.
     $info_fontsize = 8;                  // New 2.13 - The font size of the info text
 
     $has_post_processing= "false";       // New 2.13 - The flash waits 10 sec after the upload it to 100% if it has finished. If you do a lot of processing like generating thumbnails and .... this can be too short. By setting this to true you get additional 10 sec :). This is the default e.g. in TWG where the thumbnails and small images are generated right after the upload.
 
+    // New 2.14
+    $directory_file_limit_size = -1;    // New 2.14 - You can specify a maximum size in KB (!!!) someone is allowed to have in his folders. -1 means no limit! This setting does count all subfolders as well. Excluded directories and hidden files are counted as well if the legacy functions are used (see $directory_file_limit_size_system). If you like the exact amount set $directory_file_limit_size_system = false to use the backup which does handle excluded directories and hidden files like set in the configuration - only available in the registered version!
+    $directory_file_limit_size_system = true; // New 2.14 - Use system implementations for quota. See the description of $directory_file_limit_size - when set to true the legacy function is used which is up to 20 times faster.
+    $sort_directores_by_date = false;     // New 2.14 - true: Sort directores that last created folders are shown on top, alphapetically otherwise.
+    $show_server_date_instead_size='false'; // New 2.14 - true: shows the date instead of the server size. false: shows the size of the file. $show_size has to be set to true! Pleae check the tfu.htm for the flash parameter for optimal display.
+    $pdf_thumb_format = 'png';            // New 2.14 - (png,jpg): you can define the output for pdf generation. jpg gives smaller images and png better quality but larger files. Please try with your pdf's you expect!
+    $enable_file_creation = 'false';      // New 2.14 - Show the menu item to create files - only available for registered users.
+    $enable_file_creation_extensions = 'txt'; // New 2.14 - (edit,txt,all) You can define which files can be created. 'edit' files defined in $edit_textfile_extensions are allowed. 'txt': only .txt files, 'all': all file extensions
+    
     // special extension - a post upload panel - this is only implemented for JFU and not documented yet!
     $post_upload_panel='false';
     /*  This is example data for the post upload panel - this is not documented yet!
@@ -181,11 +192,11 @@ if (defined('_VALID_TWG')) {
     $post_upload_panel.="&post_telephone=my_telephone";
     $post_upload_panel.="&post_fax=my_fax";
     */
-    
+
     // internal variable - please do NOT change
     $is_jfu_plugin = 'false';
-    
-    
+
+
 /* Includes your configuration file! Then updatin is easier because your settings are not overwritten. No my_tfu_config.php is included in the download! */
 if (file_exists(dirname(__FILE__) . '/my_' . basename(__FILE__))) {
     include dirname(__FILE__) . '/my_' . basename(__FILE__);

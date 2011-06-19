@@ -1,6 +1,6 @@
 <?php
 /**
- *   Wordpress Flash uploader 2.13.x  
+ *   Wordpress Flash uploader 2.14.x  
  *
  *   This file contains the methods used by the synch part from the WFU class
  *
@@ -72,6 +72,9 @@ if (!class_exists("WFUSync")) {
                 $current = 0;
                 foreach($fuo as $item) {
                     $current++;
+                    if( !ini_get('safe_mode') ){
+                       set_time_limit();
+                    }
                     WFUSync::handle_import_file($item, $current, $sum);
                 }
                 echo '<div class="updated"><p><strong>';

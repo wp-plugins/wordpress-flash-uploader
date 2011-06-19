@@ -1,6 +1,6 @@
 <?php
 /**
- *   Wordpress Flash uploader 2.13.x  
+ *   Wordpress Flash uploader 2.14.x  
  *   This file contains all the methods for the settings screen from the WFU class
  *  
  *
@@ -11,13 +11,10 @@
  */
 if (!class_exists("WFUSettings")) {
     class WFUSettings {
-
-
         function printWordpressOptions($devOptions) {
             echo '
 <div id="icon-options-general" class="icon_jfu"><br></div>
 <h2>WP Flash Uploader - Settings</h2>
-
 <div class="wfu_reg nounderline">
 <h3>Settings</h3>
 <a href="#wor">Wordpress Options</a> | 
@@ -49,15 +46,12 @@ if (!class_exists("WFUSettings")) {
             
             
             WFUSettings::printTrueFalse($devOptions, 'Hide .htaccess create option',  'hide_htaccess', 'On the WP Flash Uploader page the option to create and delete a .htaccess file is shown. once the flash is working you can hide this option.');
-
             echo '</table>';
             echo '<div class="submit">
 <input type="submit" class="button-primary" name="update_WFUSettings" value="';
             echo _e('Update Settings', 'WFU');
             echo '" /></div>';
         }
-
-
         function printFrontendOptions($devOptions) {
             echo '
 <a name="front"></a>
@@ -67,14 +61,14 @@ You can use the flash in the frontend by adding the following shorttag to your a
 <table class="form-table">';
             WFUSettings::printTextInput($devOptions, 'Security key',  'securitykey', 'This is security key which has to be used in the shorttag. This is mandatory because otherwise anyone who can create an article can use the flash. The default security key was randomly generated during installation. Please change the key if you like.');
             WFUSettings::printTextInput($devOptions, 'Upload folder',  'frontend_upload_folder', 'This is the optional upload folder for the frontend. If no folder is specified the current image upload directory is choosen. If you like a different directory simply add the folder relative to the main Wordpress installation. This makes is e.g. easy to use the uploader for a image gallery and let users without administrator access upload images too.');
+            WFUSettings::printTrueFalse($devOptions, 'Master profile',  'master_profile', 'When the master profile is enabled a directory is created for each user.  The master profile is only used when you enter a \'Upload folder\' above. Make sure that you use the uploader on a page where a user is logged in. If this is not the case an error message is shown to avoid unrestricted access. Please test if directories can be created by php with the correct rights. If not please set the permissions for new directories below in the basic options.');
+            WFUSettings::printLoginId($devOptions, 'Master profile mode',  'master_profile_type', 'Selects the \'Username\', the \'Display name\' or the \'Id\' as directory name of the sub directory of the \'Upload folder\'.'); 
             echo '</table>';
             echo '<div class="submit">
 <input type="submit" class="button-primary" name="update_WFUSettings" value="';
             echo _e('Update Settings', 'WFU');
             echo '" /></div>';
-
         }
-
         function printOptions($devOptions) {
             echo '
 <a name="bas"></a>
@@ -95,6 +89,7 @@ You can use the flash in the frontend by adding the following shorttag to your a
             // don't change this - right now wordpress cannot handle unnormalized files!!!
             // WFUSettings::printTrueFalse($devOptions, 'Normalize',  'normalize', 'Enable to normalize folder and filenames. Convert all names to lowercase and special characters are removed e.g. !"#$%&\'()*+,-- []\^_` are replaced with an _. öäü with oe,au,ue.');
             WFUSettings::printTextInput($devOptions, 'Chmod new files',  'file_chmod', 'If you leave this empty the server defaults are used. Otherwise you can specify the permissions for new files. E.g. 0777,0755,0644 ...');
+            WFUSettings::printTextInput($devOptions, 'Chmod new directories',  'dir_chmod', 'If you leave this empty the server defaults are used. Otherwise you can specify the permissions for new directories. E.g. 0777,0755,0644 ...');
             WFUSettings::printTextInput($devOptions, 'Language selector',  'language_dropdown', 'Enables/disables a dropdown for the language selection. You have to specify the languages separated by \',\' (e.g. en,de,es). They are displayed in the given order! You can specify the default language in the "Additional settings" free text field. Available languages: ' . WFUSettings::getAvailableTFULanguages());
             WFUSettings::printTrueFalse($devOptions, 'Use image magick',  'use_image_magic', 'Enable image magick for the resize of the upload. Image magick uses less memory then gd lib and it does copy exif information!<br>' . WFUSettings::check_image_magic($devOptions['image_magic_path']));
             WFUSettings::printTextInput($devOptions, 'Image magick command',  'image_magic_path', 'The image magick command used to convert the images. \'convert\' is the default command of image magick. If the command is not in the path you have to specify the full path. JFU uses the command line version and not any php library.');
@@ -102,16 +97,12 @@ You can use the flash in the frontend by adding the following shorttag to your a
             WFUSettings::printTextInput($devOptions, 'From e-mail address',  'upload_notification_email_from', 'The sender e-mail of the notification. You have to specify the from and to email address!');
             WFUSettings::printTextInput($devOptions, 'Notification subject',  'upload_notification_email_subject', 'The subject of the notification e-mail');
             WFUSettings::printTextInput($devOptions, 'Notification text',  'upload_notification_email_text', 'The text of the notification e-mail. There are 2 parameters available. The 1st %s is the username. The 2nd %s is the list of uploaded files. If you only want the file names use %2s.');
-
             echo '</table>';
             echo '<div class="submit">
 <input type="submit" class="button-primary" name="update_WFUSettings" value="';
             echo _e('Update Settings', 'WFU');
             echo '" /></div>';
-
         }
-
-
         function printAdvancedOptions() {
             echo '
 <a name="adv"></a>
@@ -121,7 +112,6 @@ You can use the flash in the frontend by adding the following shorttag to your a
 In the current version the most important settings are mapped in the administration panel. The WP Flash Uploader uses the TWG Flash Uploader which has much more features that can be directly configured here. If you want to configure WFU in more detail you can edit the tfu_config.php directly. On the web page of WFU a tutorial is provided how this can be easily done by everyone -> <a target="_blank" class="nounderline" href="http://blog.tinywebgallery.com/wfu/advanced-features/">go there</a>
 </p>';
         }
-
         function printNextVersion() {
             echo '
 <a name="com"></a>
@@ -139,7 +129,6 @@ This version of WFU is the first release where I have implemented all main featu
 </div>
 ';
         }
-
         function printLicense() {
             echo '
 <a name="lic"></a>
@@ -157,7 +146,6 @@ A bridge links e.g. Wordpress to an external application (the TWG Flash Uploader
 </div>
 ';
         }
-
         function printRegisteredSettings($devOptions) {
             echo '
 <a name="reg"></a>
@@ -191,7 +179,6 @@ If you have a standard license then WFU does automatically enable the Javascript
 </td>
 </tr>
 ';
-
             WFUSettings::printTextInput($devOptions, 'Preview textfile extensions',  'preview_textfile_extensions', 'This are the extensions that are previewed in the flash as text files. You can restrict is to single files as well by using the full name. e.g. foldername.txt. * is supported as wildcard!.');
             WFUSettings::printTextInput($devOptions, 'Edit textfile extensions',  'edit_textfile_extensions', 'This are the extensions that can be edited in the flash. You can restrict is to single files as well by using the full name. e.g. foldername.txt. * is supported as wildcard!');
             WFUSettings::printTextInput($devOptions, 'Exclude files and directores',  'exclude_directories', 'You can enter directories and files that are hidden in WFU. Separate them by ,');
@@ -206,7 +193,6 @@ If you have a standard license then WFU does automatically enable the Javascript
 <input type="submit" class="button-primary" name="update_WFUSettings" value="';
             echo _e('Update Settings', 'WFU');
             echo '" /></div>';
-
             echo '
 <h3>Professional license</h3>
 <p>
@@ -218,7 +204,6 @@ If you have a professional license then the following features are available. Ad
 ';
             WFUSettings::printTrueFalse($devOptions, 'Enable to copy and move files',  'enable_folder_move', '');
             WFUSettings::printTrueFalse($devOptions, 'Enable to move folders',  'enable_file_copymove', '');
-
             echo '
 <tr valign="top">
 <th scope="row">Additional settings</th>
@@ -226,15 +211,12 @@ If you have a professional license then the following features are available. Ad
 <textarea rows="3" name="swf_text" cols="50" id="swf_text">'.$devOptions['swf_text'].'</textarea><br>
 <em>Additional parameters of the flash. You can add the default language here: use e.g. lang=de for German. This works without registration.<br>You can change the color of the flash here when you have a professional license or above. Please go to the help for a list of possible settings! If you e.g. want to change the text color and the background color you have to add: c_text=FF00FF&c_bg=00FF00</em></td>
 </tr>
-
 </table>
-
 <div class="submit">
 <input type="submit" class="button-primary" name="update_WFUSettings" value="';
             echo _e('Update Settings', 'WFU');
             echo '" /></div>';
         }
-
         function printServerInfo()
         {
             $limit = WFUSettings::return_kbytes(ini_get('memory_limit'));
@@ -267,7 +249,6 @@ If you have a professional license then the following features are available. Ad
                 echo " (Freeware Edition)";
             }
             echo  '</td></tr>';
-
             echo '<tr><td width="400">Server name:</td><td width="250">' . WFUSettings::get_server_name() . '</td></tr>';
             echo '<tr><td>PHP upload limit (in KB): </td><td>' . WFUSettings::getMaximumUploadSize() . '</td></tr>';
             echo '<tr><td>PHP memory limit (in KB):&nbsp;&nbsp;&nbsp;</td><td>' . $limit . '</td></tr>';
@@ -280,7 +261,7 @@ If you have a professional license then the following features are available. Ad
             if (!$limit) {
                 echo '<font color="green">No limit</font>';
             } else {
-                $xy = $limit * 1024 / 6;
+                $xy = $limit * 1024 / 6.6;
                 $x = floor(sqrt ($xy / 0.75));
                 $y = floor(sqrt($xy / 1.33));
                 if ($x > 4000) {
@@ -299,7 +280,6 @@ If you have a professional license then the following features are available. Ad
             echo '</table>';
             echo '</div>';
         }
-
         function printRegistration($devOptions) {
             echo '
 <a name="don"></a>
@@ -315,11 +295,9 @@ If you have a professional license then the following features are available. Ad
 ';
                 WFUSettings::printTrueFalse($devOptions, 'Hide the donate button',  'hide_donate', 'I don\'t want to bother you with the donate logo inside the plugins itself. Feel free to turn it off.');
                 echo '</table>
-
 &nbsp;&nbsp;<input type="submit" class="button-primary" name="update_WFUSettings" value="';
                 echo _e('Update Setting', 'WFU');
                 echo '" />';
-
                 echo '
 <h3>Registration</h3>
 <p>WFU is the wrapper of the TWG Flash Uploader. For most users the limitations of the freeware version of the TWG Flash Uploader should not be a problem. But if, you can register the flash for a small fee. The registration does also include TinyWebGallery, TWG Flash Uploader and Joomla Flash Uploader!</p>
@@ -331,14 +309,12 @@ There are 2 versions of WFU available:<br><ul>
                 echo '
 <p>      
 The registration is free (powered by trialpay) or only <b>15 €/domain</b> and can be done on www.tinywebgallery.com by clicking <a href="http://www.tinywebgallery.com/en/register_tfu.php"><b>here</b></a>.<br>The registration of the TWG Flash Uploader, JFU and WFU is the same. The registration is also valid for TWG and the standalone version of TFU!<p>To register please store the content of the 3 lines provided in the registration email in the text boxes below and press the register button. If everything worked fine you get a different message here and in the options of the registered version are enabled - and of course the 3MB limit is gone.</p>
-
 <div class="install" style="width: 600px; margin-left: 50px;">
 &lt;?php
 <table><tbody><tr><td style="text-align:right;">
 $l&nbsp; = " <input name="l" size="80" type="text"> ";</td></tr><tr><td style="text-align:right;">
 $d = " <input name="d" size="80" type="text"> ";</td></tr><tr><td style="text-align:right;">
 $s = " <input name="s" size="80" type="text"> ";</td></tr></tbody></table>
-
 ?&gt;
 <div class="submit" style="padding:0px;padding-left:60px;">
 <input type="submit" class="button-primary" name="register_WFU" value="';
@@ -354,11 +330,8 @@ $s = " <input name="s" size="80" type="text"> ";</td></tr></tbody></table>
 <input type="submit" class="button-primary" name="unregister_WFU" value="';
                 echo _e('Delete Registration file', 'WFU');
                 echo '" /><br> <br></div>';
-
-
             }
         }
-
 /**
  *  will come in the next version!
  */
@@ -374,7 +347,6 @@ Below you find the results of some test WFU is performing if you can upload prop
             echo "Upload directory writeable: <br>";
             echo "Sub directories in the upload directory can be created <br>";
         }
-
         function return_kbytes($val)
         {
             $val = trim($val);
@@ -392,7 +364,6 @@ Below you find the results of some test WFU is performing if you can upload prop
             }
             return $val;
         }
-
         function get_server_name() {
             if(isset($_SERVER['HTTP_HOST'])) {
                 $domain = $_SERVER['HTTP_HOST'];
@@ -405,15 +376,12 @@ Below you find the results of some test WFU is performing if you can upload prop
             if ( $port !== false ) $domain = substr($domain, 0, $port);
             return $domain;
         }
-
         function getMaximumUploadSize()
         {
             $upload_max = WFUSettings::return_kbytes(ini_get('upload_max_filesize'));
             $post_max = WFUSettings::return_kbytes(ini_get('post_max_size'));
             return $upload_max < $post_max ? $upload_max : $post_max;
         }
-
-
         function printTrueFalse($options, $label,  $id, $description) {
             echo '
 <tr valign="top">
@@ -429,7 +397,24 @@ Below you find the results of some test WFU is performing if you can upload prop
 </tr>
 ';
         }
-
+        
+                function printLoginId($options, $label,  $id, $description) {
+            echo '
+<tr valign="top">
+<th scope="row">'.$label.'</th>
+<td>
+';
+            echo '<input type="radio" id="'.$id.'" name="'.$id.'" value="master_profile_type_username" ';
+            if ($options[$id] == "master_profile_type_username") { echo 'checked="checked"'; }
+            echo ' /> Username&nbsp;&nbsp;<input type="radio" id="'.$id.'" name="'.$id.'" value="master_profile_type_display" ';
+            if ($options[$id] == "master_profile_type_display") {echo 'checked="checked"'; }
+            echo '/> Display name&nbsp;<input type="radio" id="'.$id.'" name="'.$id.'" value="master_profile_type_id" ';
+            if ($options[$id] == "master_profile_type_id") {echo 'checked="checked"'; }
+            echo '/> Id<br>
+<em>'.$description.'</em></td>
+</tr>
+';
+        }
         function printTextInput($options, $label,  $id, $description) {
             echo '
 <tr valign="top">
@@ -446,7 +431,6 @@ Below you find the results of some test WFU is performing if you can upload prop
         function getAvailableTFULanguages() {
             return 'de,en,es,br,cn,ct,da,fr,it,jp,nl,no,pl,pt,se,sk,tw';
         }
-
         function check_image_magic($image_magic_path) {
             $inputimage = dirname(__FILE__) . "/../tfu/lang/de.gif";
             // now we check if we can do the test in the local directoy
@@ -474,7 +458,6 @@ Below you find the results of some test WFU is performing if you can upload prop
                 return '<span id="im_test"><img src="images/no.png"> Image magick is not available. Please check the next setting.</span>';
             }
         }
-
         function execute_command ($command) {
             $use_shell_exec = true;;
             ob_start();

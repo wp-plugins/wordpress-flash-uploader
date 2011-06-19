@@ -67,6 +67,7 @@ $enable_file_rename = $_SESSION["TFU_ENABLE_FILE_RENAME"];
 $show_size = ($_SESSION["TFU_SHOW_SIZE"] == 'true') ? 'true' : '';
 $normalise_file_names = $normalise_directory_names = $normalizeSpaces = $_SESSION["TFU_NORMALIZE"];
 $file_chmod=($_SESSION["TFU_FILE_CHMOD"] == '') ? 0 : octdec($_SESSION["TFU_FILE_CHMOD"]);
+$dir_chmod=($_SESSION["TFU_DIR_CHMOD"] == '') ? 0 : octdec($_SESSION["TFU_DIR_CHMOD"]);
 
 $language_dropdown = $_SESSION["TFU_LANGUAGE_DROPDOWN"];
 $use_image_magic = ($_SESSION["TFU_USE_IMAGE_MAGIC"] == "true");
