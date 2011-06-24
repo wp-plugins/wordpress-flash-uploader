@@ -2264,7 +2264,7 @@ function delete_folder(&$dir, $enable_folder_deletion, $fix_utf8) {
    return $status;
 }
 
-function change_folder($dir, $show_root, $enable_folder_browsing, $exclude_directories) {
+function change_folder($dir, $show_root, $enable_folder_browsing, $exclude_directories, $sort_directores_by_date) {
     global $hide_hidden_files;
 
     if ($enable_folder_browsing != 'true') {
@@ -2283,11 +2283,23 @@ function change_folder($dir, $show_root, $enable_folder_browsing, $exclude_direc
         while (false !== ($filed = readdir($dirhandle))) {
             if ($filed != "." && $filed != ".." && !in_array($filed, $exclude_directories) && (!($hide_hidden_files && (strpos($filed, '.') === 0)))) {
                 if (is_dir($dir . '/' . $filed)) {
+                   if ($sort_directores_by_date) {
+                     $fdate = filemtime($dir . '/' . $filed);
+                     $filed = $fdate . $filed;
+                   }    
                     array_push($myDirs, $filed);
                 }
             }
         }
-        usort ($myDirs, "mycmp");
+        if ($sort_directores_by_date) {
+            usort ($myDirs, "cmp_date_dec");
+            $i = 0;
+            foreach ($myDirs as $fieldName) {
+                $myDirs[$i++] = substr($fieldName, 10);
+            }
+        } else {
+            usort ($myDirs, "cmp_dir_dec");
+        }
         $dir = $dir . "/" . $myDirs[$index];
     }
     $_SESSION["TFU_DIR"] = $dir;

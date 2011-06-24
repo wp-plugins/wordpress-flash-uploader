@@ -162,7 +162,7 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['
         $show_root = (isset($_SESSION["TFU_ROOT_DIR"])) ? ($dir != $_SESSION["TFU_ROOT_DIR"]) : false;
 
         if (isset($_GET['changedir'])) { // Change a directory
-           $dir = change_folder($dir, $show_root, $enable_folder_browsing, $exclude_directories);
+           $dir = change_folder($dir, $show_root, $enable_folder_browsing, $exclude_directories, $sort_directores_by_date);
         }
         // needed for browsing - we check again because folder could have changed!
         $show_root = (isset($_SESSION["TFU_ROOT_DIR"])) ? ($dir != $_SESSION["TFU_ROOT_DIR"]) : false;

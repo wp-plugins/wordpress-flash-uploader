@@ -59,6 +59,8 @@ only restricted by their servers. And most if the problems can be solved!
 Please go to the settings page of Wordpress Flash Uploader. There you find a small donation section. Thank you for your support.
 
 == Changelog ==
+* Fix: sort_directores_by_date was not working.
+
 = 2.14 =
 * Updated the flash to TFU 2.14
 * Added Master mode support - This means that each user gets his own directory automatically.
