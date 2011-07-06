@@ -103,7 +103,9 @@ function tfu_debug($data)
           }
         }
         if ($debug_file == '') {
-		      error_log($debug_string, 0);
+		      @ob_start();
+              @error_log($debug_string, 0);
+		      @ob_end_clean();
 		      return;
 	      }
 
@@ -127,7 +129,9 @@ function tfu_debug($data)
                 @fclose($debug_file_local);
                 clearstatcache();
             } else {
-                error_log($debug_string, 0);
+                @ob_start();
+                @error_log($debug_string, 0);
+		        @ob_end_clean();
             }
         }
     }
