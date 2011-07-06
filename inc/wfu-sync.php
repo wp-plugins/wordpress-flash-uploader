@@ -73,7 +73,7 @@ if (!class_exists("WFUSync")) {
                 foreach($fuo as $item) {
                     $current++;
                     if( !ini_get('safe_mode') ){
-                       set_time_limit();
+                       @set_time_limit(30);
                     }
                     WFUSync::handle_import_file($item, $current, $sum);
                 }
