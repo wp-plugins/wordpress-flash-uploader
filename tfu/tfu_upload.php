@@ -98,8 +98,8 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
             $base_filename = $image = my_basename($file['name']);
             if ($normalise_file_names) {
               $image = normalizeFileNames($image);
-            }
-            $image = fix_decoding($image, $fix_utf8);
+            }        
+            $image = fix_decoding($image, $fix_utf8);    
             $image = check_multiple_extensions($image, $remove_multiple_php_extension);
            
             $filename = $dir . '/' . $image;

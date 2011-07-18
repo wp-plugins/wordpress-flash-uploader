@@ -600,12 +600,6 @@ function is_tfu_deletable($file)
     if ($owner === false) {
         return false;
     }
-    // Note that if the directory is not owned by the same uid as this executing script, it will
-    // be unreadable and I think unwriteable in safemode regardless of directory permissions.
-    // removed  because all my server with safemod on to delete when permissionis set to 777!
-    // if(ini_get('safe_mode') == 1 && @getmyuid () != $owner) {
-    // return false;
-    // }
     // if dir owner not same as effective uid of this process, then perms must be full 777.
     // No other perms combo seems reliable across system implementations
     if (function_exists('posix_getpwuid')) {
@@ -613,7 +607,6 @@ function is_tfu_deletable($file)
             return (substr(decoct(@fileperms($file)), -3) == '777' || @is_writable(dirname($file)));
         }
     }
-
     if ($isWindows && getmyuid() != $owner) {
         return (substr(decoct(fileperms($file)), -3) == '777');
     }
@@ -1732,20 +1725,22 @@ function check_image_magic($path = "", $check_image_magic = true) {
  *  is always done.
  **/
 function normalizeFileNames($imageName){
-   global $fix_utf8, $normalizeSpaces;
+   global $normalizeSpaces;
 
-  // we make the file name lowercase
-  $imageName = strtolower($imageName);
-
+  // it's needed to decode first because str_replace does not handle str_replace in utf-8
+  $imageName = utf8_decode($imageName);
+  // we make the file name lowercase ÄÖÜ as well.
+  $imageName = mb_strtolower($imageName);
+  
   if ($normalizeSpaces == 'true') {
     $imageName=str_replace(' ','_',$imageName);
   }
-
   // Some characters I know how to fix ;).
   $imageName=str_replace(array('ä','ö','ü','ß'),array('ae','oe','ue','ss'),$imageName);
   // and some others might need
   $imageName=str_replace(array('á','à','ã','â','ç','¢','é','ê','è','ë','í','î','ï','ì','ñ','ô','ó','õ','ò','š','ú','ù','û','ü','ý','ÿ','ž'),
                          array('a','a','a','a','c','c','e','e','e','e','i','i','i','i','n','o','o','o','o','s','u','u','u','u','y','y','z'),$imageName);
+ 
   // we remove the rest of unwanted chars
   $patterns[] = '/[\x7b-\xff]/';  // remove all characters above the letter z.  This will eliminate some non-English language letters
   $patterns[] = '/[\x21-\x2c]/'; // remove range of shifted characters on keyboard - !"#$%&'()*+
@@ -1755,7 +1750,7 @@ function normalizeFileNames($imageName){
   $patterns[] = '/[\x21-\x2c]/u'; // remove range of shifted characters on keyboard - !"#$%&'()*+
   $patterns[] = '/[\x5b-\x60]/u'; // remove range including brackets - []\^_`
   $replacement ="_";
-  return preg_replace($patterns, $replacement, $imageName);
+  return utf8_encode(preg_replace($patterns, $replacement, $imageName));
 }
 
 function execute_command ($command) {
@@ -1788,10 +1783,10 @@ function tfu_rename_file($dir, $file, $enable_file_rename, $keep_file_extension,
         exit(0);
     }
     $newName = parseInputParameterFile(trim(my_basename(' ' . $_GET['newfilename']))); // fixes that file can be renamed to an upper dir.
-    $newName = fix_decoding($newName, $fix_utf8);
     if ($normalise_file_names) {
        $newName = normalizeFileNames($newName);
     }
+    $newName = fix_decoding($newName, $fix_utf8);
     if ($keep_file_extension == 'true') {
         $newNameEx = getExtension($newName);
         $fileEx = getExtension($file);
@@ -2175,10 +2170,10 @@ function create_dir($dir, $enable_folder_creation, $fix_utf8) {
         }
         resetSessionTree();
         $newdir = parseInputParameterFile(trim(my_basename(' ' . $_GET['newdir'])));
-        $newdir = fix_decoding($newdir, $fix_utf8);
         if ($normalise_directory_names) {
            $newdir = normalizeFileNames($newdir);
         }
+        $newdir = fix_decoding($newdir, $fix_utf8);
         $createdir = $dir . "/" . $newdir;
         if (file_exists($createdir)) {
             $status = '&create_dir=exists';
@@ -2220,10 +2215,10 @@ function rename_dir( &$dir, $enable_folder_rename, $fix_utf8) {
         resetSessionTree();
         $upperdir = substr($dir, 0, strrpos ($dir, "/"));
         $newdir = parseInputParameterFile(trim(my_basename(' ' . $_GET['newdir'])));
-        $newdir = fix_decoding($newdir, $fix_utf8);
         if ($normalise_directory_names) {
            $newdir = normalizeFileNames($newdir);
         }
+        $newdir = fix_decoding($newdir, $fix_utf8);
         if ($dir == $_SESSION["TFU_ROOT_DIR"]) {
             $status = "&rename_dir=main";
         } else {
@@ -2421,8 +2416,8 @@ function check_restrictions($dir, $show_root, &$myFiles, $fix_utf8, $status) {
 
     $nrFiles = count($myFiles);
     // now we check if can delete files - we only check the 1st file!
-    if ($nrFiles > 0) {
-        $delfile = fix_decoding($myFiles[0], $fix_utf8);
+    if ($nrFiles > 0) { 
+        $delfile = fix_decoding(urldecode($myFiles[0]), $fix_utf8);
         // we have to remove the ** before checking
         $delfile = substr($delfile, 0, strpos($delfile, "**"));
         $status .= (is_tfu_deletable($dir . "/" . $delfile)) ? "&file_delete=true" : "&file_delete=false";
