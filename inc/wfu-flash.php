@@ -12,6 +12,9 @@ if (!class_exists("WFUFlash")) {
     class WFUFlash {
 
         function printWFU($devOptions, $istab) {
+            global $current_user;
+            wp_get_current_user();
+            
             $show_flash = true;
             $htaccess_path = dirname(__FILE__) . '/../tfu/.htaccess';
             $reg_path = dirname(__FILE__) . '/../tfu/twg.lic.php';
@@ -27,6 +30,8 @@ if (!class_exists("WFUFlash")) {
             @session_start();
             ob_end_clean();
             $_SESSION["IS_ADMIN"] = "true";
+            $_SESSION["WFU_USER_LOGIN"] = $current_user->user_login;
+            $_SESSION["WFU_USER_ROLE"] = array_shift($current_user->roles);
             WFUFlash::storeSettingsToSession($devOptions);
             WFUFlash::setUploadFolder();
 

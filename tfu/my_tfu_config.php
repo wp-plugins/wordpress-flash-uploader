@@ -93,6 +93,23 @@ $edit_textfile_extensions = $_SESSION["TFU_EDIT_TEXTFILE_EXTENSIONS"];
 $exclude_directories = array_map("trim", explode(",", $_SESSION["TFU_EXCLUDE_DIRECTORIES"])); 
 $forbidden_view_file_filter = $_SESSION["TFU_FILE_FILTER"]; 
 
+// get user/role defined configs 
+$user_loaded = false;
+if (isset($_SESSION["WFU_USER_LOGIN"])) {
+  // load user - look for tfu_config_<user>.php 
+  if (file_exists('tfu_config_' . $_SESSION["WFU_USER_LOGIN"] . '.php')) {
+    include ('tfu_config_' . $_SESSION["WFU_USER_LOGIN"] . '.php');
+    $user_loaded = true;
+  }
+}
+
+if (!$user_loaded && isset($_SESSION["WFU_USER_ROLE"])) {
+  // load role - look for tfu_config_<role>.php
+ if (file_exists('tfu_config_'. $_SESSION["WFU_USER_ROLE"] . '.php')) {
+    include ('tfu_config_'. $_SESSION["WFU_USER_ROLE"] . '.php');
+  }
+}
+
 $zip_folder = $folder; // has to be set again!
 
 ?>

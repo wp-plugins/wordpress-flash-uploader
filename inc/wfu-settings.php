@@ -109,7 +109,10 @@ You can use the flash in the frontend by adding the following shorttag to your a
 <div id="icon-options-general" class="icon_jfu"><br></div>
 <h2>WP Flash Uploader - Advanced Options</h2>
 <p>
-In the current version the most important settings are mapped in the administration panel. The WP Flash Uploader uses the TWG Flash Uploader which has much more features that can be directly configured here. If you want to configure WFU in more detail you can edit the tfu_config.php directly. On the web page of WFU a tutorial is provided how this can be easily done by everyone -> <a target="_blank" class="nounderline" href="http://blog.tinywebgallery.com/wfu/advanced-features/">go there</a>
+In the current version the most important settings are mapped in the administration panel. The WP Flash Uploader uses the TWG Flash Uploader which has much more features that can be directly configured here. If you want to configure WFU in more detail you can edit the tfu_config.php directly. On the web page of WFU a tutorial is provided how this can be easily done by everyone -> <a target="_blank" class="nounderline" href="http://blog.tinywebgallery.com/blog/wfu/advanced-features/">go there</a>
+</p>
+<p>
+<strong>You also can define individual configurations for a user or a user role</strong>. This is done by a custom config file in the "wp-content/plugins/wordpress-flash-uploader/tfu" folder. Create file with the name tfu_config_&lt;user login&gt;.php for a user or tfu_config_&lt;user role&gt;.php for a role. In this file you can overwrite any configuration that is possible in TFU. The file has to be a valid php file starting with &lt;?php and end with ?&gt;. There you can set all parameters available in tfu_config.php. If a config file for the user and a role is available the one for the user is used! The default roles you have to use in Wordpress are administrator, editor, author, contributor, subscriber. So a filename for the admin user would be tfu_config_admin.php and for the role administrator tfu_config_administrator.php.
 </p>';
         }
         function printNextVersion() {
