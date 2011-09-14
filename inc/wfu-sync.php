@@ -277,7 +277,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                 }
 
                 if (!$main) { // we check the meta data if the main image is o.k.
-                    $data = unserialize($item->meta_att);
+                    $data = @unserialize($item->meta_att);
                     // todo - check for thumbnails
                     $base = dirname($data['file']);
 
@@ -345,7 +345,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
 
                     $base = dirname($v3);
                     // now we check the metadata
-                    $data = unserialize($item->meta_att);
+                    $data = @unserialize($item->meta_att);
                     if (isset($data['sizes']) && isset($data['sizes']['thumbnail']) && isset($data['sizes']['thumbnail']['file'])) {
                       $thumbnail =  realpath($base . '/' . $data['sizes']['thumbnail']['file']);
                       if (realpath($fitem) == $thumbnail) { $found = true; break; }
