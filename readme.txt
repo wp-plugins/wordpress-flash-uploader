@@ -59,6 +59,9 @@ only restricted by their servers. And most if the problems can be solved!
 Please go to the settings page of Wordpress Flash Uploader. There you find a small donation section. Thank you for your support.
 
 == Changelog ==
+= 2.14.5 =
+* The $width variable was used to early and therefore not setting a flash variable. Now the notice is gone and the flash variable set correct.
+
 = 2.14.4 =
 * Added @ to avoid notices when unserializable is called. 
 

@@ -173,7 +173,8 @@ if (!class_exists("WFUFlash")) {
             $relative_dir = dirname($_SERVER['PHP_SELF']);
             $relative_dir = rtrim($relative_dir,"\\/.") . '/'; // we replace to get a consistent output with different php versions!
             $base_dir = $rel_dir . "wp-content/plugins/wordpress-flash-uploader/tfu";
-          
+            $width = $devOptions['flash_size'];   
+           
             ob_start();
             $id = session_id();
             session_write_close();
@@ -205,7 +206,7 @@ if (!class_exists("WFUFlash")) {
           flashvars.base="'.$base_dir.'";
           flashvars.relative_dir="'.$relative_dir.'";';
           if ($width == '650') {
-            echo 'params.scale = "noScale"';
+            $output .= 'params.scale = "noScale"';
           } 
           if ($devOptions['swf_text']) {
             $elements = split("&",$devOptions['swf_text']);
@@ -214,7 +215,7 @@ if (!class_exists("WFUFlash")) {
             }
           }
           
-          $width = $devOptions['flash_size'];   
+         
           $height=floor($width*(340/650));
           if ($height > 390) $height = floor($height * 0.95);
           
