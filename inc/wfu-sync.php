@@ -1,6 +1,6 @@
 <?php
 /**
- *   Wordpress Flash uploader 2.14.x  
+ *   Wordpress Flash uploader 2.15.x  
  *
  *   This file contains the methods used by the synch part from the WFU class
  *
@@ -12,15 +12,15 @@
 if (!class_exists("WFUSync")) {
     class WFUSync {
 
-        function printSync($devOptions, $istab) {
-
+        function printSync($devOptions, $istab = false, $check_nonce = true) {
             // now we check all possible actions if the correct nonce is set.
-            if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library'])  || isset($_GET['clean_media_library']) ) {
-                $nonce=$_POST['wfunonce'];
-                if (! wp_verify_nonce($nonce, 'wfu-nonce') ) die('Security check failed!');
-            } 
+            if ($check_nonce) {
+              if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library'])  || isset($_GET['clean_media_library']) ) {
+                  $nonce=$_POST['wfunonce'];
+                  if (! wp_verify_nonce($nonce, 'wfu-nonce') ) die('Security check failed!');
+              } 
+            }
             // nounce is set porperly - we continue...   
-            
             echo '<div class="wrap wfupadding">';
             $nonce= wp_create_nonce ('wfu-nonce'); 
             echo '<form method="post" action="'. $_SERVER["REQUEST_URI"] . '">';       
@@ -28,9 +28,9 @@ if (!class_exists("WFUSync")) {
             // this is printed first to get a header while generating thumbnails.
             echo '<div id="icon-upload" class="icon_jfu"><br></div>
                   <h2>Synchronize Media Library</h2>';
-            flush();
+            @flush();
             $mlf = WFUSync::getMediaLibraryFiles();
-            $uff = WFUSync::getUploadFolderFiles('../' . WFUSync::getUploadPath());
+            $uff = WFUSync::getUploadFolderFiles('../' . WFUSync::getUploadPath(), !$check_nonce);
             $enable_sych = ($uff !== false);
             if (!$enable_sych) {
               $uff = array();
@@ -62,10 +62,8 @@ if (!class_exists("WFUSync")) {
                 } else {
                   echo _e("No invalid media library entries found.", "WFU");    
                 }
-                echo '</strong></p></div>';
-                
+                echo '</strong></p></div>';                
             }
-
             if (isset($_POST['synchronize_media_library'])
                 || isset($_POST['import_media_library']) || isset($_GET['import_media_library'])) {
                 $sum = count ($fuo);
@@ -99,7 +97,7 @@ if (!class_exists("WFUSync")) {
                 || isset($_POST['import_media_library'])) {
                 // we reload the data.
                 $mlf = WFUSync::getMediaLibraryFiles();
-                $uff = WFUSync::getUploadFolderFiles('../' . WFUSync::getUploadPath());
+                $uff = WFUSync::getUploadFolderFiles('../' . WFUSync::getUploadPath(), !$check_nonce);
                 if (!$enable_sych) {
                   $uff = array();
                 } 
@@ -185,20 +183,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                 return substr($str, $pos + strlen(WFUSync::getUploadPath())+1);
             }
         }
-        
-        /*
-         function stripAboveUpload($str) {
-            $str = str_replace("\\","/",$str);
-            if (stristr($str, 'uploads') === false) {
-                return $str;
-            } else {
-                $pos = stripos($str, 'uploads/');
-                return substr($str, $pos + 8);
-            }
-        }
-        */
-
-
+      
         function stripAfterUpload($str) {
             echo $str . "<br>";
             $str = str_replace("\\","/",$str); 
@@ -215,18 +200,6 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
             return $str;
         }
       
-         /*  
-         function stripAfterUpload($str) {
-            echo $str . "<br>";
-            $str = str_replace("\\","/",$str);
-            $str =  stristr($str, 'uploads');
-            echo $str . "<br>"; 
-            $str = substr(stristr($str, '/'),1); 
-            echo $str . "<br>";
-            return $str;
-        }
-        */
-
         function getMediaLibraryFiles() {
             global $wpdb;
             $sql= "SELECT pm.post_id, pm.meta_id, pm.meta_value, pma.meta_value as meta_att FROM $wpdb->posts p,$wpdb->postmeta pm, $wpdb->postmeta pma WHERE pm.post_id=p.id and pma.post_id=pm.post_id and p.post_type = 'attachment' and pm.meta_key='_wp_attached_file' and pm.meta_value <> pma.meta_value order by pm.meta_value ";
@@ -234,7 +207,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
             return $mlf;
         }
 
-        function getUploadFolderFiles( $from = '../wp-content/uploads') {
+        function getUploadFolderFiles( $from = '../wp-content/uploads', $is_cron) {
             if(!is_dir($from)) {
                echo '<div class="updated"><p><strong>';
                echo _e("Upload folder does not exist yet. Please upload at least one file.", "WFU");
@@ -255,18 +228,43 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                         $path = $dir . '/' . $file;
                         if( is_dir($path))
                         $dirs[] = $path;
-                        else
-                        $files[] = $path;
+                        else {
+                            if (WFUSync::isSupportedExtension($path, $is_cron)) {
+                            $files[] = $path;
+                          }
+                        }
                     }
                     closedir($dh);
                 }
             }
+            
+             // all filesizes are read - then we wait and then we read again 
+             // only the ones who stay the same are "stable" and not files currently 
+             // uploaded
+             $size_array = array();
+             foreach ($files as $file) {
+                 $size_array[$file] = filesize($file);
+             }
+             if ($is_cron) {
+               sleep(5);
+             } else {
+               sleep(1);
+             }
+             clearstatcache();
+             foreach ($files as $key => $file) {
+                 if ($size_array[$file] != filesize($file)) {
+                   unset($files[$key]); 
+                 }
+             }  
             return $files;
         }
 
         function getMediaLibraryOnly($mlf) {
             $mfo = array();
             foreach($mlf as $item) {
+                if (!WFUSync::isSupportedExtension($item->meta_value, false)) {
+                    continue;
+                }
                 $main = false;
                 // echo $item->meta_value . '<br>';
                 // files have either a full path or the relative path in the uploads folder.
@@ -330,7 +328,6 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
             $wfuOptions = $this->getAdminOptions();
              
             foreach($filesystem as $fitem) {
-
                 $found = false;
                 foreach($media as $item) {
                     $v1 =  realpath('../'.WFUSync::getUploadPath().'/' . $item->meta_value);
@@ -370,13 +367,17 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                         if (strlen($fitem) > strlen($itemcomp)) { // we check if it is longer                   
                           $c1 = WFUSync::removeExtension($itemcomp) . '-';
                           $c2 = substr($fitem,0,strlen($c1));
-                          if ($c1 == $c2) {
-                            $add = false;  
+                          if (strtolower($c1) == strtolower($c2)) {
+                            $c3 = substr(WFUSync::removeExtension($fitem),strlen($c1));
+                            // it has the same prefix. Now it is checked if the rest 
+                            // has the pattern [0-9]{1,5}x[0-9]{1,5}
+                            if (preg_match('/[0-9]{1,5}x[0-9]{1,5}/', $c3) == 1) {
+                               $add = false;
+                            }    
                           } 
                         }
                       }  
-                    }
-                    
+                    }                   
                     if ($add) {
                       $fuo[] = realpath($fitem);
                     }
@@ -387,13 +388,16 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
 
         //Handle an individual file import. This function is based on the one from add-from-server
         function handle_import_file($file, $current, $sum, $post_id = 0) {
+            
+            $debug_string = '    Request: ' . $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'] . "\n";
+             
             $post_id = isset($_REQUEST['post_id']) ? intval($_REQUEST['post_id']) : 0;
 
             $file = str_replace('\\', '/',$file);
 
             // we have to replace special characters because wordpress does not handle them properly.
             $filenorm = WFUSync::normalizeFileNames($file);
-            if (rename ($file, $filenorm)) {
+            if (@rename ($file, $filenorm)) {
                 $file =  $filenorm;
             }
             // $path = WFUSync::stripAfterUpload($file);
@@ -421,9 +425,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
 
             $post_date = date( 'Y-m-d H:i:s', $time);
             $post_date_gmt = gmdate( 'Y-m-d H:i:s', $time);
-
-
-
+            
             //Apply upload filters
             $return = apply_filters( 'wp_handle_upload', array( 'file' => $new_file, 'url' => $url, 'type' => $type ) );
             $new_file = $return['file'];
@@ -431,14 +433,18 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
             $type = $return['type'];
             $title = preg_replace('!\.[^.]+$!', '', basename($file));
             $content = '';
+           
             // use image exif/iptc data for title and caption defaults if possible
-            if ( $image_meta = @wp_read_image_metadata($new_file) ) {
-                if ( '' != trim($image_meta['title']) )
-                $title = trim($image_meta['title']);
-                if ( '' != trim($image_meta['caption']) )
-                $content = trim($image_meta['caption']);
+            // TODO: fix path!!!
+            $new_file_path = '../'.WFUSync::getUploadPath()  . "/" . $new_file;
+            if (file_exists($new_file_path) && function_exists("wp_read_image_metadata")) {
+              if ( $image_meta = wp_read_image_metadata($new_file_path) ) {     // add @ again.
+                  if ( '' != trim($image_meta['title']) )
+                  $title = trim($image_meta['title']);
+                  if ( '' != trim($image_meta['caption']) )
+                  $content = trim($image_meta['caption']);
+              }
             }
-
             // Construct the attachment array
             $attachment = array(
             'post_mime_type' => $type,
@@ -452,41 +458,49 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
             );
             // Save the data
             $id = wp_insert_attachment($attachment, $new_file, $post_id);
+            
             if ( !is_wp_error($id) ) {
                 echo 'Crunching ('.$current.'/'.$sum.'): ' . htmlentities($filename) . '<br>';
                 echo '<script type="text/javascript">
       if (window.parent.frames[window.name] && (parent.document.getElementsByTagName(\'frameset\').length <= 0)) {
         window.parent.document.getElementById("status_text").innerHTML = "Crunching ('.$current.'/'.$sum.'): ' . htmlentities($filename).'";
       }</script>';
-                flush(); ob_flush();
+                @flush();
                 $data = wp_generate_attachment_metadata( $id, $file );
                 $data['file'] = $new_file; // fix to get the right file name into the database!
-
                 wp_update_attachment_metadata( $id, $data );
             }
             return $id;
         }
 
-        function normalizeFileNames($imageName){
-            // we make the file name lowercase
-            $imageName = strtolower($imageName);
-
-            // Some characters I know how to fix ;).
-            $imageName=str_replace(array('ä','ö','ü','ß'),array('ae','oe','ue','ss'),$imageName);  
-            // and some others might need
-            $imageName=str_replace(array('á','à','ã','â','ç','¢','é','ê','è','ë','í','î','ï','ì','ñ','ô','ó','õ','ò','š','r','ú','ù','û','ü','ý','ÿ','ž'),
-                                   array('a','a','a','a','c','c','e','e','e','e','i','i','i','i','n','o','o','o','o','s','r','u','u','u','u','y','y','z'),$imageName);  
-            // we remove the rest of unwanted chars
-            $patterns[] = '/[\x7b-\xff]/';  // remove all characters above the letter z.  This will eliminate some non-English language letters
-            $patterns[] = '/[\x21-\x2c]/'; // remove range of shifted characters on keyboard - !"#$%&'()*+
-            $patterns[] = '/[\x5b-\x60]/'; // remove range including brackets - []\^_`
-            // we remove all kind of special characters for utf8 encoding as well
-            $patterns[] = '/[\x7b-\xff]/u';  // remove all characters above the letter z.  This will eliminate some non-English language letters
-            $patterns[] = '/[\x21-\x2c]/u'; // remove range of shifted characters on keyboard - !"#$%&'()*+
-            $patterns[] = '/[\x5b-\x60]/u'; // remove range including brackets - []\^_`
-            $replacement ="_";
-            return preg_replace($patterns, $replacement, $imageName);
+       function normalizeFileNames($imageName){
+         global $normalizeSpaces;
+      
+        // it's needed to decode first because str_replace does not handle str_replace in utf-8
+        $imageName = utf8_decode($imageName);
+        // we make the file name lowercase ÄÖÜ as well.
+        $imageName = mb_strtolower($imageName);
+        
+        if ($normalizeSpaces == 'true') {
+          $imageName=str_replace(' ','_',$imageName);
         }
+        // Some characters I know how to fix ;).
+        $imageName=str_replace(array('ä','ö','ü','ß'),array('ae','oe','ue','ss'),$imageName);
+        // and some others might need
+        $imageName=str_replace(array('á','à','ã','â','ç','¢','é','ê','è','ë','í','î','ï','ì','ñ','ô','ó','õ','ò','š','ú','ù','û','ü','ý','ÿ','ž'),
+                               array('a','a','a','a','c','c','e','e','e','e','i','i','i','i','n','o','o','o','o','s','u','u','u','u','y','y','z'),$imageName);
+       
+        // we remove the rest of unwanted chars
+        $patterns[] = '/[\x7b-\xff]/';  // remove all characters above the letter z.  This will eliminate some non-English language letters
+        $patterns[] = '/[\x21-\x2c]/'; // remove range of shifted characters on keyboard - !"#$%&'()*+
+        $patterns[] = '/[\x5b-\x60]/'; // remove range including brackets - []\^_`
+        // we remove all kind of special characters for utf8 encoding as well
+        $patterns[] = '/[\x7b-\xff]/u';  // remove all characters above the letter z.  This will eliminate some non-English language letters
+        $patterns[] = '/[\x21-\x2c]/u'; // remove range of shifted characters on keyboard - !"#$%&'()*+
+        $patterns[] = '/[\x5b-\x60]/u'; // remove range including brackets - []\^_`
+        $replacement ="_";
+        return utf8_encode(preg_replace($patterns, $replacement, $imageName));
+      }
 
         function getUploadPath() {
           $upload_path = get_option('upload_path');
@@ -500,12 +514,38 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
           return $upload_path;
         }
         
-        function removeExtension($name)
-        {
+        function removeExtension($name) {
             return substr($name, 0, strrpos ($name, '.'));
         }
-
+        function getExtension($name) {
+	          return substr (strrchr ($name, '.'), 1);
+        }
+        /**
+         * We check the extension + the if this is a cron a file has to be at least 1 min old!
+         */                 
+        function isSupportedExtension($filename, $is_cron) {
+          $wfuOptions = $this->getAdminOptions();
+          if ($is_cron) {
+             clearstatcache();
+             if (file_exists($filename)) {
+               // check if the file was not modified in the last 10 sec
+               // and is therefore in an upload
+               // this does only work on some systems. Therefore the          
+               if ((time() - filemtime($filename)) < 60) {
+                 return false;
+               }   
+             } else {
+               die("check :" . $filename);
+             }
+          }
+          if (!isset($wfuOptions['sync_extensions']) || ($wfuOptions['sync_extensions'] == '')) {
+            return true;
+          } else {  
+            $ae = array_map("trim", explode(",", $wfuOptions['sync_extensions'])); // we need an array here and trim spaces too.
+            $ext = WFUSync::getExtension($filename);
+            return in_array($ext, $ae); 
+         }
+       }
 
     }}
-
 ?>

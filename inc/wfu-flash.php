@@ -1,6 +1,6 @@
 <?php
 /**
- *   Wordpress Flash uploader 2.14.x  
+ *   Wordpress Flash uploader 2.15.x  
  *   This file contains all methods used on the main wfu page from the WFU class
  *
  *   Copyright (c) 2004-2011 TinyWebGallery
@@ -220,7 +220,7 @@ if (!class_exists("WFUFlash")) {
           if ($height > 390) $height = floor($height * 0.95);
           
           $output .= '
-          swfobject.embedSWF("'.$rel_dir.'wp-content/plugins/wordpress-flash-uploader/tfu/tfu_214.swf", "flashcontent", "'.$width.'", "'.$height.'", "8.0.0", "", flashvars, params, attributes);
+          swfobject.embedSWF("'.$rel_dir.'wp-content/plugins/wordpress-flash-uploader/tfu/tfu_215.swf", "flashcontent", "'.$width.'", "'.$height.'", "8.0.0", "", flashvars, params, attributes);
 
           </script>
           ';          

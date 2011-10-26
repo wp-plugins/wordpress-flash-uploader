@@ -1,6 +1,6 @@
 <?php
 /**
- * TWG Flash uploader 2.14.x
+ * TWG Flash uploader 2.15.x
  *
  * Copyright (c) 2004-2011 TinyWebGallery
  * written by Michael Dempfle
@@ -15,7 +15,7 @@ if (isset($_GET['TFUSESSID'])) { // this is a workaround if you set php_flag ses
     session_id($_GET['TFUSESSID']);
 }
 session_start();
-
+    
 $install_path = '';      // Please read the howto 8 of the TFU FAQ what you have to do with this parameter! You need a / at the end if you set it + you have to 
 include $install_path . "tfu_helper.php";
 
@@ -61,7 +61,7 @@ if (isset($_POST['twg_user']) && isset($_POST['twg_pass'])) { // twg_user and tw
     include $install_path . "tfu_config.php";
     
     // check if all included files have the same version to avoid problems during update!
-    if ($tfu_config_version != '2.14' || $tfu_help_version != '2.14') {
+    if ($tfu_config_version != '2.15' || $tfu_help_version != '2.15') {
       tfu_debug('Not all files belong to this version. Please update all files.');
     }
 
@@ -116,7 +116,7 @@ if (isset($_POST['twg_user']) && isset($_POST['twg_pass'])) { // twg_user and tw
         ob_start();
         include $license_file;
         ob_end_clean();   
-        $reg_infos = "&d=" . $d . "&s=" . $s . "&l=" . $l; 
+        $reg_infos = "&d=" . $d . "&s=" . $s . "&l=" . $l ."&dd=" . urlencode($d); 
     } else {
         $reg_infos = ""; // means freeware version!
     }

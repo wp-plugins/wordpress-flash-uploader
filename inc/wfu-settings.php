@@ -1,9 +1,8 @@
 <?php
 /**
- *   Wordpress Flash uploader 2.14.x  
+ *   Wordpress Flash uploader 2.15.x  
  *   This file contains all the methods for the settings screen from the WFU class
  *  
- *
  *  Copyright (c) 2004-2011 TinyWebGallery
  *  Author: Michael Dempfle
  *  Author URI: http://www.tinywebgallery.com    
@@ -37,14 +36,11 @@ if (!class_exists("WFUSettings")) {
  on the \'WP Flash Uploader\' page to manage the Wordpress install. They will get 2 buttons where they can switch between the main directory of Wordpress and the upload folder.
 <table class="form-table">';
             WFUSettings::printTrueFalse($devOptions, 'Show \'WP Flash Uploader\' in Media menu',  'show_wfu_media', '');
+            WFUSettings::printTrueFalse($devOptions, 'Show \'WP Flash Uploader\'  in Media tabs',  'show_wfu_tab', 'If you add a new post you can insert/select new media files. You can include WFU to the tabs there and upload your images to the media library and include it then directly. In this view the flash is shown which is preconfigured to the current image folder. You cannot manage your webspace there like when you select the menu entry.');
+            
             WFUSettings::printTrueFalse($devOptions, 'Show \'Sync Media Library\' in Media menu',  'show_sync_media', '');
-            
-            WFUSettings::printTrueFalse($devOptions, 'Show \'WFU\'  in Media tabs',  'show_wfu_tab', 'If you add a new post you can insert/select new media files. You can include WFU to the tabs there and upload your images to the media library and include it then directly. In this view the flash is shown which is preconfigured to the current image folder. You cannot manage your webspace there like when you select the menu entry.');
-            WFUSettings::printTrueFalse($devOptions, 'Show \'Sync\' in Media tabs',  'show_sync_tab', 'If you add a new post you can insert/select new media files. You can include the \'Sync\' to the tabs there and include it then directly.');
-            
-            WFUSettings::printTrueFalse($devOptions, 'Try to detect resized files',  'detect_resized', 'Resized files should normally not imported again. WP Flash Uploader tries to detect this files and does not offer them on the \'Sync\' menu entry if you set this to true. If you set it to false all files are synchronized.');
-            
-            
+            WFUSettings::printTrueFalse($devOptions, 'Show \'Sync Media Library\' in Media tabs',  'show_sync_tab', 'If you add a new post you can insert/select new media files. You can include the \'Sync\' to the tabs there and include it then directly.');
+
             WFUSettings::printTrueFalse($devOptions, 'Hide .htaccess create option',  'hide_htaccess', 'On the WP Flash Uploader page the option to create and delete a .htaccess file is shown. once the flash is working you can hide this option.');
             echo '</table>';
             echo '<div class="submit">
@@ -312,7 +308,7 @@ There are 2 versions of WFU available:<br><ul>
                 echo '
 <p>      
 The registration is free (powered by trialpay) or only <b>15 €/domain</b> and can be done on www.tinywebgallery.com by clicking <a href="http://www.tinywebgallery.com/en/register_tfu.php"><b>here</b></a>.<br>The registration of the TWG Flash Uploader, JFU and WFU is the same. The registration is also valid for TWG and the standalone version of TFU!<p>To register please store the content of the 3 lines provided in the registration email in the text boxes below and press the register button. If everything worked fine you get a different message here and in the options of the registered version are enabled - and of course the 3MB limit is gone.</p>
-<div class="install" style="width: 600px; margin-left: 50px;">
+<div class="install" style="width: 650px; margin-left: 50px;">
 &lt;?php
 <table><tbody><tr><td style="text-align:right;">
 $l&nbsp; = " <input name="l" size="80" type="text"> ";</td></tr><tr><td style="text-align:right;">
@@ -401,6 +397,66 @@ Below you find the results of some test WFU is performing if you can upload prop
 ';
         }
         
+        
+        
+        
+        function printSyncSettings($devOptions) {
+            echo '
+<a name="reg"></a>
+<div id="icon-options-general" class="icon_jfu"></div>
+<h2>Sync media library options</h2>
+<p>
+You can automatically sync the media library in a given interval. It is also possible to define the file extensions that should be synched
+</p>
+<table class="form-table">
+<!-- enable_file_download -->
+<tr valign="top">
+<th scope="row">Sync automatically</th>
+<td>';
+            echo '<select name="scheduler">';
+            WFUSettings::printOptionLine('none', 'No automatic sync', $devOptions);            
+            WFUSettings::printOptionLine('every_min', 'Every minute', $devOptions);
+            WFUSettings::printOptionLine('every_5_min', 'Every 5 minutes', $devOptions);
+            WFUSettings::printOptionLine('every_10_min', 'Every 10 minutes', $devOptions);
+            WFUSettings::printOptionLine('every_30_min', 'Every 30 minutes', $devOptions);
+            WFUSettings::printOptionLine('hourly', 'Every hour', $devOptions);
+            WFUSettings::printOptionLine('daily', 'Once a day', $devOptions);
+            echo '<select>';
+            echo '<br>
+<em>Please set the time interval the upload folder should be checked and syncronized with the media library. You have to set <b>"define(\'ALTERNATE_WP_CRON\', true);"</b> in the wp-config.php to enable the cron job! Please note that this is not a realy cron job. So if you set 5 minutes then it is syncronized at the next request that happens after 5 minutes waiting!</em>
+</td>
+</tr>
+';
+            WFUSettings::printTextInput($devOptions, 'Sync extensions',  'sync_extensions', 'You can define the extensions that should be synchronized. If you leave the field empty an import of all files is tried! Please separate the extensions with "," .');
+            WFUSettings::printTrueFalse($devOptions, 'Try to detect resized files',  'detect_resized', 'Resized files should normally not imported again. The plugin tries to detect this files and does not offer them on the \'Sync\' menu entry if you set this to true. If you set it to false all files are synchronized.');
+            
+            echo '
+</table>
+<div class="submit">
+<input type="submit" class="button-primary" name="update_WFUSettings" value="';
+            echo _e('Update Settings', 'WFU');
+            echo '" /></div>';
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
                 function printLoginId($options, $label,  $id, $description) {
             echo '
 <tr valign="top">
@@ -478,6 +534,17 @@ Below you find the results of some test WFU is performing if you can upload prop
             }
             ob_end_clean();
         }
+        
+
+         function printOptionLine($value, $text, $devOptions) {
+           $selected = '';
+           if ($devOptions['scheduler'] == $value) {
+              $selected = ' selected="selected" ';
+           } 
+           echo '<option '.$selected.' value="'.$value.'">&nbsp;' .__($text). '&nbsp;</option>';
+         }
+           
+        
     }
 }
 ?>

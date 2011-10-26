@@ -3,7 +3,7 @@
 Plugin Name: Wordpress Flash Uploader
 Plugin URI: http://www.tinywebgallery.com/blog/wfu
 Description: The Wordpress Flash Uploader does contain 2 plugins: '<strong>Wordpress Flash Uploader</strong>' and '<strong>Sync Media Library</strong>'. The Wordpress Flash Uploader is a flash uploader that replaces the existing flash uploader and let you manage your whole  WP installation. 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library. 
-Version: 2.14.5
+Version: 2.15
 Author: Michael Dempfle
 Author URI: http://www.tinywebgallery.com
 */
@@ -97,7 +97,10 @@ if (!class_exists("WFU")) {
                 'frontend_upload_folder' => '',
                 // new 2.14
                 'master_profile' => 'false',
-                'master_profile_type' => 'master_profile_type_username'                     
+                'master_profile_type' => 'master_profile_type_username',  
+                // new 2.15
+                'sync_extensions' => '',
+                'scheduler' => 'none'                  
             );
 
             $wfuOptions = get_option($this->adminOptionsName);
@@ -122,6 +125,12 @@ if (!class_exists("WFU")) {
                 wp_die($message);
             }      
         }
+        
+        function deactivate(){ 
+           if ( wp_next_scheduled('wfu_task_hook') ) {
+               wp_clear_scheduled_hook('wfu_task_hook');
+           }
+        }
 
         /* CSS für den Admin-Bereich von WFU */
         function addAdminHeaderCode() {
@@ -133,8 +142,8 @@ if (!class_exists("WFU")) {
             WFUFlash::printWFU($this->getAdminOptions(), $istab);
         }
 
-        function printSync($istab = false) {
-            WFUSync::printSync($this->getAdminOptions(), $istab);
+        function printSync($istab = false, $check_nonce = true) {
+            WFUSync::printSync($this->getAdminOptions(), $istab, $check_nonce);
         }
 
 
@@ -238,6 +247,7 @@ if (!class_exists("WFU")) {
             $nonce= wp_create_nonce ('wfu-nonce'); 
             echo '<div class=wrap><form method="post" action="'. $_SERVER["REQUEST_URI"] . '">';
             echo '<input type="hidden" name="wfunonce" value="'.$nonce.'">';
+            WFUSettings::printSyncSettings($wfuOptions);
             WFUSettings::printWordpressOptions($wfuOptions);
             WFUSettings::printFrontendOptions($wfuOptions); 
             WFUSettings::printOptions($wfuOptions);
@@ -395,8 +405,39 @@ if (!class_exists("WFU")) {
                }
              }
         
-        
-        
+         // add custom time 30 m to cron
+         function filter_cron_schedules( $param ) {
+             return array( 
+              'every_min' => array(
+                'interval' => 60, // seconds
+                'display'  => __( 'Every minute' )
+                ) ,
+               'every_5_min' => array(
+                'interval' => 300, // seconds
+                'display'  => __( 'Every 5 minutes' )
+                ),    
+               'every_10_min' => array(
+                'interval' => 600, // seconds
+                'display'  => __( 'Every 10 minutes' )
+                ), 
+                 'every_30_min' => array(
+                'interval' => 1800, // seconds
+                'display'  => __( 'Every 30 minutes' )
+                )
+              );
+         }
+       
+    
+      /**
+       * Called by the cron job !
+       */ 
+      function wfu_task_function() {
+           require_once(ABSPATH . 'wp-admin/includes/image.php');
+           $_POST['synchronize_media_library'] = 'true';
+           $this->printSync(true, false);
+      }
+
+               
     } } //End Class WFU
 
 if (class_exists("WFU")) {
@@ -427,6 +468,7 @@ if (!function_exists("WFU_ap")) {
 //Actions and Filters	
 if (isset($dl_pluginSeries)) {
     register_activation_hook(__FILE__, array(&$dl_pluginSeries, 'activate'));
+    register_deactivation_hook (__FILE__, array(&$dl_pluginSeries, 'deactivate'));
     //Actions
     add_action('admin_menu', 'WFU_ap');
     add_action('wordpress-flash-uploader/wordpress-flash-uploader.php',  array(&$dl_pluginSeries, 'init'));
@@ -443,6 +485,17 @@ if (isset($dl_pluginSeries)) {
 
     add_shortcode('wfu', array(&$dl_pluginSeries,'wfu_func'));
 
+    add_filter( 'cron_schedules', array( &$dl_pluginSeries, 'filter_cron_schedules' ) );
+    add_action('wfu_task_hook', array( &$dl_pluginSeries, 'wfu_task_function' ) );
+
+    $wfuOptions = &$dl_pluginSeries->getAdminOptions();
+    if ( $wfuOptions['scheduler'] != 'none' && !wp_next_scheduled('wfu_task_hook') ) {
+       wp_schedule_event( time(),  $wfuOptions['scheduler'], 'wfu_task_hook' ); // hourly, daily and twicedaily
+    } else if  ($wfuOptions['scheduler'] == 'none') {
+        wp_clear_scheduled_hook('wfu_task_hook');
+    }
 }
+
+
 
 ?>

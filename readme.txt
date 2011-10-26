@@ -3,7 +3,7 @@ Contributors: mdempfle, Michael Dempfle
 Tags: admin, media, upload, synchronize, flash, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
 Tested up to: 3.2.1
-Stable tag: 2.14.4
+Stable tag: 2.15
 Donate link: Please check the settings of Wordpress Flash Uploader
 
 'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you also manage your whole Wordpress installation and synchronize your media library. 
@@ -15,7 +15,9 @@ and let you manage your whole Wordpress installation.
 The Wordpress Flash Uploader does contain 2 plugins: 'Wordpress Flash Uploader' and 'Sync Media Library'. 
 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your 
 upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library.
-Since WFU 2.12.1 it is also possible to add the flash to the site! See the frontend settings for details. 
+Since WFU 2.12.1 it is also possible to add the flash to the site! See the frontend settings for details.
+
+You can now also synchronize the media library automatically using the wordpress cron and define the extensions that should be synchronized.
 
 = Motivation: =
 Wordpress has a flash uploader which was not working on any of my servers. So I decided to write a 
@@ -49,6 +51,13 @@ You get 'WP Flash Uploader' and 'Sync Media Library' in the 'Media' menu and 'WP
 Go to Settings->WP Flash Uploader and check the 'Limitations' part. Most of the users can upload and are 
 only restricted by their servers. And most if the problems can be solved!
 
+If you want to use the automatic sync please add   
+define('ALTERNATE_WP_CRON', true);
+in the 
+wp-config.php 
+to enable the cron job! 
+Please note that this is not a realy cron job. So if you set 5 minutes then it is syncronized at the next request that happens after 5 minutes waiting!
+
 == Screenshots ==
 1. The Wordpress Flash Uploader page where you can upload images
 2. The Synch Media Library page where you can synchronize your upload folder with the Media Library
@@ -59,6 +68,12 @@ only restricted by their servers. And most if the problems can be solved!
 Please go to the settings page of Wordpress Flash Uploader. There you find a small donation section. Thank you for your support.
 
 == Changelog ==
+= 2.15 =
+* New configuration options for the 'Sync media library'. You can define which file extensions should be syncronized.
+* You can enable automatically sync which is executed as cron job in Wordpress. I have added several cron job times as well. You have to set "define('ALTERNATE_WP_CRON', true);" in wp-config.php to enable the cron jobs.
+* Running upload detection: The file size is read twice during the process. If the filesize changes then the file is still uploading and not synchronized!
+* Updated the flash to TFU 2.15
+
 = 2.14.5 =
 * The $width variable was used to early and therefore not setting a flash variable. Now the notice is gone and the flash variable set correct.
 

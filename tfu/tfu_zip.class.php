@@ -21,7 +21,7 @@
  * @package zip
  */
 defined('_VALID_TWG') or die('Direct Access to this location is not allowed.');
-$tfu_zip_version = '2.14';
+$tfu_zip_version = '2.15';
  
 class TFUZipFile {
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * TWG Flash uploader 2.14.x
+ * TWG Flash uploader 2.15.x
  *
  * Copyright (c) 2004-2011 TinyWebGallery
  * written by Michael Dempfle
@@ -14,7 +14,7 @@
  * * ensure this file is being included by a parent file
  */
 defined('_VALID_TWG') or die('Direct Access to this location is not allowed.');
-$tfu_help_version = '2.14';
+$tfu_help_version = '2.15';
 // some globals you can change
 $check_safemode = true;              // New 2.12.x - By default TFU checks if you have a safe mode problem. On some server this test does not work. There you can try to turn it off and test if you can e.g. create directories, upload files to new created directories.
 $session_double_fix = false; // this is only needed if you get errors because of corrupt sessions. If you turn this on a backup is made and checked if the first one is corrupt
@@ -46,7 +46,7 @@ tfu_setHeader();
 include dirname(__FILE__) . '/tfu_zip.class.php';
 
 // check if all included files have the same version to avoid problems during update!
-if ($tfu_zip_version != '2.14') {
+if ($tfu_zip_version != '2.15') {
   tfu_debug('Not all files belong to this version. Please update all files.');
 }
 
@@ -644,8 +644,37 @@ function getCurrentDir()
 
 function getFileName($dir)
 {
-    global $fix_utf8, $exclude_directories, $sort_files_by_date, $hide_hidden_files, $enable_enhanced_debug;
+    global $fix_utf8, $exclude_directories, $sort_files_by_date, $hide_hidden_files, $enable_enhanced_debug, $use_index_for_files;
 
+    if (!$use_index_for_files) {
+      // used for position critical stuff like delete, rename... 
+      if (isset($_POST['tfu_file_name'])) {     
+        $filename_post = $_POST['tfu_file_name'];
+        $filename = $dir . '/' . fix_decoding($filename_post, $fix_utf8);
+          if (file_exists($filename)) {
+            return $filename;
+          } else {
+            tfu_debug("Check the encoding settings. Files canot be found when sent from the flash. If you get this error and you cannot fix this with the encoding please use the old index way and set \$use_index_for_files=false. See TFU FAQ 21.");
+            return "_FILE_NOT_FOUND"; 
+          } 
+      }      
+      // xdelete, copymove !!!  Because there can be many files! 
+      if (isset($_POST['tfu_file_names'])) { 
+        $filenames = array();
+        $filenames_post_array = explode('||', $_POST['tfu_file_names']);
+        foreach ($filenames_post_array as $filename_post) {
+            $filename = $dir . '/' . fix_decoding($filename_post, $fix_utf8);
+            if (file_exists($filename)) {
+              $filenames[] = $filename;
+            } else {
+              tfu_debug("Check the encoding settings. Files canot be found when sent from the flash. If you get this error and you cannot fix this with the encoding please use the old index way and set \$use_index_for_files=false. See TFU FAQ 21.");
+              return "_FILE_NOT_FOUND"; 
+            } 
+        }
+        return $filenames;
+      }
+    }
+      
     if (!isset($_GET['index']) || $_GET['index'] == '') {
         return '';
     }
@@ -1271,6 +1300,7 @@ function sendConfigData()
     global $big_progressbar,$img_progressbar,$img_progressbar_back,$img_progressbar_anim, $big_server_view;
     global $zip_file_pattern, $is_jfu_plugin, $has_post_processing, $directory_file_limit_size;
     global $show_server_date_instead_size, $enable_file_creation, $enable_file_creation_extensions;
+    global $switch_sides;
 
     // the sessionid is mandatory because upload in flash and Firefox would create a new session otherwise - sessionhandled login would fail then!
     $output = '&login=' . $login .  '&maxfilesize=' . '' . $maxfilesize;
@@ -1312,13 +1342,15 @@ function sendConfigData()
     $output .= '&is_jfu_plugin=' . $is_jfu_plugin . '&has_post_processing=' . $has_post_processing;
     $output .= '&directory_file_limit_size=' . $directory_file_limit_size . '&show_server_date_instead_size=' . $show_server_date_instead_size;
     $output .= '&enable_file_creation=' . $enable_file_creation . '&enable_file_creation_extensions=' . $enable_file_creation_extensions;
-    
+    $output .= '&switch_sides=' . $switch_sides;
+     
 
     // all parameters are sent encrypted to the client.
     $parameters = "&parameters=" . urlencode(tfu_enc($output, $rn));
 
     // we generate a nonce for this request
     // last=true is added for such websites who add their own code to each page!
+    
     echo '&tfu_nonce=' . create_tfu_nonce() . $parameters . "&last=true";
 }
 
@@ -1608,8 +1640,9 @@ function printServerInfo()
     echo '<br><p><center>Some info\'s about your server. This limits are not TFU limits. You have to change this in the php.ini.</center></p>';
     echo '<div class="install">';
     echo '<table><tr><td>';
-    echo '<tr><td width="400">TFU version:</td><td width="250">2.14&nbsp;';
+    echo '<tr><td width="400">TFU version:</td><td width="250">2.15&nbsp;';
     // simply output the license type by checking the strings in the license. No real check like in the flash is done here.
+    
     if ($m != "" && $m != "s" && $m !="w" ) {
         ob_start();
         $ff = dirname(__FILE__) . "/twg.lic.php";

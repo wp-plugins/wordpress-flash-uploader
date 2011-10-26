@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.14.x
+ * TWG Flash uploader 2.15.x
  *
- * Copyright (c) 2004-2010 TinyWebGallery
+ * Copyright (c) 2004-2011 TinyWebGallery
  * written by Michael Dempfle
  *
  *    This file is the main configuration file of the flash.
@@ -29,7 +29,7 @@
  */
 
 if (defined('_VALID_TWG')) {
-$tfu_config_version = '2.14';
+$tfu_config_version = '2.15';
 
     $login = 'true';                     // The login flag - has to set by yourself below 'true' is logged in, 'auth' shows the login form, 'reauth' should be set if the authentification has failed. 'false' if the flash should be shown with an eroror message that the authorisation finally failed.
     $folder = 'upload';                  // this is the root upload folder. If you use login='auth' by default the folder from the user profile in .htusers.php is used!
@@ -150,8 +150,8 @@ $tfu_config_version = '2.14';
     $ftp_pass   = 'pass';                // Your ftp password
     $ftp_root   = '<full root directory>'; // The full path to the root upload directory of TFU. e.g. /httpdocs/test/path/upload. If you have $folder dynamic you have to make this variable dynamic too.
 
-    $enable_dir_create_detection = !$ftp_enable;   // (true, false) If you cannot create directories you can try to disable the automatic detection which prevents this. If you set this to 'false' the flash tries to create the directory; maybe it works ;). - try to upload files into the directory and create another subdirectory too. If this works you can leave this to false. This setting is currently not mapped in JFU 2.9 - will be added in 2.11! Please check also the option to create directories by ftp.
-    $big_server_view = 'false';          // Use this if you want the server side the same size as the upload.
+    $enable_dir_create_detection = !$ftp_enable; // (true, false) If you cannot create directories you can try to disable the automatic detection which prevents this. If you set this to 'false' the flash tries to create the directory; maybe it works ;). - try to upload files into the directory and create another subdirectory too. If this works you can leave this to false. This setting is currently not mapped in JFU 2.9 - will be added in 2.11! Please check also the option to create directories by ftp.
+    $big_server_view = 'false';          // Use this if you want the server side the same size as the upload. Please set the value also at the flash. The flash is then loaded already with the right layout. If you don't set this and only in the config then you see the default view for a very short moment.
 
     // New 2.12
     $compression = 80;                   // This is the compression used for jpg images when you resize a file  - 100 is no compression. Normally 75 or 80 is used. The value is used for GD-Lib and image magick.
@@ -171,13 +171,17 @@ $tfu_config_version = '2.14';
     $has_post_processing= "false";       // New 2.13 - The flash waits 10 sec after the upload it to 100% if it has finished. If you do a lot of processing like generating thumbnails and .... this can be too short. By setting this to true you get additional 10 sec :). This is the default e.g. in TWG where the thumbnails and small images are generated right after the upload.
 
     // New 2.14
-    $directory_file_limit_size = -1;    // New 2.14 - You can specify a maximum size in KB (!!!) someone is allowed to have in his folders. -1 means no limit! This setting does count all subfolders as well. Excluded directories and hidden files are counted as well if the legacy functions are used (see $directory_file_limit_size_system). If you like the exact amount set $directory_file_limit_size_system = false to use the backup which does handle excluded directories and hidden files like set in the configuration - only available in the registered version!
-    $directory_file_limit_size_system = true; // New 2.14 - Use system implementations for quota. See the description of $directory_file_limit_size - when set to true the legacy function is used which is up to 20 times faster.
-    $sort_directores_by_date = false;     // New 2.14 - true: Sort directores that last created folders are shown on top, alphapetically otherwise.
-    $show_server_date_instead_size='false'; // New 2.14 - true: shows the date instead of the server size. false: shows the size of the file. $show_size has to be set to true! Pleae check the tfu.htm for the flash parameter for optimal display.
+    $directory_file_limit_size = -1;    // New 2.14 - (Number) You can specify a maximum size in KB (!!!) someone is allowed to have in his folders. -1 means no limit! This setting does count all subfolders as well. Excluded directories and hidden files are counted as well if the legacy functions are used (see $directory_file_limit_size_system). If you like the exact amount set $directory_file_limit_size_system = false to use the backup which does handle excluded directories and hidden files like set in the configuration - only available in the registered version!
+    $directory_file_limit_size_system = true; // New 2.14 - (true,false) Use system implementations for quota. See the description of $directory_file_limit_size - when set to true the legacy function is used which is up to 20 times faster.
+    $sort_directores_by_date = false;     // New 2.14 - (true,false) true: Sort directores that last created folders are shown on top, alphapetically otherwise.
+    $show_server_date_instead_size='false'; // New 2.14 - ('true','false') true: shows the date instead of the server size. false: shows the size of the file. $show_size has to be set to true! Pleae check the tfu.htm for the flash parameter for optimal display.
     $pdf_thumb_format = 'png';            // New 2.14 - (png,jpg): you can define the output for pdf generation. jpg gives smaller images and png better quality but larger files. Please try with your pdf's you expect!
-    $enable_file_creation = 'false';      // New 2.14 - Show the menu item to create files - only available for registered users.
+    $enable_file_creation = 'false';      // New 2.14 - ('true','false') Show the menu item to create files - only available for registered users.
     $enable_file_creation_extensions = 'txt'; // New 2.14 - (edit,txt,all) You can define which files can be created. 'edit' files defined in $edit_textfile_extensions are allowed. 'txt': only .txt files, 'all': all file extensions
+    
+    // New 2.15
+    $switch_sides = 'false';              // New 2.15 - ('true','false') - Use this if you want the server side on the right the and upload side on the the left side. Please set the value also at the flash. The flash is then loaded already with the right layout. If you don't set this and only in the config then you see the default view for a very short moment.
+    $use_index_for_files = false;          // New 2.15 - (true,false) - By default the file name and the index of a file is sent to the server. Here you can decide which way to use. Please read howto 21 of the TFU FAQ if you want to change the default behaviour.
     
     // special extension - a post upload panel - this is only implemented for JFU and not documented yet!
     $post_upload_panel='false';
