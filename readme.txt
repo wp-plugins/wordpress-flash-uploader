@@ -3,7 +3,7 @@ Contributors: mdempfle, Michael Dempfle
 Tags: admin, media, upload, synchronize, flash, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
 Tested up to: 3.2.1
-Stable tag: 2.15
+Stable tag: 2.15.1
 Donate link: Please check the settings of Wordpress Flash Uploader
 
 'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you also manage your whole Wordpress installation and synchronize your media library. 
@@ -68,6 +68,9 @@ Please note that this is not a realy cron job. So if you set 5 minutes then it i
 Please go to the settings page of Wordpress Flash Uploader. There you find a small donation section. Thank you for your support.
 
 == Changelog ==
+= 2.15.1 =
+* Updated TFU 2.15. Language files where updated and Serbian language file was added.
+
 = 2.15 =
 * New configuration options for the 'Sync media library'. You can define which file extensions should be syncronized.
 * You can enable automatically sync which is executed as cron job in Wordpress. I have added several cron job times as well. You have to set "define('ALTERNATE_WP_CRON', true);" in wp-config.php to enable the cron jobs.

@@ -101,6 +101,11 @@ function tfu_debug($data)
             }
             $debug_string .= "\n";
           }
+          if (function_exists("memory_get_usage")) {
+            $debug_string .= "    Current memory usage: ". floor(memory_get_usage() / 1024)." KB\n";
+          } else {
+          $debug_string .=   "    Current memory usage: memory_get_usage not available.\n";
+          }
         }
         if ($debug_file == '') {
 		      @ob_start();
@@ -1300,7 +1305,7 @@ function sendConfigData()
     global $big_progressbar,$img_progressbar,$img_progressbar_back,$img_progressbar_anim, $big_server_view;
     global $zip_file_pattern, $is_jfu_plugin, $has_post_processing, $directory_file_limit_size;
     global $show_server_date_instead_size, $enable_file_creation, $enable_file_creation_extensions;
-    global $switch_sides;
+    global $switch_sides, $date_format;
 
     // the sessionid is mandatory because upload in flash and Firefox would create a new session otherwise - sessionhandled login would fail then!
     $output = '&login=' . $login .  '&maxfilesize=' . '' . $maxfilesize;
@@ -1342,7 +1347,7 @@ function sendConfigData()
     $output .= '&is_jfu_plugin=' . $is_jfu_plugin . '&has_post_processing=' . $has_post_processing;
     $output .= '&directory_file_limit_size=' . $directory_file_limit_size . '&show_server_date_instead_size=' . $show_server_date_instead_size;
     $output .= '&enable_file_creation=' . $enable_file_creation . '&enable_file_creation_extensions=' . $enable_file_creation_extensions;
-    $output .= '&switch_sides=' . $switch_sides;
+    $output .= '&switch_sides=' . $switch_sides . '&date_format=' . $date_format;
      
 
     // all parameters are sent encrypted to the client.
@@ -1763,7 +1768,12 @@ function normalizeFileNames($imageName){
   // it's needed to decode first because str_replace does not handle str_replace in utf-8
   $imageName = utf8_decode($imageName);
   // we make the file name lowercase ÄÖÜ as well.
-  $imageName = mb_strtolower($imageName);
+  // seems not to be available on all systems.
+  if (function_exists("mb_strtolower")) { 
+    $imageName = mb_strtolower($imageName); 
+  } else {
+    $imageName = strtolower($imageName); 
+  }
   
   if ($normalizeSpaces == 'true') {
     $imageName=str_replace(' ','_',$imageName);
