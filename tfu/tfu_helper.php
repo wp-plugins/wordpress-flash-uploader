@@ -2019,10 +2019,10 @@ function tfu_preview($file) {
 
 function tfu_createThumb($file) {
       global $compression, $use_image_magic, $image_magic_path, $pdf_thumb_format;
-      if (!(preg_match("/.*\.(p|P)(d|D)(f|F)$/", $file) && $use_image_magic)) {
+      if (!(preg_match("/.*\.(p|P)(d|D)(f|F)$/", $file))) {
         $name = removeExtension($file) . "-" . $_GET['tfu_width'] . 'x' . $_GET['tfu_height'] . "." . getExtension($file);
         resize_file($file, $_GET['tfu_width'] . 'x' . $_GET['tfu_height'], $compression, basename($file), $name); 
-      } else {
+      } else if ($use_image_magic) {
         $name = dirname(__FILE__) . '/' . removeExtension($file) . "-" . $_GET['tfu_width'] . '.' . $pdf_thumb_format;
         // create a pdf thumbnail
           $ima = realpath($file);
