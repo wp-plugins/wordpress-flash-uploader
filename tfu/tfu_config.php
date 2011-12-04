@@ -181,7 +181,7 @@ $tfu_config_version = '2.15';
     
     // New 2.15
     $switch_sides = 'false';             // New 2.15 - ('true','false') - Use this if you want the server side on the right the and upload side on the the left side. Please set the value also at the flash. The flash is then loaded already with the right layout. If you don't set this and only in the config then you see the default view for a very short moment.
-    $use_index_for_files = true;        // New 2.15 - (true,false) - By default the file name and the index of a file is sent to the server. Here you can decide which way to use. true: index, false: filename. Please read howto 21 of the TFU FAQ if you want to change the default behaviour.
+    $use_index_for_files = true;         // New 2.15 - (true,false) - By default the file name and the index of a file is sent to the server. Here you can decide which way to use. true: index, false: filename. Please read howto 21 of the TFU FAQ if you want to change the default behaviour.
     $date_format = 'd.m.y';              // New 2.15 - (String) - You can define how the dates are displayed in the flash. flash does unfortunately not supprt standard formating. So Please use the following syntax: d: day (2 digits), m: month (2 digits), y: year (4 digits). You can use this variables how you like ;). e.g. y-m-d, y-m-d, m/d/y.
     
     // special extension - a post upload panel - this is only implemented for JFU and not documented yet!

@@ -20,6 +20,7 @@ if (!class_exists("WFUSync")) {
                   if (! wp_verify_nonce($nonce, 'wfu-nonce') ) die('Security check failed!');
               } 
             }
+            echo "<!-- DEBUG: wpnounce set properly -->\n";
             // nounce is set porperly - we continue...   
             echo '<div class="wrap wfupadding">';
             $nonce= wp_create_nonce ('wfu-nonce'); 
@@ -29,13 +30,17 @@ if (!class_exists("WFUSync")) {
             echo '<div id="icon-upload" class="icon_jfu"><br></div>
                   <h2>Synchronize Media Library</h2>';
             @flush();
+            echo "\n<!-- DEBUG: before getMediaLibraryFiles -->\n";
             $mlf = WFUSync::getMediaLibraryFiles();
+            echo "<!-- DEBUG: before getUploadFolderFiles -->\n";
             $uff = WFUSync::getUploadFolderFiles('../' . WFUSync::getUploadPath(), !$check_nonce);
             $enable_sych = ($uff !== false);
             if (!$enable_sych) {
               $uff = array();
-            }  
+            } 
+            echo "<!-- DEBUG: before getMediaLibraryOnly -->\n"; 
             $mfo = WFUSync::getMediaLibraryOnly($mlf);
+            echo "<!-- DEBUG: before findUploadOnly -->\n"; 
             $fuo = WFUSync::findUploadOnly($mlf, $uff);
 
             if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library'])  || isset($_GET['clean_media_library']) ||
@@ -45,7 +50,7 @@ if (!class_exists("WFUSync")) {
                 window.parent.document.getElementById("status_text").innerHTML = "Starting synchronisation.";
               }</script>';
             }
-
+            @flush(); // is done to see the debug stuff
             if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library']) || isset($_GET['clean_media_library'])) {
                 // we remove the ones tat are not in the upload folder anymore.
                 echo '<div class="updated"><p><strong>';
@@ -204,6 +209,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
             global $wpdb;
             $sql= "SELECT pm.post_id, pm.meta_id, pm.meta_value, pma.meta_value as meta_att FROM $wpdb->posts p,$wpdb->postmeta pm, $wpdb->postmeta pma WHERE pm.post_id=p.id and pma.post_id=pm.post_id and p.post_type = 'attachment' and pm.meta_key='_wp_attached_file' and pm.meta_value <> pma.meta_value order by pm.meta_value ";
             $mlf = $wpdb->get_results( $sql );
+            echo '<!-- DEBUG: getMediaLibraryFiles: ' . count($mlf) . "-->\n"; 
             return $mlf;
         }
 
@@ -256,6 +262,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                    unset($files[$key]); 
                  }
              }  
+             echo '<!-- DEBUG: getUploadFolderFiles: ' . count($files) . "-->\n"; 
             return $files;
         }
 
@@ -319,7 +326,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                     }
                 }
             }
-
+            echo '<!-- DEBUG: getMediaLibraryOnly: ' . count($mfo) . " -->\n";  
             return $mfo;
         }
 
@@ -383,6 +390,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                     }
                 }
             }
+            echo '<!-- DEBUG: findUploadOnly: ' . count($fuo) . " -->\n"; 
             return $fuo;
         }
 
