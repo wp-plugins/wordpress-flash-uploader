@@ -190,7 +190,7 @@ if (!class_exists("WFUFlash")) {
              obj.refreshFileList();
              }
            }           
-               document.write(\'<div id="flashcontent"><div class="noflash">TWG Flash Uploader requires at least Flash 8.<br>Please go to <a target="blank" href="http://www.adobe.com/go/EN_US-H-GET-FLASH">adobe</a> and install it.';
+               document.write(\'<div id="flashcontent"><div class="noflash">TWG Flash Uploader requires at least Flash 8.<br>Please update your browser.';
             if (file_exists($htaccess_path)) {
                 $output .= '<p>You have created a .htaccess file which seems not to help on your server. Please go to <a target="blank" class="nounderline" href="http://blog.tinywebgallery.com/wfu/wfu-faq/">blog.tinywebgallery.com/wfu/wfu-faq/</a> for more help.</p>';
             }
