@@ -359,9 +359,11 @@ if (!class_exists("WFU")) {
 	            if ($logged_id) {
                   $_SESSION["WFU_USER_LOGIN"] = $current_user->user_login;
                   $_SESSION["WFU_USER_ROLE"] = array_shift($current_user->roles);
+                  $_SESSION["WFU_USER_EMAIL"] = $current_user->user_email;
                 } else {
                   unset($_SESSION["WFU_USER_LOGIN"]);
                   unset($_SESSION["WFU_USER_ROLE"]);
+                  unset($_SESSION["WFU_USER_EMAIL"]);
                 }
 	            $dir_chmod=($devOptions['dir_chmod'] == '') ? 0 : octdec($devOptions['dir_chmod']);
 	            

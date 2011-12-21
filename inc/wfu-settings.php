@@ -227,7 +227,7 @@ If you have a professional license then the following features are available. Ad
             echo 'Some info\'s about your server. This limits are not TFU limits. You have to change this in the php.ini.';
             echo '<div class="install" style="margin-left:50px">';
             echo '<table><tr><td>';
-            echo '<tr><td width="400">TFU version:</td><td width="250">2.12&nbsp;';
+            echo '<tr><td width="400">TFU version:</td><td width="250">2.15.4&nbsp;';
             // simply output the license type by checking the strings in the license. No real check like in the flash is done here.
             if (file_exists(dirname(__FILE__) . "/../tfu/twg.lic.php")) {
                 include  dirname(__FILE__) . "/../tfu/twg.lic.php";
