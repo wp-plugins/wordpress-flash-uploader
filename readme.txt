@@ -3,7 +3,7 @@ Contributors: mdempfle, Michael Dempfle
 Tags: admin, media, upload, synchronize, flash, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
 Tested up to: 3.3
-Stable tag: 2.15.4
+Stable tag: 2.15.5
 Donate link: Please check the settings of Wordpress Flash Uploader
 
 'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you also manage your whole Wordpress installation and synchronize your media library. 
@@ -68,8 +68,11 @@ Please note that this is not a realy cron job. So if you set 5 minutes then it i
 Please go to the settings page of Wordpress Flash Uploader. There you find a small donation section. Thank you for your support.
 
 == Changelog ==
+= 2.15.5 =
+* Fix: When setting color values with the default size of 650 a Javscript error caused that the flash was not loaded. 
+
 = 2.15.4 =
-Removed the link to the adobe website inside the include Javascript. Some tracking scripts where generating Javascript errors by inserting invalid code.
+* Removed the link to the adobe website inside the include Javascript. Some tracking scripts where generating Javascript errors by inserting invalid code.
 
 = 2.15.3 =
 * Checked the compability with wordpress 3.3 and everything works fine.

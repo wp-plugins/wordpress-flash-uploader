@@ -206,15 +206,14 @@ if (!class_exists("WFUFlash")) {
           flashvars.base="'.$base_dir.'";
           flashvars.relative_dir="'.$relative_dir.'";';
           if ($width == '650') {
-            $output .= 'params.scale = "noScale"';
+            $output .= 'params.scale = "noScale";';
           } 
           if ($devOptions['swf_text']) {
             $elements = split("&",$devOptions['swf_text']);
             foreach ($elements as $element) {
               $output .= "flashvars." . str_replace("=", "=\"", $element) . "\";";
             }
-          }
-          
+          }      
          
           $height=floor($width*(340/650));
           if ($height > 390) $height = floor($height * 0.95);
