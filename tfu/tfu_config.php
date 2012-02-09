@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.15.x
+ * TWG Flash uploader 2.16.x
  *
- * Copyright (c) 2004-2011 TinyWebGallery
+ * Copyright (c) 2004-2012 TinyWebGallery
  * written by Michael Dempfle
  *
  *    This file is the main configuration file of the flash.
@@ -11,17 +11,17 @@
  *
  * There are 2 interesting settings you should look at first:
  *    - $login  - you can implement your own autentification by setting this flag!
- *                If you use 'auth' a login screen appears. If you use true please read the
- *                'Important' in tfu_login.php
+ *                If you use 'auth' a login screen appears. If you use true please 
+ *                 read the 'Important' in tfu_login.php
  *
  *    - $folder - The folder where your uploads will be saved!
  *
- *    Please edit tfu_login.php and add your authentification there. Read the howto about makeing
- *    the flash secure and/or the help text in tfu_login.php.
+ *    Please edit tfu_login.php and add your authentification there. Read the 
+ *    howto about makeing the flash secure and/or the help text in tfu_login.php.
  *
  *    You should create a file called my_tfu_config.php and copy your changes there.
  *    All setting in this file overwrite the settings here. You can then update
- *    mucheasier to the latest version!
+ *    much easier to the latest version!
  *
  *    Have fun using TWG Flash Uploader
  *
@@ -29,9 +29,9 @@
  */
 
 if (defined('_VALID_TWG')) {
-$tfu_config_version = '2.15';
+$tfu_config_version = '2.16';
 
-    $login = 'true';                     // The login flag - has to set by yourself below 'true' is logged in, 'auth' shows the login form, 'reauth' should be set if the authentification has failed. 'false' if the flash should be shown with an eroror message that the authorisation finally failed.
+    $login = 'true';                     // The login flag - has to set by yourself below 'true' is logged in, 'auth' shows the login form, 'reauth' should be set if the authentification has failed. 'false' if the flash should be shown with an eroror message that the authorisation finally failed. When using auth by default the users of the file .htuser.php are used. Please go to this file to setup users.
     $folder = 'upload';                  // this is the root upload folder. If you use login='auth' by default the folder from the user profile in .htusers.php is used!
     $maxfilesize = getMaximumUploadSize(); // The max files size limit of the server in KB. You can specify your own limit here e.g. 512. This setting is restricted by your server settings! Please read FAQ 4 of the TFU FAQ how to set upload_max_filesize and post_max_size.
     $resize_show = is_gd_version_min_20(); // Show the resize box! Valid is 'true' and 'false' (Strings!) - the function is_gd_version_min_20 checks if the minimum requirements for resizing images are there!
@@ -41,7 +41,7 @@ $tfu_config_version = '2.15';
     $allowed_file_extensions = 'all'; // 'jpeg,gif,png,jpg';    // Allowed file extensions! 'all' allowes all types - this list is the supported files in the browse dropdown! If this field is empty then the upload grid is removed and the server only view is enabled. Please note: The filter of the file chooser dialog is limited. Don't use more than ~25 extensions. If you specify more TFU automatically uses 'All Files' - Then all files are listed and not supported extensions are checked by the flash after pressing 'Open'.
     $forbidden_file_extensions = 'php';  // Forbidden file extensions! - only usefull if you use 'all' and you want to skip some exensions! php e.g. means php* ! then php4 and so on is covered as well!
     // Enhanced features - this are only defaults! if TFU detects that this is not possible this functions are disabled!
-    $hide_remote_view = '';              // If you want to disable the remote view set 'true' as value!
+    $hide_remote_view = 'false';              // If you want to disable the remote view set 'true' as value!
     $show_preview = is_gd_version_min_20(); // Show the small preview. Valid is 'true' and 'false' (Strings!) - the function is_gd_version_min_20 checks if the minimum requirements for resizing images are there!
     $show_big_preview = 'true';          // Show the big preview - clicking on the preview image shows a bigger preview
     $show_delete = 'true';               // Shows the delete button - if download is set to button this moves to the menu!
@@ -68,7 +68,7 @@ $tfu_config_version = '2.15';
     $sort_files_by_date = false;         // sort files that last uploaded files are shown on top
     $warning_setting = 'all';            // the warning is shown if remote files do already exist - can be set to all,once,none
     $split_extension = 'part';           // This is the extension when you upload splitted files - tfu can merge them after upload. A splited file has to ge like: file.extension.part1, file.extension.part2 ... - the file extension cannot be empty - if emptpy the default is part! to disable splited uploads use 'FALSE';
-    $show_size = 'true';                 // true = 'true' ; false = '' - by default the size of the files are shown - but you can disable this by removing the parameter and setting it to false;
+    $show_size = 'true';                 // true = 'true' ; false = '' or 'false' - by default the size of the files are shown - but you can disable this by removing the parameter and setting it to false;
     $hide_directory_in_title = 'false';  // You can disable the display of the upload dir in the title bar if you set this to 'true'
     $truncate_dir_in_title = 'false';    // You can truncate everything before the main upload directory if you set this to true. So only sub directories are shown in the title.
     // the text of the email is stored in the tfu_upload.php if you like to change it :)
@@ -116,6 +116,7 @@ $tfu_config_version = '2.15';
     $edit_textfile_extensions = 'txt,css';   // This are the files that can be edited in the flash. But you can restrict is to single files as well by using the full name. e.g. foldername.txt. * is supported as wildcard! Only available for registered users.
     $allowed_view_file_extensions = 'all'; // You can define the file extensions that are shown on the server view. If you set 'all' all files except the one from $forbidden_view_file_extensions are shown. If you define a list of extensions here only these are shown - Only available for registered users.
     $forbidden_view_file_extensions = ''; // If you have set $allowed_view_file_extensions = 'all' then you can define a list of file extensions that are not shown. If you set a extra , at the end files with no extension are not viewed as well. - Only available for registered users.
+   
     $description_mode = 'false';         // You can enable a description mode where the size and the date is replaced by a description field. The data of this field is sent to the server and stored in a txt file called <filename>.txt or sent by e-mail to you. Only available for professional license or above.
     $description_mode_show_default = 'true'; // Shows/hides a 'Enter description' in the description field if you like. The text is stored in the language file if you want to change it. Only available for professional license or above.
     $description_mode_store = 'txt';   // ('txt','email') The description is either saved to a textfile called <filename>.txt or is added to the notification e-mail. Only available for professional license or above.
@@ -151,7 +152,7 @@ $tfu_config_version = '2.15';
     $ftp_root   = '<full root directory>'; // The full path to the root upload directory of TFU. e.g. /httpdocs/test/path/upload. If you have $folder dynamic you have to make this variable dynamic too.
 
     $enable_dir_create_detection = !$ftp_enable; // (true, false) If you cannot create directories you can try to disable the automatic detection which prevents this. If you set this to 'false' the flash tries to create the directory; maybe it works ;). - try to upload files into the directory and create another subdirectory too. If this works you can leave this to false. This setting is currently not mapped in JFU 2.9 - will be added in 2.11! Please check also the option to create directories by ftp.
-    $big_server_view = 'false';          // Use this if you want the server side the same size as the upload. Please set the value also at the flash. The flash is then loaded already with the right layout. If you don't set this and only in the config then you see the default view for a very short moment.
+    $big_server_view = 'false';          // Use this if you want the server side the same size as the upload. Please set the value also at the flash. The flash is then loaded already with the right layout. If you don't set this and only in the config then you see the default view for a very short moment. When using together with the description view and hide server the description column is shown much bigger.
 
     // New 2.12
     $compression = 80;                   // This is the compression used for jpg images when you resize a file  - 100 is no compression. Normally 75 or 80 is used. The value is used for GD-Lib and image magick.
@@ -200,7 +201,6 @@ $tfu_config_version = '2.15';
 
     // internal variable - please do NOT change
     $is_jfu_plugin = 'false';
-
 
 /* Includes your configuration file! Then updatin is easier because your settings are not overwritten. No my_tfu_config.php is included in the download! */
 if (file_exists(dirname(__FILE__) . '/my_' . basename(__FILE__))) {

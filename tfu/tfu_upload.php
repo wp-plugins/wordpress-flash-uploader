@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.15.x
+ * TWG Flash uploader 2.16.x
  *
- * Copyright (c) 2004-2011 TinyWebGallery
+ * Copyright (c) 2004-2012 TinyWebGallery
  * written by Michael Dempfle
  *
  *
@@ -41,7 +41,7 @@ restore_temp_session(); // this restores a lost session if your server handles s
 include 'tfu_config.php';
 
 // check if all included files have the same version to avoid problems during update!
-if ($tfu_config_version != '2.15' || $tfu_help_version != '2.15') {
+if ($tfu_config_version != '2.16' || $tfu_help_version != '2.16') {
   tfu_debug('Not all files belong to this version. Please update all files.');
 }
 

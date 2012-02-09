@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.15
+ * TWG Flash uploader 2.16.x
  *
- * Copyright (c) 2004-2011 TinyWebGallery
+ * Copyright (c) 2004-2012 TinyWebGallery
  * written by Michael Dempfle
  *
  *     This file does all file functions of TFU
@@ -44,7 +44,7 @@ restore_temp_session(); // this restores a lost session if your server handles s
 include 'tfu_config.php';
 
 // check if all included files have the same version to avoid problems during update!
-if ($tfu_config_version != '2.15' || $tfu_help_version != '2.15') {
+if ($tfu_config_version != '2.16' || $tfu_help_version != '2.16') {
   tfu_debug('Not all files belong to this version. Please update all files.');
 }
 
@@ -66,7 +66,8 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['
 
     if (isset($_GET['index']) && $action != 'dir') {
         // file functions!
-        if ((isset($_GET['copyfolder']) && ($_GET['copyfolder'] == "true")) || isset($_GET['createfile']) ) {
+        if ((isset($_GET['copyfolder']) && ($_GET['copyfolder'] == "true")) 
+          || isset($_GET['createfile']) || isset($_GET['lastuploadinfo']) ) {
             $file = ""; // not needed for this task
         } else {
             $file = getFileName($dir); // returns an array if more than one is selected!
@@ -95,6 +96,8 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['
             tfu_preview($file);
         } else if ($action == 'info') { // checks if a preview can be done and the file size is returned.
             tfu_info($file);
+        } else if ($action == 'lastuploadinfo') { // gets some infos about the last uploaded file!
+            tfu_upload_info($dir);
         } else if ($action == 'text') { // get infos about a file
             tfu_text($file);
         } else if ($action == 'savetext') { // save a textfile

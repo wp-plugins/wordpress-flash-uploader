@@ -2,27 +2,32 @@
 Contributors: mdempfle, Michael Dempfle
 Tags: admin, media, upload, synchronize, flash, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
-Tested up to: 3.3
-Stable tag: 2.15.5
+Tested up to: 3.3.1
+Stable tag: 2.16
 Donate link: Please check the settings of Wordpress Flash Uploader
 
 'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you also manage your whole Wordpress installation and synchronize your media library. 
 
 == Description ==
 
-'Wordpress Flash Uploader' is a flash uploader that replaces the existing flash uploader 
-and let you manage your whole Wordpress installation. 
+'Wordpress Flash Uploader' is a flash uploader that replaces the existing flash uploader and let you manage your whole Wordpress installation. 
 The Wordpress Flash Uploader does contain 2 plugins: 'Wordpress Flash Uploader' and 'Sync Media Library'. 
 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your 
 upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library.
-Since WFU 2.12.1 it is also possible to add the flash to the site! See the frontend settings for details.
 
-You can now also synchronize the media library automatically using the wordpress cron and define the extensions that should be synchronized.
+= Features =
+* Support of all features of TFU: http://www.tinywebgallery.com/en/tfu/web_overview.php 
+* Add the flash uploader to the site! You can define different profiles for users, groups and roles! So you can define exactly who can do/upload what and where on the server! See the frontend settings for details.
+* Manage your Wordpress installation with WFU.
+* Synchronize the upload folder with the media library. 
+* Synchronize the media library automatically using the wordpress cron 
+* Define the extensions that should be synchronized.
+
 
 = Motivation: =
 Wordpress has a flash uploader which was not working on any of my servers. So I decided to write a 
 wrapper for the TWG Flash Uploader which works on most servers so far. 
-WordPress 2.5+ includes a new Media manager, However, It only knows about files which have been uploaded 
+WordPress 2.5+ includes a new Media manager, However, it only knows about files which have been uploaded 
 via the WordPress interface, not files which have been uploaded via other means (eg, FTP or WFU).
 So I had to implement something that does the synchronisation.
 The final result are actually two plugins in one.  The 'Wordpress Flash Uploader - WFU' and the 
@@ -68,14 +73,18 @@ Please note that this is not a realy cron job. So if you set 5 minutes then it i
 Please go to the settings page of Wordpress Flash Uploader. There you find a small donation section. Thank you for your support.
 
 == Changelog ==
-= 2.15.5 =
-* Fix: When setting color values with the default size of 650 a Javscript error caused that the flash was not loaded. 
-
-= 2.15.4 =
-* Removed the link to the adobe website inside the include Javascript. Some tracking scripts where generating Javascript errors by inserting invalid code.
-
-= 2.15.3 =
-* Checked the compability with wordpress 3.3 and everything works fine.
+= 2.16 =
+* Updated to TFU 2.16.
+* Support for a global custom configuration file called tfu_config_wfu.php. Please store your global custom settings here. This file is not overwritten when you update WFU.
+* Support for custom configuration files for groups. So now there is support for users, groups and roles. Please see the advanced section in the settings of WFU.
+* Javascript can be added to the site - use wordpress-flash-uploader.js in the wfu plugin folder.
+* Custom configurations files are now listed in the advanced section. 
+* The height of the flash is set in an extra div so that the page does not jump after the flash is loaded.
+* Help updated - it describes now the usage of additional Javascript and the custom configs better.
+* Fix: The session cache workaround does now also work in Wordpress now. Using it caused that only the first settings where used (e.g. switching to the wordpress view was not working)   
+* Fix: Fixed that flash was not shown when color settings where added in the free text field.
+* Fix: In the front end the language flags are loaded.
+* Fix: In the front end the big progress bars are loaded
 
 = 2.15.2 =
 * Added some debug outputs to be able to find problems during synchronize.

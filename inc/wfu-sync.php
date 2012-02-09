@@ -1,10 +1,10 @@
 <?php
 /**
- *   Wordpress Flash uploader 2.15.x  
+ *   Wordpress Flash uploader 2.16.x  
  *
  *   This file contains the methods used by the synch part from the WFU class
  *
- *   Copyright (c) 2004-2011 TinyWebGallery
+ *   Copyright (c) 2004-2012 TinyWebGallery
  *   Author: Michael Dempfle
  *   Author URI: http://www.tinywebgallery.com 
  */

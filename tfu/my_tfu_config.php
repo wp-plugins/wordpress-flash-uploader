@@ -1,23 +1,20 @@
 <?php
 /**
- * Joomla Flash uploader 2.8 Freeware - for Joomla 1.0.x and Joomla 1.5.x - based on TWG Flash uploader 2.8
+ * TWG Flash uploader 2.16 Freeware - for Wordpress
  *
- * Copyright (c) 2004-2008 TinyWebGallery
+ * Copyright (c) 2004-2012 TinyWebGallery
  * written by Michael Dempfle
  * 
- *  This is the config file where sll the JFU stuff from the wrapper is set.
- *  Since 2.8 99% of the TFU addoptions needed to use TFU for JFU are in this file! 
- *  
  *  The commented settings cannot be set by the backend - if you want to set them you 
  *  have to uncomment it an set it    
  * 
- *   Have fun using JFU
+ *   Have fun using Wordpress Flash Uploader
  */
 /** ensure this file is being included by a parent file */
 defined( '_VALID_TWG' ) or die( 'Direct Access to this location is not allowed.' );
 
 /*
-    Joomla related settings
+    Wordpress related settings
 */
 
 
@@ -93,17 +90,41 @@ $edit_textfile_extensions = $_SESSION["TFU_EDIT_TEXTFILE_EXTENSIONS"];
 $exclude_directories = array_map("trim", explode(",", $_SESSION["TFU_EXCLUDE_DIRECTORIES"])); 
 $forbidden_view_file_filter = $_SESSION["TFU_FILE_FILTER"]; 
 
-// get user/role defined configs 
-$user_loaded = false;
+// load a custom global config file - tfu_config_wfu.php
+if (file_exists(dirname(__FILE__) . '/tfu_config_wfu.php')) {
+    include dirname(__FILE__) . '/tfu_config_wfu.php';
+}
+
+// we load shortcode specific configs
+if (isset($_SESSION["WFU_SHORTCODE_CONFIG"])) {
+  // load shortcode config - look for tfu_config_shortcode_<shortcode_config>.php 
+  if (file_exists('tfu_config_shortcode_' . $_SESSION["WFU_SHORTCODE_CONFIG"] . '.php')) {
+    include ('tfu_config_shortcode_' . $_SESSION["WFU_SHORTCODE_CONFIG"] . '.php');
+  }
+}
+// get user defined configs 
+$config_loaded = false;
 if (isset($_SESSION["WFU_USER_LOGIN"])) {
   // load user - look for tfu_config_<user>.php 
   if (file_exists('tfu_config_' . $_SESSION["WFU_USER_LOGIN"] . '.php')) {
     include ('tfu_config_' . $_SESSION["WFU_USER_LOGIN"] . '.php');
-    $user_loaded = true;
+    $config_loaded = true;
   }
 }
-
-if (!$user_loaded && isset($_SESSION["WFU_USER_ROLE"])) {
+// get group defined configs
+if (!$config_loaded && isset($_SESSION["WFU_USER_GROUPS"])) {
+  // load role - look for tfu_config_<role>.php
+   $groups = $_SESSION["WFU_USER_GROUPS"];
+   foreach ($groups as $group) {
+     if (file_exists('tfu_config_'. $group . '.php')) {
+        include ('tfu_config_'. $group . '.php');
+         $config_loaded = true;
+         break;
+      }
+    }
+}
+// get roles defined configs
+if (!$config_loaded && isset($_SESSION["WFU_USER_ROLE"])) {
   // load role - look for tfu_config_<role>.php
  if (file_exists('tfu_config_'. $_SESSION["WFU_USER_ROLE"] . '.php')) {
     include ('tfu_config_'. $_SESSION["WFU_USER_ROLE"] . '.php');

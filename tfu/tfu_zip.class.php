@@ -10,7 +10,7 @@
  * Plus some more memory required to store the .zip entries - this is written only at the end
  * of the process.
  * 
- * 20.2.2011: Fixed by Michael Dempfle (www.tinywebgallery.com). 
+ * 20.2.2011: Fixed by Michael Dempfle (www.tinywebgallery.com).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         What are you doing here ;)
  *            - The created zip files where not working on Mac. Now they do. A couple of elements where added twice! 
  *            - It also does not require php 5 anymore. It works also fine on php 4.
  *            - Compression can be turned off to get more speed if this is important for you. 
@@ -21,7 +21,7 @@
  * @package zip
  */
 defined('_VALID_TWG') or die('Direct Access to this location is not allowed.');
-$tfu_zip_version = '2.15';
+$tfu_zip_version = '2.16';
  
 class TFUZipFile {
 

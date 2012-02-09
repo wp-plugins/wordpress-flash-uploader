@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.15.x
+ * TWG Flash uploader 2.16.x
  *
- * Copyright (c) 2004-2011 TinyWebGallery
+ * Copyright (c) 2004-2012 TinyWebGallery
  * written by Michael Dempfle
  *
  *    This file is the login and stetup file of the flash.
@@ -61,7 +61,7 @@ if (isset($_POST['twg_user']) && isset($_POST['twg_pass'])) { // twg_user and tw
     include $install_path . "tfu_config.php";
     
     // check if all included files have the same version to avoid problems during update!
-    if ($tfu_config_version != '2.15' || $tfu_help_version != '2.15') {
+    if ($tfu_config_version != '2.16' || $tfu_help_version != '2.16') {
       tfu_debug('Not all files belong to this version. Please update all files.');
     }
 

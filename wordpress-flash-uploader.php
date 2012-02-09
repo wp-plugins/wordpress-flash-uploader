@@ -3,7 +3,7 @@
 Plugin Name: Wordpress Flash Uploader
 Plugin URI: http://www.tinywebgallery.com/blog/wfu
 Description: The Wordpress Flash Uploader does contain 2 plugins: '<strong>Wordpress Flash Uploader</strong>' and '<strong>Sync Media Library</strong>'. The Wordpress Flash Uploader is a flash uploader that replaces the existing flash uploader and let you manage your whole  WP installation. 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library. 
-Version: 2.15.5
+Version: 2.16
 Author: Michael Dempfle
 Author URI: http://www.tinywebgallery.com
 */
@@ -14,6 +14,14 @@ Author URI: http://www.tinywebgallery.com
 include 'inc/wfu-flash.php';		
 include 'inc/wfu-settings.php';
 include 'inc/wfu-sync.php';
+
+define('_VALID_TWG', '42');
+
+include 'tfu/tfu_helper.php';
+
+// avoids that the jfu logfile is used for everything!	
+$skip_error_handling = "true"; 
+$debug_file = '';
 
 if (!class_exists("WFU")) {
     class WFU {
@@ -100,7 +108,9 @@ if (!class_exists("WFU")) {
                 'master_profile_type' => 'master_profile_type_username',  
                 // new 2.15
                 'sync_extensions' => '',
-                'scheduler' => 'none'                  
+                'scheduler' => 'none',
+                // new 2.16
+                'frontend_javascript' => ''                  
             );
 
             $wfuOptions = get_option($this->adminOptionsName);
@@ -333,10 +343,11 @@ if (!class_exists("WFU")) {
          // [wfu]
          function wfu_func($atts) {
 	        extract(shortcode_atts(array(
-		   'securitykey' => 'xxx',
-		   'width' => '650',
+	   	      'securitykey' => 'xxx',
+		        'width' => '650',
+		        'configid' => '',
 	        ), $atts));	          
-	           ob_start();
+	              ob_start();
                 @session_start();
                 ob_end_clean();
 
@@ -353,9 +364,14 @@ if (!class_exists("WFU")) {
                  if (is_numeric ($width)) {
                    $devOptions['flash_size'] = $width;
                  }
+                 if ($configid != '' && is_numeric ($configid)) {
+                    $_SESSION["WFU_SHORTCODE_CONFIG"] = $configid; 
+                 } else if (isset($_SESSION["WFU_SHORTCODE_CONFIG"])) {
+                    unset($_SESSION["WFU_SHORTCODE_CONFIG"]);
+                 }
                  WFUFlash::storeSettingsToSession($devOptions); 
                  unset($_SESSION["IS_ADMIN"]);
-	            $_SESSION["IS_FRONTEND"] = "true";
+	               $_SESSION["IS_FRONTEND"] = "true";
 	            if ($logged_id) {
                   $_SESSION["WFU_USER_LOGIN"] = $current_user->user_login;
                   $_SESSION["WFU_USER_ROLE"] = array_shift($current_user->roles);
@@ -365,7 +381,7 @@ if (!class_exists("WFU")) {
                   unset($_SESSION["WFU_USER_ROLE"]);
                   unset($_SESSION["WFU_USER_EMAIL"]);
                 }
-	            $dir_chmod=($devOptions['dir_chmod'] == '') ? 0 : octdec($devOptions['dir_chmod']);
+	              $dir_chmod=($devOptions['dir_chmod'] == '') ? 0 : octdec($devOptions['dir_chmod']);
 	            
                 if ($devOptions['frontend_upload_folder'] == '') {
 	              WFUFlash::setUploadFolder('', $dir_chmod);
@@ -394,10 +410,9 @@ if (!class_exists("WFU")) {
                   $js = '<script type="text/javascript">function uploadFinished(loc) {}; function deleteFile(loc) {} </script>';
 
                   
-                  // Fix 2.12.1 - relative path was not good because of permurls !
-                    $domain = get_option('siteurl');
-                            
-                   return WFUFlash::printFlash($devOptions , $domain . '/', 'frontend') . $js;
+                   // Fix 2.12.1 - relative path was not good because of permurls !
+                   $siteurl = get_option('siteurl') . '/';    
+                   return $js . WFUFlash::printFlash($devOptions , '/' , 'frontend', $siteurl) ;
                  } else {
                     return '<div style="padding:10px; margin:10px; border: 1px solid #555555; background-color: #f8f8f8; text-align:center; width:330px;">Please login. The flash is configured that a user has to be logged in to use it.</div>';
                  
@@ -490,7 +505,7 @@ if (isset($dl_pluginSeries)) {
     add_filter( 'cron_schedules', array( &$dl_pluginSeries, 'filter_cron_schedules' ) );
     add_action('wfu_task_hook', array( &$dl_pluginSeries, 'wfu_task_function' ) );
 
-    $wfuOptions = &$dl_pluginSeries->getAdminOptions();
+    $wfuOptions = $dl_pluginSeries->getAdminOptions();
     if ( $wfuOptions['scheduler'] != 'none' && !wp_next_scheduled('wfu_task_hook') ) {
        wp_schedule_event( time(),  $wfuOptions['scheduler'], 'wfu_task_hook' ); // hourly, daily and twicedaily
     } else if  ($wfuOptions['scheduler'] == 'none') {

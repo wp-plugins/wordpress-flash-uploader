@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.15.x
+ * TWG Flash uploader 2.16.x
  *
- * Copyright (c) 2004-2011 TinyWebGallery
+ * Copyright (c) 2004-2012 TinyWebGallery
  * written by Michael Dempfle
  *
  *
@@ -14,7 +14,7 @@
  * * ensure this file is being included by a parent file
  */
 defined('_VALID_TWG') or die('Direct Access to this location is not allowed.');
-$tfu_help_version = '2.15';
+$tfu_help_version = '2.16';
 // some globals you can change
 $check_safemode = true;              // New 2.12.x - By default TFU checks if you have a safe mode problem. On some server this test does not work. There you can try to turn it off and test if you can e.g. create directories, upload files to new created directories.
 $session_double_fix = false; // this is only needed if you get errors because of corrupt sessions. If you turn this on a backup is made and checked if the first one is corrupt
@@ -46,7 +46,7 @@ tfu_setHeader();
 include dirname(__FILE__) . '/tfu_zip.class.php';
 
 // check if all included files have the same version to avoid problems during update!
-if ($tfu_zip_version != '2.15') {
+if ($tfu_zip_version != '2.16') {
   tfu_debug('Not all files belong to this version. Please update all files.');
 }
 
@@ -647,11 +647,10 @@ function getCurrentDir()
     return $dir;
 }
 
-function getFileName($dir)
-{
+function getFileName($dir, $find_index_file = false) {
     global $fix_utf8, $exclude_directories, $sort_files_by_date, $hide_hidden_files, $enable_enhanced_debug, $use_index_for_files;
 
-    if (!$use_index_for_files) {
+    if (!$use_index_for_files && !$find_index_file) {
       // used for position critical stuff like delete, rename... 
       if (isset($_POST['tfu_file_name'])) {     
         $filename_post = $_POST['tfu_file_name'];
@@ -679,50 +678,58 @@ function getFileName($dir)
         return $filenames;
       }
     }
-      
-    if (!isset($_GET['index']) || $_GET['index'] == '') {
-        return '';
-    }
-    $index = parseInputParameter($_GET['index']);
-    // All files are sorted in the array myFiles
-    $dirhandle = opendir($dir);
-    $myFiles = array();
-    while (($file = readdir($dirhandle)) !== false) {
-        if ($file != '.' && $file != '..' && !in_array($file, $exclude_directories)&& (!($hide_hidden_files && (strpos($file, '.') === 0)))) {
-            if (!is_dir($dir . '/' . $file) && check_view_extension($file)) {
-                if ($sort_files_by_date) {
-                    $file = filemtime(($dir . '/' . $file)) . $file;
-                }
-                array_push($myFiles, fix_encoding($file, $fix_utf8));
-            }
-        }
-    }
-    closedir ($dirhandle);
-    if ($sort_files_by_date) {
-        usort ($myFiles, 'mycmp_date');
-    } else {
-        usort ($myFiles, 'mycmp');
-    }
-    // now we have the same order as in the listing and check if we have one or multiple indexes !
-    if (strpos($index, ',') === false) { // only 1 selection
-        if (isset($myFiles[$index])) {
-          return get_decoded_string($dir, $myFiles[$index]);
-        } else {
-          if ($enable_enhanced_debug) {
-            tfu_debug("File index not found.");
+    
+    if (!$find_index_file) {  
+      if (!isset($_GET['index']) || $_GET['index'] == '') {
+          return '';
+      }
+      $index = parseInputParameter($_GET['index']);
+      }
+      // All files are sorted in the array myFiles
+      $dirhandle = opendir($dir);
+      $myFiles = array();
+      while (($file = readdir($dirhandle)) !== false) {
+          if ($file != '.' && $file != '..' && !in_array($file, $exclude_directories)&& (!($hide_hidden_files && (strpos($file, '.') === 0)))) {
+              if (!is_dir($dir . '/' . $file) && check_view_extension($file)) {
+                  if ($sort_files_by_date) {
+                      $file = filemtime(($dir . '/' . $file)) . $file;
+                  }
+                  array_push($myFiles, fix_encoding($file, $fix_utf8));
+              }
           }
-          return "_FILE_NOT_FOUND";
-        }
-    } else { // we return an array !
-        // we need the offset
-        $offset = parseInputParameter($_GET['offset']);
-        $filenames = array();
-        $index = trim($index, ',');
-        $indices = explode(',', $index);
-        foreach ($indices as $ind) {
-            $filenames[] = get_decoded_string($dir, $myFiles[$ind - $offset]);
-        }
-        return $filenames;
+      }
+      closedir ($dirhandle);
+      if ($sort_files_by_date) {
+          usort ($myFiles, 'mycmp_date');
+      } else {
+          usort ($myFiles, 'mycmp');
+      }
+      // now we have the same order as in the listing and check if we have one or multiple indexes !
+      if (!$find_index_file) {
+      if (strpos($index, ',') === false) { // only 1 selection
+          if (isset($myFiles[$index])) {
+            return get_decoded_string($dir, $myFiles[$index]);
+          } else {
+            if ($enable_enhanced_debug) {
+              tfu_debug("File index not found.");
+            }
+            return "_FILE_NOT_FOUND";
+          }
+      } else { // we return an array !
+          // we need the offset
+          $offset = parseInputParameter($_GET['offset']);
+          $filenames = array();
+          $index = trim($index, ',');
+          $indices = explode(',', $index);
+          foreach ($indices as $ind) {
+              $filenames[] = get_decoded_string($dir, $myFiles[$ind - $offset]);
+          }
+          return $filenames;
+      }
+    } else {
+        // reverse search
+        $transMyFiles = array_flip($myFiles);
+        return $transMyFiles[$find_index_file]; 
     }
 }
 
@@ -755,7 +762,11 @@ function getRootUrl() {
     }
     $dirn = dirname ($GLOBALS['__SERVER']['PHP_SELF']);
     if ($dirn == '\\' || $dirn == '/') $dirn = '';
-    return 'http' . (isset($GLOBALS['__SERVER']['HTTPS']) ? 's' : '') . '://' . $GLOBALS['__SERVER']['HTTP_HOST'] . $dirn . '/';
+    // fix for IIS7 - check has to be for on or 1, not for existence only!
+    $isHttps = isset($GLOBALS['__SERVER']['HTTPS']) 
+               && ( (strtolower($GLOBALS['__SERVER']['HTTPS']) == 'on') 
+               || ($GLOBALS['__SERVER']['HTTPS'] == '1'));
+    return 'http' . (($isHttps) ?  's' : '') . '://' . $GLOBALS['__SERVER']['HTTP_HOST'] . $dirn . '/';
 }
 
 function tfu_checkSession()
@@ -1442,6 +1453,18 @@ function restore_temp_session($checkrn = false)
                 }
             }
         }
+        // check the protection of the folder
+        $index_htm = dirname(__FILE__) . '/session_cache/index.htm';
+        if (!file_exists($index_htm)) {
+             $fh = fopen($index_htm, 'w');
+             fclose($fh);
+        }
+        $htaccess = dirname(__FILE__) . '/session_cache/.htaccess';
+        if (!file_exists($htaccess)) {
+             $fh = fopen($htaccess, 'w');
+             fwrite($fh, 'deny from all');
+             fclose($fh);
+        }
         // now we have to clean old temp sessions! - we do this once a day only!
         // first we check if we have done this already!
         $today = dirname(__FILE__) . '/session_cache/_cache_day_' . date('Y_m_d') . '.tmp';
@@ -1645,7 +1668,7 @@ function printServerInfo()
     echo '<br><p><center>Some info\'s about your server. This limits are not TFU limits. You have to change this in the php.ini.</center></p>';
     echo '<div class="install">';
     echo '<table><tr><td>';
-    echo '<tr><td width="400">TFU version:</td><td width="250">2.15&nbsp;';
+    echo '<tr><td width="400">TFU version:</td><td width="250">2.15.1&nbsp;';
     // simply output the license type by checking the strings in the license. No real check like in the flash is done here.
     
     if ($m != "" && $m != "s" && $m !="w" ) {
@@ -2022,16 +2045,22 @@ function tfu_createThumb($file) {
       if (!(preg_match("/.*\.(p|P)(d|D)(f|F)$/", $file))) {
         $name = removeExtension($file) . "-" . $_GET['tfu_width'] . 'x' . $_GET['tfu_height'] . "." . getExtension($file);
         resize_file($file, $_GET['tfu_width'] . 'x' . $_GET['tfu_height'], $compression, basename($file), $name); 
+        unset($_SESSION['TFU_LAST_UPLOADS']);
+        $_SESSION['TFU_LAST_UPLOADS'] = array();
+        $_SESSION['TFU_LAST_UPLOADS'][] = $name;
       } else if ($use_image_magic) {
-        $name = dirname(__FILE__) . '/' . removeExtension($file) . "-" . $_GET['tfu_width'] . '.' . $pdf_thumb_format;
-        // create a pdf thumbnail
+          $name = dirname(__FILE__) . '/' . removeExtension($file) . "-" . $_GET['tfu_width'] . '.' . $pdf_thumb_format;
+          // create a pdf thumbnail
           $ima = realpath($file);
           if (!file_exists($name)) {
-            $ima = realpath($file);
-            $resize = $_GET['tfu_width'] . 'x' . $_GET['tfu_height'];
-            $command = $image_magic_path . ' -colorspace rgb "' . $ima . '[0]" -border 1x1 -quality 80 -thumbnail ' . $resize . ' "' . $name . '"';
-            execute_command ($command);
+             $ima = realpath($file);
+             $resize = $_GET['tfu_width'] . 'x' . $_GET['tfu_height'];
+             $command = $image_magic_path . ' -colorspace rgb "' . $ima . '[0]" -border 1x1 -quality 80 -thumbnail ' . $resize . ' "' . $name . '"';
+             execute_command ($command);
           }
+          unset($_SESSION['TFU_LAST_UPLOADS']);
+          $_SESSION['TFU_LAST_UPLOADS'] = array();
+          $_SESSION['TFU_LAST_UPLOADS'][] = $name;
       }     
 }
 
@@ -2061,6 +2090,35 @@ function tfu_info($file) {
        return;
     }
     echo '&hasPreview=false&tfu_x=0&tfu_y=0';
+}
+
+function tfu_upload_info($dir) {
+    $last_file = $_SESSION['TFU_LAST_UPLOADS'][0];
+    $index = getFileName($dir,my_basename($last_file));    
+    echo '&filename_index='.$index.'&filename=' .my_basename($last_file);
+    
+     $file = $last_file; 
+     if (is_supported_tfu_image($file,$file)) {
+        set_error_handler('on_error_no_output'); // is needed because error are most likly but we don't care about fields we don't even know
+        $oldsize = @getimagesize($file);
+        set_error_handler('on_error');
+        if ($oldsize) {
+            if (isMemoryOk($oldsize, 400, "")) {
+                echo '&hasPreview=true&tfu_x=' . $oldsize[0] . '&tfu_y=' . $oldsize[1] ; // has preview!
+            } else {
+                echo '&hasPreview=error&tfu_x=0&tfu_y=0'; // too big! - same error massage as hasPreview=false
+            }
+            return;
+        }
+        echo '&hasPreview=false'; // no image!
+    }
+    if (preg_match("/.*\.(p|P)(d|D)(f|F)$/", $file) && $use_image_magic &&
+        file_exists(dirname(__FILE__) . '/thumbs') && is_writable(dirname(__FILE__) . '/thumbs')) {  // check if pdf
+       echo '&hasPreview=true&tfu_x=1000&tfu_y=1000'; // has preview! - pdfs are max 1000x1000';
+       return;
+    }
+    echo '&hasPreview=false&tfu_x=0&tfu_y=0';
+    
 }
 
 function  tfu_text($file) {

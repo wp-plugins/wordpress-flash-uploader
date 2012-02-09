@@ -1,15 +1,33 @@
 <?php
 /**
- *   Wordpress Flash uploader 2.15.x  
+ *   Wordpress Flash uploader 2.16.x  
  *   This file contains all methods used on the main wfu page from the WFU class
  *
- *   Copyright (c) 2004-2011 TinyWebGallery
+ *   Copyright (c) 2004-2012 TinyWebGallery
  *   Author: Michael Dempfle
  *   Author URI: http://www.tinywebgallery.com 
  */
 
 if (!class_exists("WFUFlash")) {
     class WFUFlash {
+
+        function get_user_groups($id) {
+           global $wpdb;
+          $currGroups = array();
+          $sqlCurrGroups = $wpdb->prepare("
+              SELECT 
+                  {$wpdb->prefix}ps_groups.ID,
+                  {$wpdb->prefix}ps_groups.group_title
+              FROM {$wpdb->prefix}ps_groups
+              JOIN {$wpdb->prefix}ps_group_relationships
+                  ON {$wpdb->prefix}ps_group_relationships.grel_group_id = {$wpdb->prefix}ps_groups.ID
+              WHERE {$wpdb->prefix}ps_group_relationships.grel_user_id = '%s'
+              ",$id);
+          foreach($wpdb->get_results($sqlCurrGroups) as $curGrp){
+              $currentGroups[$curGrp->ID] = $curGrp->group_title;
+          }
+          return  $currentGroups;
+        }
 
         function printWFU($devOptions, $istab) {
             global $current_user;
@@ -31,7 +49,11 @@ if (!class_exists("WFUFlash")) {
             ob_end_clean();
             $_SESSION["IS_ADMIN"] = "true";
             $_SESSION["WFU_USER_LOGIN"] = $current_user->user_login;
+
             $_SESSION["WFU_USER_ROLE"] = array_shift($current_user->roles);
+            // need an easy way to get the groups of a user...
+            $_SESSION["WFU_USER_GROUPS"] = WFUFlash::get_user_groups($current_user->id);
+             
             WFUFlash::storeSettingsToSession($devOptions);
             WFUFlash::setUploadFolder();
 
@@ -65,7 +87,10 @@ if (!class_exists("WFUFlash")) {
                 }
             }
             
-            
+            // could be set in the frontedn and has to be reset.
+            if (isset($_SESSION["WFU_SHORTCODE_CONFIG"])) {
+              unset($_SESSION["WFU_SHORTCODE_CONFIG"]);
+            }
             echo WFUFlash::printFlash($devOptions);
    
             echo '<br>&nbsp;';
@@ -168,20 +193,34 @@ if (!class_exists("WFUFlash")) {
         }
         */
         
-        function printFlash($devOptions, $rel_dir = "../", $admin = 'true') {    
+        function printFlash($devOptions, $rel_dir = "../", $admin = 'true', $siteurl = '../') {    
             $htaccess_path = dirname(__FILE__) . '/../tfu/.htaccess'; 
             $relative_dir = dirname($_SERVER['PHP_SELF']);
             $relative_dir = rtrim($relative_dir,"\\/.") . '/'; // we replace to get a consistent output with different php versions!
             $base_dir = $rel_dir . "wp-content/plugins/wordpress-flash-uploader/tfu";
             $width = $devOptions['flash_size'];   
-           
+  
             ob_start();
+            // stores the session to the session_cache folder if the workaround is activated!
+            store_temp_session();
             $id = session_id();
             session_write_close();
             ob_end_clean();
           
-            $output = '
-           <script type="text/javascript" src="'.$rel_dir.'wp-content/plugins/wordpress-flash-uploader/tfu/swfobject.js"></script>
+           $height=floor($width*(340/650));
+           if ($height > 390) $height = floor($height * 0.95);
+         
+           $output = '';
+           $js_file = dirname(__FILE__) . '/../wordpress-flash-uploader.js'; 
+           if ($siteurl != "../" && file_exists($js_file)) {            
+              $output .= '<script type="text/javascript">';
+              $output .= file_get_contents($js_file); 
+              $output .= '</script>'; 
+           }
+            
+            $output .= '
+           <div style="height:'.$height.'px;">
+           <script type="text/javascript" src="'.$siteurl.'wp-content/plugins/wordpress-flash-uploader/tfu/swfobject.js"></script>
            <script type="text/javascript">
            function debugError(errorString) { }
            function refreshFileList() {
@@ -190,7 +229,7 @@ if (!class_exists("WFUFlash")) {
              obj.refreshFileList();
              }
            }           
-               document.write(\'<div id="flashcontent"><div class="noflash">TWG Flash Uploader requires at least Flash 8.<br>Please update your browser.';
+               document.write(\'<div id="flashcontent"><div class="noflash">TWG Flash Uploader requires at least Flash 8.<br>Please go to <a target="blank" href="http://www.adobe.com/go/EN_US-H-GET-FLASH">adobe</a> and install it.';
             if (file_exists($htaccess_path)) {
                 $output .= '<p>You have created a .htaccess file which seems not to help on your server. Please go to <a target="blank" class="nounderline" href="http://blog.tinywebgallery.com/wfu/wfu-faq/">blog.tinywebgallery.com/wfu/wfu-faq/</a> for more help.</p>';
             }
@@ -213,15 +252,12 @@ if (!class_exists("WFUFlash")) {
             foreach ($elements as $element) {
               $output .= "flashvars." . str_replace("=", "=\"", $element) . "\";";
             }
-          }      
-         
-          $height=floor($width*(340/650));
-          if ($height > 390) $height = floor($height * 0.95);
-          
+          }
           $output .= '
-          swfobject.embedSWF("'.$rel_dir.'wp-content/plugins/wordpress-flash-uploader/tfu/tfu_215.swf", "flashcontent", "'.$width.'", "'.$height.'", "8.0.0", "", flashvars, params, attributes);
+          swfobject.embedSWF("'.$siteurl.'wp-content/plugins/wordpress-flash-uploader/tfu/tfu_216.swf", "flashcontent", "'.$width.'", "'.$height.'", "8.0.0", "", flashvars, params, attributes);
 
           </script>
+          </div>
           ';          
           return $output;
      }

@@ -1,9 +1,9 @@
 <?php
 /**
- *   Wordpress Flash uploader 2.15.x  
+ *   Wordpress Flash uploader 2.16.x  
  *   This file contains all the methods for the settings screen from the WFU class
  *  
- *  Copyright (c) 2004-2011 TinyWebGallery
+ *  Copyright (c) 2004-2012 TinyWebGallery
  *  Author: Michael Dempfle
  *  Author URI: http://www.tinywebgallery.com    
  *  
@@ -19,13 +19,13 @@ if (!class_exists("WFUSettings")) {
 <a href="#wor">Wordpress Options</a> | 
 <a href="#front">Frontend Options</a> | 
 <a href="#bas">Basic Options</a> | 
-<a href="#adv">Advanced Options</a> | 
+<a href="#adv">Advanced Options/ profiles</a> | 
 <a href="#reg">Registered Options</a>
 <h3>Info</h3>
 <a href="#lim">Limits</a> | <a href="#don">Donation / Registration</a> | 
 <a href="#lic">License</a> | <a href="#com">Coming next</a>
 <h3>Help</h3>
-<a target="_blank" href="http://blog.tinywebgallery.com/wfu">Website</a> | <a target="_blank"  href="http://blog.tinywebgallery.com/wfu-faq">FAQ/Help</a> | <a target="_blank" href="http://www.tinywebgallery.com/en/forum.php">Forum</a> 
+<a target="_blank" href="http://www.tinywebgallery.com/blog/wfu">Website</a> | <a target="_blank"  href="http://www.tinywebgallery.com/blog/wfu-faq">FAQ/Help</a> | <a target="_blank" href="http://www.tinywebgallery.com/en/forum.php">Forum</a> 
 <br>&nbsp;
 <div style="height:1px;width:100%;background-color:#aaa;"></div>
 </div>
@@ -40,7 +40,6 @@ if (!class_exists("WFUSettings")) {
             
             WFUSettings::printTrueFalse($devOptions, 'Show \'Sync Media Library\' in Media menu',  'show_sync_media', '');
             WFUSettings::printTrueFalse($devOptions, 'Show \'Sync Media Library\' in Media tabs',  'show_sync_tab', 'If you add a new post you can insert/select new media files. You can include the \'Sync\' to the tabs there and include it then directly.');
-
             WFUSettings::printTrueFalse($devOptions, 'Hide .htaccess create option',  'hide_htaccess', 'On the WP Flash Uploader page the option to create and delete a .htaccess file is shown. once the flash is working you can hide this option.');
             echo '</table>';
             echo '<div class="submit">
@@ -52,13 +51,17 @@ if (!class_exists("WFUSettings")) {
             echo '
 <a name="front"></a>
 <div id="icon-options-general" class="icon_jfu"><br></div>
-<h2>WP Flash Uploader - Frontend Options</h2>
-You can use the flash in the frontend by adding the following shorttag to your article or page: <p><b>[wfu securitykey="'.$devOptions['securitykey'].'"]</b></p>The security key is mandatory while there is an optional parameter \'width\' that has a default of 650 px. If you want to specify the width simply add e.g. width="500". Please note that the uploaded images are NOT synchronized with the media library. This can be done in the administration of Wordpress.
+<h2>WP Flash Uploader - Front end Options</h2>
+You can use the flash in the frontend by adding the following shorttag to your article or page: <p><b>[wfu securitykey="'.$devOptions['securitykey'].'"]</b></p>The security key is mandatory while there is an optional parameter <strong>\'width\'</strong> that has a default of 650 px. If you want to specify the width simply add e.g. width="500". Please note that the uploaded images are NOT synchronized with the media library. This can be done in the administration of Wordpress.
+<p>
+For the front end you can specify <strong>custom configurations</strong> for individual <strong>users</strong>, <strong>groups</strong> or <strong>roles</strong>. Please read the <a class="wfu_reg nounderline" href="#adv">advanced options/ profile section</a> for details.  
+</p>
 <table class="form-table">';
             WFUSettings::printTextInput($devOptions, 'Security key',  'securitykey', 'This is security key which has to be used in the shorttag. This is mandatory because otherwise anyone who can create an article can use the flash. The default security key was randomly generated during installation. Please change the key if you like.');
             WFUSettings::printTextInput($devOptions, 'Upload folder',  'frontend_upload_folder', 'This is the optional upload folder for the frontend. If no folder is specified the current image upload directory is choosen. If you like a different directory simply add the folder relative to the main Wordpress installation. This makes is e.g. easy to use the uploader for a image gallery and let users without administrator access upload images too.');
             WFUSettings::printTrueFalse($devOptions, 'Master profile',  'master_profile', 'When the master profile is enabled a directory is created for each user.  The master profile is only used when you enter a \'Upload folder\' above. Make sure that you use the uploader on a page where a user is logged in. If this is not the case an error message is shown to avoid unrestricted access. Please test if directories can be created by php with the correct rights. If not please set the permissions for new directories below in the basic options.');
             WFUSettings::printLoginId($devOptions, 'Master profile mode',  'master_profile_type', 'Selects the \'Username\', the \'Display name\' or the \'Id\' as directory name of the sub directory of the \'Upload folder\'.'); 
+          
             echo '</table>';
             echo '<div class="submit">
 <input type="submit" class="button-primary" name="update_WFUSettings" value="';
@@ -66,6 +69,7 @@ You can use the flash in the frontend by adding the following shorttag to your a
             echo '" /></div>';
         }
         function printOptions($devOptions) {
+           
             echo '
 <a name="bas"></a>
 <div id="icon-options-general" class="icon_jfu"><br></div>
@@ -100,17 +104,68 @@ You can use the flash in the frontend by adding the following shorttag to your a
             echo '" /></div>';
         }
         function printAdvancedOptions() {
+          global $current_user;
+        
             echo '
 <a name="adv"></a>
 <div id="icon-options-general" class="icon_jfu"><br></div>
-<h2>WP Flash Uploader - Advanced Options</h2>
+<h2>WP Flash Uploader - Advanced Options/ profiles</h2>
 <p>
-In the current version the most important settings are mapped in the administration panel. The WP Flash Uploader uses the TWG Flash Uploader which has much more features that can be directly configured here. If you want to configure WFU in more detail you can edit the tfu_config.php directly. On the web page of WFU a tutorial is provided how this can be easily done by everyone -> <a target="_blank" class="nounderline" href="http://blog.tinywebgallery.com/blog/wfu/advanced-features/">go there</a>
+In the current version the most important settings are mapped in the administration panel. The WP Flash Uploader uses the TWG Flash Uploader which has much more features that can be directly configured here. If you want to configure WFU in more detail please create a file called tfu_config_wfu.php and copy your changes to this file. On the web page of WFU a tutorial is provided how this can be easily done by everyone -> <a target="_blank" class="nounderline" href="http://blog.tinywebgallery.com/blog/wfu/advanced-features/">go there</a>
 </p>
 <p>
-<strong>You also can define individual configurations for a user or a user role</strong>. This is done by a custom config file in the "wp-content/plugins/wordpress-flash-uploader/tfu" folder. Create file with the name tfu_config_&lt;user login&gt;.php for a user or tfu_config_&lt;user role&gt;.php for a role. In this file you can overwrite any configuration that is possible in TFU. The file has to be a valid php file starting with &lt;?php and end with ?&gt;. There you can set all parameters available in tfu_config.php. If a config file for the user and a role is available the one for the user is used! The default roles you have to use in Wordpress are administrator, editor, author, contributor, subscriber. So a filename for the admin user would be tfu_config_admin.php and for the role administrator tfu_config_administrator.php.
-</p>';
+<strong>You also can define individual configurations for a user, a group or a user role</strong>. This is done by a custom config file in the "wp-content/plugins/wordpress-flash-uploader/tfu" folder. Create file with the name tfu_config_&lt;user login&gt;.php for a user, tfu_config_&lt;group&gt;.php for a group or tfu_config_&lt;user role&gt;.php for a role. In this file you can overwrite any configuration that is possible in TFU. The file has to be a valid php file starting with &lt;?php and end with ?&gt;. There you can set all parameters available in tfu_config.php. If a config file for the user and a group is available the one for the user is used! If a config file for the group and a role is available the one for the group is used!<br>The default roles you have to use in Wordpress are administrator, editor, author, contributor, subscriber. So a filename for the admin user would be tfu_config_admin.php and for the role administrator tfu_config_administrator.php.
+</p>
+<p>
+You can also insert custom Javascript you need for using the Javascript callbacks of TFU (See the howtos of TFU). Create a file called wordpress-flash-uploader.js in the main folder of the plugin (where wordpress-flash-uploader.php is located) and put your Javascript in there. A simple example for the callback after an upload is:
+</p>
+&nbsp;&nbsp;function uploadFinished(loc) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;alert("Done");<br/>
+&nbsp;&nbsp;}<br/>
+</p>
+<h3>Existing custom config files</h3>
+<p>
+The following custom configuration files do currently exist. Please note that you can edit this files with the plugin editor of Wordpress -> Plugins -> Editor -> Select "Wordpress Flash uploader" in the upper right dropdown box:
+</p>
+';
+$roles = array('administrator', 'editor', 'author', 'contributor', 'subscriber');
+$groups = WFUFlash::get_user_groups($current_user->id);
+
+$config_files = array();
+if (file_exists(dirname(__FILE__) . "/../wordpress-flash-uploader.js")) {
+$config_files[] = '- wordpress-flash-uploader.js - Javascript file that is included in the frontend where you use the wordpress short code.';
+}
+ 
+   foreach (glob(dirname(__FILE__) .'/../tfu/tfu_config_*.php') as $filename) {
+    $base = basename($filename, '.php');
+    $type = substr($base, 11);  
+    $text = '';
+    if ($type == 'wfu') {
+       $text  = "The <strong>global</strong> custom configuration file that overrides <strong>all</strong> settings from <strong>tfu_config.php</strong> and <strong>my_tfu_config.php</strong>";
+    } else  { 
+        if (in_array($type, $roles)) {
+           $type_str  = "role";
+        } else if (in_array($type, $groups)) {
+           $type_str  = "group";
+        } else {
+            $type_str  = "user";
         }
+        $text =  "Configuration file for the ".$type_str." '".$type."'.";
+    }  
+    $config_files[] = '- tfu/' . $base . '.php - ' . $text; 
+}
+
+echo "<hr height=1>";
+if (count($config_files) == 0 && count($js_files) == 0) {
+     echo "<ul><li>No custom configuration files found.</li></ul>";
+} else {
+  foreach ($config_files as $file) {
+    echo $file . '</br>';
+  }
+}
+echo "<hr height=1>";
+}
+
         function printNextVersion() {
             echo '
 <a name="com"></a>
@@ -227,7 +282,7 @@ If you have a professional license then the following features are available. Ad
             echo 'Some info\'s about your server. This limits are not TFU limits. You have to change this in the php.ini.';
             echo '<div class="install" style="margin-left:50px">';
             echo '<table><tr><td>';
-            echo '<tr><td width="400">TFU version:</td><td width="250">2.15.4&nbsp;';
+            echo '<tr><td width="400">TFU version:</td><td width="250">2.16&nbsp;';
             // simply output the license type by checking the strings in the license. No real check like in the flash is done here.
             if (file_exists(dirname(__FILE__) . "/../tfu/twg.lic.php")) {
                 include  dirname(__FILE__) . "/../tfu/twg.lic.php";
@@ -535,7 +590,6 @@ You can automatically sync the media library in a given interval. It is also pos
             ob_end_clean();
         }
         
-
          function printOptionLine($value, $text, $devOptions) {
            $selected = '';
            if ($devOptions['scheduler'] == $value) {
