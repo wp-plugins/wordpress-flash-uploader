@@ -3,7 +3,7 @@
 Plugin Name: Wordpress Flash Uploader
 Plugin URI: http://www.tinywebgallery.com/blog/wfu
 Description: The Wordpress Flash Uploader does contain 2 plugins: '<strong>Wordpress Flash Uploader</strong>' and '<strong>Sync Media Library</strong>'. The Wordpress Flash Uploader is a flash uploader that replaces the existing flash uploader and let you manage your whole  WP installation. 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library. 
-Version: 2.16
+Version: 2.16.1
 Author: Michael Dempfle
 Author URI: http://www.tinywebgallery.com
 */
@@ -17,11 +17,7 @@ include 'inc/wfu-sync.php';
 
 define('_VALID_TWG', '42');
 
-include 'tfu/tfu_helper.php';
-
-// avoids that the jfu logfile is used for everything!	
-$skip_error_handling = "true"; 
-$debug_file = '';
+include 'tfu/wfu_helper.php';
 
 if (!class_exists("WFU")) {
     class WFU {
@@ -471,7 +467,7 @@ if (!function_exists("WFU_ap")) {
         if (function_exists('add_options_page')) {
             add_options_page('WP Flash Uplader', 'WP Flash Uploader', 'manage_options', basename(__FILE__), array(&$dl_pluginSeries, 'printAdminPage'));
         }
-        $wfuOptions = &$dl_pluginSeries->getAdminOptions();
+        $wfuOptions = $dl_pluginSeries->getAdminOptions();
         if (function_exists('add_media_page')&& $wfuOptions['show_wfu_media'] == "true") {
             add_media_page('WP Flash Uploader', 'WP Flash Uploader', 'upload_files', basename(__FILE__), array(&$dl_pluginSeries, 'printWFU'));
         }

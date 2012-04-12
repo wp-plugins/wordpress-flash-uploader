@@ -3,7 +3,7 @@ Contributors: mdempfle, Michael Dempfle
 Tags: admin, media, upload, synchronize, flash, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
 Tested up to: 3.3.1
-Stable tag: 2.16
+Stable tag: 2.16.1
 Donate link: Please check the settings of Wordpress Flash Uploader
 
 'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you also manage your whole Wordpress installation and synchronize your media library. 
@@ -73,6 +73,9 @@ Please note that this is not a realy cron job. So if you set 5 minutes then it i
 Please go to the settings page of Wordpress Flash Uploader. There you find a small donation section. Thank you for your support.
 
 == Changelog ==
+= 2.16.1 =
+* Fix: Blank screens in combination with some cache plugins fixed. I included the tfu_helper file where I was using only one function from. Including only this one function on an extra file solved the problem on 2 test installs.
+
 = 2.16 =
 * Updated to TFU 2.16.
 * Support for a global custom configuration file called tfu_config_wfu.php. Please store your global custom settings here. This file is not overwritten when you update WFU.
