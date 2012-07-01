@@ -22,7 +22,7 @@ if (!class_exists("WFUSync")) {
             }
             echo "<!-- DEBUG: wpnounce set properly -->\n";
             // nounce is set porperly - we continue...   
-            echo '<div class="wrap wfupadding">';
+            echo '<div id="wfu" class="wrap wfupadding">';
             $nonce= wp_create_nonce ('wfu-nonce'); 
             echo '<form method="post" action="'. $_SERVER["REQUEST_URI"] . '">';       
             echo '<input type="hidden" name="wfunonce" value="'.$nonce.'">';

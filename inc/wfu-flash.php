@@ -13,6 +13,10 @@ if (!class_exists("WFUFlash")) {
 
         function get_user_groups($id) {
            global $wpdb;
+          
+          if($wpdb->get_var("SHOW TABLES LIKE 'ps_groups'") != 'ps_groups') {
+            return null;
+          } else {
           $currGroups = array();
           $sqlCurrGroups = $wpdb->prepare("
               SELECT 
@@ -27,6 +31,7 @@ if (!class_exists("WFUFlash")) {
               $currentGroups[$curGrp->ID] = $curGrp->group_title;
           }
           return  $currentGroups;
+          }
         }
 
         function printWFU($devOptions, $istab) {
@@ -61,6 +66,7 @@ if (!class_exists("WFUFlash")) {
                 echo '<div style="clear: both;"></div>';
             }
             $nonce= wp_create_nonce ('wfu-nonce'); 
+            echo '<div id="wfu">';
             echo '<form method="post" action="'. $_SERVER["REQUEST_URI"] . '">';       
             echo '<input type="hidden" name="wfunonce" value="'.$nonce.'">';
             echo '<div class="wrap wfupadding">';
@@ -122,7 +128,7 @@ if (!class_exists("WFUFlash")) {
                     echo  '" />';
                 }
             }
-            echo '</div></form><div style="clear:both" />';
+            echo '</div></form></div><div style="clear:both" />';
 
             if (!$istab && $devOptions['hide_donate'] == 'false') {
                 echo '<br><table><tr><td>You like this plugin? Support the development with a small donation. </td><td>&nbsp;&nbsp;&nbsp;<A target="_blank" HREF="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=paypal%40mdempfle%2ede&item_name=WP%20Flash%20Uploader&item_number=Support%20Open%20Source&no_shipping=0&no_note=1&tax=0&currency_code=EUR&lc=EN&bn=PP%2dDonationsBF&charset=UTF%2d8"><img src="../wp-content/plugins/wordpress-flash-uploader/img/btn_donate_SM.gif"></A></td></tr></table>';
