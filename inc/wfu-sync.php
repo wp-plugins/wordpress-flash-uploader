@@ -8,6 +8,8 @@
  *   Author: Michael Dempfle
  *   Author URI: http://www.tinywebgallery.com 
  */
+ 
+set_time_limit(600);
 
 if (!class_exists("WFUSync")) {
     class WFUSync {
