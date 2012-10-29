@@ -41,6 +41,7 @@ if (!class_exists("WFUSettings")) {
             WFUSettings::printTrueFalse($devOptions, 'Show \'Sync Media Library\' in Media menu',  'show_sync_media', '');
             WFUSettings::printTrueFalse($devOptions, 'Show \'Sync Media Library\' in Media tabs',  'show_sync_tab', 'If you add a new post you can insert/select new media files. You can include the \'Sync\' to the tabs there and include it then directly.');
             WFUSettings::printTrueFalse($devOptions, 'Hide .htaccess create option',  'hide_htaccess', 'On the WP Flash Uploader page the option to create and delete a .htaccess file is shown. once the flash is working you can hide this option.');
+          
             echo '</table>';
             echo '<div class="submit">
 <input type="submit" class="button-primary" name="update_WFUSettings" value="';
@@ -484,7 +485,13 @@ You can automatically sync the media library in a given interval. It is also pos
 ';
             WFUSettings::printTextInput($devOptions, 'Sync extensions',  'sync_extensions', 'You can define the extensions that should be synchronized. If you leave the field empty an import of all files is tried! Please separate the extensions with "," .');
             WFUSettings::printTrueFalse($devOptions, 'Try to detect resized files',  'detect_resized', 'Resized files should normally not imported again. The plugin tries to detect this files and does not offer them on the \'Sync\' menu entry if you set this to true. If you set it to false all files are synchronized.');
-            
+            if ($devOptions['sync_time'] != '0' && $devOptions['sync_time'] != '') {
+              $time = intval($devOptions['sync_time']);
+              // Both settings should do the same! Only works with safemode off!
+              @set_time_limit($time);
+              @ini_set('max_execution_time', $time);
+            }
+            WFUSettings::printTextInput($devOptions, 'PHP time limit',  'sync_time', 'This sets the maximum execution time of the script. See <a target="_blank" href="http://php.net/manual/en/function.set-time-limit.php">http://php.net/manual/en/function.set-time-limit.php</a>. On most systems this is set to a default of 30 seconds. For big syncs this is not enough and you can increase this time. But not all servers do allow this. By leaving this field empty or by entering 0 noghing is done and the default of the server is used.<br />This only works with <strong>safe mode off</strong>. The current time returned from the system with the settings above is <strong>' .  ini_get('max_execution_time') . "s</strong>. If the time is NOT equals your setting than the time cannot be set. Please turn off safe mode." );
             echo '
 </table>
 <div class="submit">
@@ -492,27 +499,8 @@ You can automatically sync the media library in a given interval. It is also pos
             echo _e('Update Settings', 'WFU');
             echo '" /></div>';
         }
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-                function printLoginId($options, $label,  $id, $description) {
+
+function printLoginId($options, $label,  $id, $description) {
             echo '
 <tr valign="top">
 <th scope="row">'.$label.'</th>

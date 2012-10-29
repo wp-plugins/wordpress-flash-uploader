@@ -3,7 +3,7 @@ Contributors: mdempfle, Michael Dempfle
 Tags: admin, media, upload, synchronize, flash, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
 Tested up to: 3.4.1
-Stable tag: 2.16.3
+Stable tag: 2.16.4
 Donate link: Please check the settings of Wordpress Flash Uploader
 
 'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you also manage your whole Wordpress installation and synchronize your media library. 
@@ -73,6 +73,9 @@ Please note that this is not a real cron job. So if you set 5 minutes then it is
 Please go to the settings page of Wordpress Flash Uploader. There you find a small donation section. Thank you for your support.
 
 == Changelog ==
+= 2.16.4 =
+* New: set_time_limit can now be configured in the administration. Please note that this only works with save mode off.
+
 = 2.16.3 =
 * New: Added set_time_limit(600); to the sync part. So if your server does allow this the time limit is set to 10 minutes instead using the default of 30.
  

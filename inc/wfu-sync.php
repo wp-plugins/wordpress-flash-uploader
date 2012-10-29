@@ -9,13 +9,20 @@
  *   Author URI: http://www.tinywebgallery.com 
  */
  
-set_time_limit(600);
-
 if (!class_exists("WFUSync")) {
     class WFUSync {
 
         function printSync($devOptions, $istab = false, $check_nonce = true) {
             // now we check all possible actions if the correct nonce is set.
+            $wfuOptions = $this->getAdminOptions();
+            
+            if ($wfuOptions['sync_time'] != '0' && $wfuOptions['sync_time'] != '') {
+              $time = intval($wfuOptions['sync_time']);
+              // Both settings should do the same! Only works with safemode off!
+              @set_time_limit($time);
+              @ini_set('max_execution_time', $time);
+            }
+            
             if ($check_nonce) {
               if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library'])  || isset($_GET['clean_media_library']) ) {
                   $nonce=$_POST['wfunonce'];
