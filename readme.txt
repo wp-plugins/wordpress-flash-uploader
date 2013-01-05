@@ -63,6 +63,11 @@ wp-config.php
 to enable the cron job! 
 Please note that this is not a real cron job. So if you set 5 minutes then it is syncronized at the next request that happens after 5 minutes waiting!
 
+Please make a backup of your images when you use the synch the first time!
+On some systems Wordpress does remove the images once.
+If you have this problem please contact me to fix this because it is not 
+reproduceable on my systems.
+
 == Screenshots ==
 1. The Wordpress Flash Uploader page where you can upload images
 2. The Synch Media Library page where you can synchronize your upload folder with the Media Library
