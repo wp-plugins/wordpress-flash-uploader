@@ -1,9 +1,9 @@
 === Wordpress Flash Uploader ===
 Contributors: mdempfle, Michael Dempfle
-Tags: admin, media, upload, synchronize, flash, ftp, media library, sync, uploader, images, gallery, image upload, image preview
+Tags: upload, admin, media, synchronize, flash, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
-Tested up to: 3.4.1
-Stable tag: 2.16.4
+Tested up to: 3.5.1
+Stable tag: 2.16.5
 Donate link: Please check the settings of Wordpress Flash Uploader
 
 'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you also manage your whole Wordpress installation and synchronize your media library. 
@@ -49,6 +49,9 @@ Website:    http://www.tinywebgallery.com/blog/wfu/
 Forum:      http://www.tinywebgallery.com/en/forum.php
 
 == Installation ==
+Please make a backup of your images when you use the synch the first time!
+On some systems Wordpress does remove the images once.
+If you have this problem please contact me to fix this because it is not reproduceable on my systems.
 
 Extract the zip file and just drop the contents in the wp-content/plugins/ directory of your WordPress installation and then activate the plugin from plugins page.
 You get 'WP Flash Uploader' and 'Sync Media Library' in the 'Media' menu and 'WP Flash Uploader' in the 'Settings' menu. 
@@ -58,15 +61,13 @@ only restricted by their servers. And most if the problems can be solved!
 
 If you want to use the automatic sync please add   
 define('ALTERNATE_WP_CRON', true);
-in the 
-wp-config.php 
+in the wp-config.php 
 to enable the cron job! 
 Please note that this is not a real cron job. So if you set 5 minutes then it is syncronized at the next request that happens after 5 minutes waiting!
 
 Please make a backup of your images when you use the synch the first time!
 On some systems Wordpress does remove the images once.
-If you have this problem please contact me to fix this because it is not 
-reproduceable on my systems.
+If you have this problem please contact me to fix this because it is not reproduceable on my systems.
 
 == Screenshots ==
 1. The Wordpress Flash Uploader page where you can upload images
@@ -78,6 +79,10 @@ reproduceable on my systems.
 Please go to the settings page of Wordpress Flash Uploader. There you find a small donation section. Thank you for your support.
 
 == Changelog ==
+= 2.16.5 =
+* Fix: check if mb_strtolower is available. if not strtolower is used.
+* fix: Hotfix for Wordpress >= 3.4: update_attached_file is now used.
+
 = 2.16.4 =
 * New: set_time_limit can now be configured in the administration. Please note that this only works with save mode off.
 

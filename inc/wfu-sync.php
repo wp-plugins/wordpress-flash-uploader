@@ -142,17 +142,17 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
 <div class="submit">';
             if (!$istab) {
                 echo '
-<input type="submit" name="synchronize_media_library" value="';
+<input type="submit" class="button action" name="synchronize_media_library" value="';
                 echo _e('Synchronize Media Library', 'WFU');
                 echo '" />';
             }
             echo '
-<input type="submit" name="import_media_library" value="';
+<input type="submit" class="button action" name="import_media_library" value="';
             echo _e('Import files to Media Library', 'WFU');
             echo '" />';
             if (!$istab) {
                 echo '
-<input type="submit" name="clean_media_library" value="';
+<input type="submit" class="button action" name="clean_media_library" value="';
                 echo _e('Remove invalid Media Library entries', 'WFU');
                 echo '" />';
             }
@@ -486,6 +486,8 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                 $data = wp_generate_attachment_metadata( $id, $file );
                 $data['file'] = $new_file; // fix to get the right file name into the database!
                 wp_update_attachment_metadata( $id, $data );
+                // hotfix for wordpress 3.4
+                update_attached_file( $id, $file );
             }
             return $id;
         }
@@ -496,7 +498,11 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
         // it's needed to decode first because str_replace does not handle str_replace in utf-8
         $imageName = utf8_decode($imageName);
         // we make the file name lowercase ÄÖÜ as well.
-        $imageName = mb_strtolower($imageName);
+        if (function_exists("mb_strtolower")) { 
+          $imageName = mb_strtolower($imageName); 
+        } else {
+          $imageName = strtolower($imageName); 
+        }  
         
         if ($normalizeSpaces == 'true') {
           $imageName=str_replace(' ','_',$imageName);
