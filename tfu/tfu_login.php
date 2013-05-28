@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.16.x
+ * TWG Flash uploader 3.0
  *
- * Copyright (c) 2004-2012 TinyWebGallery
+ * Copyright (c) 2004-2013 TinyWebGallery
  * written by Michael Dempfle
  *
  *    This file is the login and stetup file of the flash.
@@ -10,16 +10,10 @@
  *    Have fun using TWG Flash Uploader
  */
 define('_VALID_TWG', '42');
-
-if (isset($_GET['TFUSESSID'])) { // this is a workaround if you set php_flag session.use_trans_sid=off + a workaround for some servers that don't handle sessions correctly if you open 2 instances of TFU
-    session_id($_GET['TFUSESSID']);
-}
-session_start();
     
 $install_path = '';      // Please read the howto 8 of the TFU FAQ what you have to do with this parameter! You need a / at the end if you set it + you have to 
-include $install_path . "tfu_helper.php";
 
-restore_temp_session(true); // this restores a lost session if your server handles sessions wrong - only important for joomla because for TFU standalone nothing is in the session yet.
+include $install_path . 'tfu_session.php';
 
 if (isset($_POST['twg_user']) && isset($_POST['twg_pass'])) { // twg_user and twg_pass are always sent by the flash! - never remove this part! otherwise everyone can call tfu_config directly
     /**
@@ -61,7 +55,7 @@ if (isset($_POST['twg_user']) && isset($_POST['twg_pass'])) { // twg_user and tw
     include $install_path . "tfu_config.php";
     
     // check if all included files have the same version to avoid problems during update!
-    if ($tfu_config_version != '2.16' || $tfu_help_version != '2.16') {
+    if ($tfu_config_version != '3.0' || $tfu_help_version != '3.0') {
       tfu_debug('Not all files belong to this version. Please update all files.');
     }
 
@@ -89,6 +83,7 @@ if (isset($_POST['twg_user']) && isset($_POST['twg_pass'])) { // twg_user and tw
             if ($user == $userarray[0] && $pass == $userarray[1]) {
                 $login = "true";
                 $folder = $userarray[2];
+              
                 if ($userarray[3] != "") {
                     $show_delete = $userarray[3];
                 }
@@ -96,6 +91,7 @@ if (isset($_POST['twg_user']) && isset($_POST['twg_pass'])) { // twg_user and tw
                     $enable_folder_browsing = $enable_folder_creation = $userarray[4];
                     $enable_folder_deletion = $enable_folder_rename = $userarray[4];
                 }
+               
                 break;
             } else {
                 $login = "reauth";

@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.16.x
+ * TWG Flash uploader 3.0
  *
- * Copyright (c) 2004-2012 TinyWebGallery
+ * Copyright (c) 2004-2013 TinyWebGallery
  * written by Michael Dempfle
  *
  *    This file is the main configuration file of the flash.
@@ -29,7 +29,7 @@
  */
 
 if (defined('_VALID_TWG')) {
-$tfu_config_version = '2.16';
+$tfu_config_version = '3.0';
 
     $login = 'true';                     // The login flag - has to set by yourself below 'true' is logged in, 'auth' shows the login form, 'reauth' should be set if the authentification has failed. 'false' if the flash should be shown with an eroror message that the authorisation finally failed. When using auth by default the users of the file .htuser.php are used. Please go to this file to setup users.
     $folder = 'upload';                  // this is the root upload folder. If you use login='auth' by default the folder from the user profile in .htusers.php is used!
@@ -38,10 +38,11 @@ $tfu_config_version = '2.16';
     $resize_data = '100000,1280,1024,800'; // The data for the resize dropdown
     $resize_label = 'Original,1280,1024,800'; // The labels for the resize dropdown
     $resize_default = '0';               // The preselected entry in the dropdown (1st = 0)
-    $allowed_file_extensions = 'all'; // 'jpeg,gif,png,jpg';    // Allowed file extensions! 'all' allowes all types - this list is the supported files in the browse dropdown! If this field is empty then the upload grid is removed and the server only view is enabled. Please note: The filter of the file chooser dialog is limited. Don't use more than ~25 extensions. If you specify more TFU automatically uses 'All Files' - Then all files are listed and not supported extensions are checked by the flash after pressing 'Open'.
-    $forbidden_file_extensions = 'php';  // Forbidden file extensions! - only usefull if you use 'all' and you want to skip some exensions! php e.g. means php* ! then php4 and so on is covered as well!
+    $use_size_as_height = false;         // new 3.0 If you set this to true horizontal and vertical images are all resized to the given size. So vertical images are wider than the given size!
+    $allowed_file_extensions = 'all';    // 'jpeg,gif,png,jpg';    // Allowed file extensions! 'all' allowes all types - this list is the supported files in the browse dropdown! If this field is empty then the upload grid is removed and the server only view is enabled. Please note: The filter of the file chooser dialog is limited. Don't use more than ~25 extensions. If you specify more TFU automatically uses 'All Files' - Then all files are listed and not supported extensions are checked by the flash after pressing 'Open'.
+    $forbidden_file_extensions = '';     // Forbidden file extensions! - only usefull if you use 'all' and you want to skip some exensions! php e.g. means php* ! then php4 and so on is covered as well!
     // Enhanced features - this are only defaults! if TFU detects that this is not possible this functions are disabled!
-    $hide_remote_view = 'false';              // If you want to disable the remote view set 'true' as value!
+    $hide_remote_view = 'false';         // If you want to disable the remote view set 'true' as value! '' or 'false' shows the remote view!
     $show_preview = is_gd_version_min_20(); // Show the small preview. Valid is 'true' and 'false' (Strings!) - the function is_gd_version_min_20 checks if the minimum requirements for resizing images are there!
     $show_big_preview = 'true';          // Show the big preview - clicking on the preview image shows a bigger preview
     $show_delete = 'true';               // Shows the delete button - if download is set to button this moves to the menu!
@@ -72,7 +73,7 @@ $tfu_config_version = '2.16';
     $hide_directory_in_title = 'false';  // You can disable the display of the upload dir in the title bar if you set this to 'true'
     $truncate_dir_in_title = 'false';    // You can truncate everything before the main upload directory if you set this to true. So only sub directories are shown in the title.
     // the text of the email is stored in the tfu_upload.php if you like to change it :)
-    $upload_notification_email = '';     // you can get an email everytime a fileupload was initiated! The mail is sent at the first file of an upload queue! '' = no emails - php mail has to be configured properly! Enter the e-mail you want to send the notification to.
+    $upload_notification_email = '';     // you can get an email everytime a fileupload was initiated! The mail is sent at the first file of an upload queue! '' = no emails - php mail has to be configured properly! Enter the e-mail you want to send the notification to. Also set the from address!
     $upload_notification_email_from = ''; // the sender of the notification email!
     $upload_notification_email_subject = 'Files were uploaded by the TWG Flash Uploader'; // Subject of the email - you should set a nicer one after the login or in tfu_upload.php
     $upload_notification_email_text = 'The following files where uploaded by %s: %s'; // Text of the email - the first %s ist the username (if no is set 'not set is used'), the 2nd %s is the list of files that where uploaded!
@@ -80,7 +81,7 @@ $tfu_config_version = '2.16';
 
     $exclude_directories = array('data.pxp', '_vti_cnf', 'CVS', 'thumbs'); // new 2.6 - You can enter directories here that are ignored in TFU. You can enter files as well that should be hidden!
     $keep_internal_session_handling = false;  // new 2.7.5 - TFU can detect servers with session problems. And it removes the session_cache folder it it is not needed. If you set this to true the session_Cache folder is not removed automatically. You should set this to true if you have only sometimes problems with the upload!
-    $normalise_file_names = false;         // new 2.7.5 - This setting convertes all filenames to lowercase and special characters are removed e.g. !"#$%&'()*+,-- []\^_`öäüß are replaces with an _
+    $normalise_file_names = false;        // new 2.7.5 - This setting convertes all filenames to lowercase and special characters are removed e.g. !"#$%&'()*+,-- []\^_`öäüß are replaces with an _
     $normalise_directory_names = false;   // new 2.8.1 - This setting convertes all directory names that are created or renamed to lowercase and special characters are removed e.g. !"#$%&'()*+,-- []\^_`öäüß are replaces with an _
 
     // This switch is for supporting filesystems for e.g. chinese characters.
@@ -119,12 +120,11 @@ $tfu_config_version = '2.16';
    
     $description_mode = 'false';         // You can enable a description mode where the size and the date is replaced by a description field. The data of this field is sent to the server and stored in a txt file called <filename>.txt or sent by e-mail to you. Only available for professional license or above.
     $description_mode_show_default = 'true'; // Shows/hides a 'Enter description' in the description field if you like. The text is stored in the language file if you want to change it. Only available for professional license or above.
-    $description_mode_store = 'txt';   // ('txt','email') The description is either saved to a textfile called <filename>.txt or is added to the notification e-mail. Only available for professional license or above.
-
-    // New 2.9
-    $overwrite_files='true';             // true - Existing files are overwritten; false - existing files are not overwritten.
+    $description_mode_store = 'txt';     // ('txt','email') The description is either saved to a textfile called <filename>.txt or is added to the notification e-mail. Only available for professional license or above.
     $description_mode_mandatory='false'; // true - a description has to be provided for each file; false - description is optional.
-    $normalizeSpaces='false';            // if you enable normalize file names or directory names you can decide here if spaces are replaces with an _ or not.
+    
+    $overwrite_files='true';             // true - Existing files are overwritten; false - existing files are not overwritten.
+    $normalizeSpaces='true';             // if you enable normalize file names or directory names you can decide here if spaces are replaces with an _ or not.
     $file_chmod=0;                       // by using 0 the default mode of the files is used. Then the creation depend on the umask of the server.  If you want the files to have different permissions please use the octal representation e.g. 0777, 0755, 0644 ...
     $dir_chmod=0;                        // by using 0 the default mode of the directory is used. Then the creation depend on the umask of the server. If you want the directory to have different permissions please use the octal representation e.g. 0777, 0755, 0644 ...
 
@@ -163,28 +163,43 @@ $tfu_config_version = '2.16';
 
     // Watermark text on the images when you click on the small thumb - will display some information about the image.
     $info_text = '{dimension} | {size} | {date}'; // New 2.13 - Defines if a info text is shown and which info is printed. You can define your own string here: {dimension}, {size} and {date} are place holders you can use.
-    $info_textcolor_R = 255;             // New 2.13 - The color of the info text. Define the red value of a RGB color in decimal here.
-    $info_textcolor_G = 60;              // New 2.13 - The color of the info text. Define the green value of a RGB color in decimal here.
-    $info_textcolor_B = 60;              // New 2.13 - The color of the info text. Define the blue value of a RGB color in decimal here.
-    $info_font = "verdana.ttf";          // New 2.13 - The font which should be used. By default verdana is included in the install package.
-    $info_fontsize = 8;                  // New 2.13 - The font size of the info text
+    $info_textcolor_R = 255;             // The color of the info text. Define the red value of a RGB color in decimal here.
+    $info_textcolor_G = 60;              // The color of the info text. Define the green value of a RGB color in decimal here.
+    $info_textcolor_B = 60;              // The color of the info text. Define the blue value of a RGB color in decimal here.
+    $info_font = "verdana.ttf";          // The font which should be used. By default verdana is included in the install package.
+    $info_fontsize = 8;                  // The font size of the info text
 
     $has_post_processing= "false";       // New 2.13 - The flash waits 10 sec after the upload it to 100% if it has finished. If you do a lot of processing like generating thumbnails and .... this can be too short. By setting this to true you get additional 10 sec :). This is the default e.g. in TWG where the thumbnails and small images are generated right after the upload.
 
     // New 2.14
-    $directory_file_limit_size = -1;     // New 2.14 - (Number) You can specify a maximum size in KB (!!!) someone is allowed to have in his folders. -1 means no limit! This setting does count all subfolders as well. Excluded directories and hidden files are counted as well if the legacy functions are used (see $directory_file_limit_size_system). If you like the exact amount set $directory_file_limit_size_system = false to use the backup which does handle excluded directories and hidden files like set in the configuration - only available in the registered version!
-    $directory_file_limit_size_system = true; // New 2.14 - (true,false) Use system implementations for quota. See the description of $directory_file_limit_size - when set to true the legacy function is used which is up to 20 times faster.
-    $sort_directores_by_date = false;    // New 2.14 - (true,false) true: Sort directores that last created folders are shown on top, alphapetically otherwise.
-    $show_server_date_instead_size='false'; // New 2.14 - ('true','false') true: shows the date instead of the server size. false: shows the size of the file. $show_size has to be set to true! Pleae check the tfu.htm for the flash parameter for optimal display.
-    $pdf_thumb_format = 'png';           // New 2.14 - (png,jpg): you can define the output for pdf generation. jpg gives smaller images and png better quality but larger files. Please try with your pdf's you expect!
-    $enable_file_creation = 'false';     // New 2.14 - ('true','false') Show the menu item to create files - only available for registered users.
-    $enable_file_creation_extensions = 'txt'; // New 2.14 - (edit,txt,all) You can define which files can be created. 'edit' files defined in $edit_textfile_extensions are allowed. 'txt': only .txt files, 'all': all file extensions
+    $directory_file_limit_size = -1;     // (Number) You can specify a maximum size in KB (!!!) someone is allowed to have in his folders. -1 means no limit! This setting does count all subfolders as well. Excluded directories and hidden files are counted as well if the legacy functions are used (see $directory_file_limit_size_system). If you like the exact amount set $directory_file_limit_size_system = false to use the backup which does handle excluded directories and hidden files like set in the configuration - only available in the registered version!
+    $directory_file_limit_size_system = true; // (true,false) Use system implementations for quota. See the description of $directory_file_limit_size - when set to true the legacy function is used which is up to 20 times faster.
+    $sort_directores_by_date = false;    // (true,false) true: Sort directores that last created folders are shown on top, alphapetically otherwise.
+    $show_server_date_instead_size='false'; // ('true','false') true: shows the date instead of the server size. false: shows the size of the file. $show_size has to be set to true! Pleae check the tfu.htm for the flash parameter for optimal display.
+    $pdf_thumb_format = 'png';           // (png,jpg): you can define the output for pdf generation. jpg gives smaller images and png better quality but larger files. Please try with your pdf's you expect!
+    $enable_file_creation = 'false';     // ('true','false') Show the menu item to create files - only available for registered users.
+    $enable_file_creation_extensions = 'txt'; // (edit,txt,all) You can define which files can be created. 'edit' files defined in $edit_textfile_extensions are allowed. 'txt': only .txt files, 'all': all file extensions
     
     // New 2.15
-    $switch_sides = 'false';             // New 2.15 - ('true','false') - Use this if you want the server side on the right the and upload side on the the left side. Please set the value also at the flash. The flash is then loaded already with the right layout. If you don't set this and only in the config then you see the default view for a very short moment.
-    $use_index_for_files = true;         // New 2.15 - (true,false) - By default the file name and the index of a file is sent to the server. Here you can decide which way to use. true: index, false: filename. Please read howto 21 of the TFU FAQ if you want to change the default behaviour.
-    $date_format = 'd.m.y';              // New 2.15 - (String) - You can define how the dates are displayed in the flash. flash does unfortunately not supprt standard formating. So Please use the following syntax: d: day (2 digits), m: month (2 digits), y: year (4 digits). You can use this variables how you like ;). e.g. y-m-d, y-m-d, m/d/y.
+    $switch_sides = 'false';             // ('true','false') - Use this if you want the server side on the right the and upload side on the the left side. Please set the value also at the flash. The flash is then loaded already with the right layout. If you don't set this and only in the config then you see the default view for a very short moment.
+    $use_index_for_files = true;         // (true,false) - By default the file name and the index of a file is sent to the server. Here you can decide which way to use. true: index, false: filename. Please read howto 21 of the TFU FAQ if you want to change the default behaviour.
+    $date_format = 'd.m.y';              // (String) - You can define how the dates are displayed in the flash. flash does unfortunately not supprt standard formating. So Please use the following syntax: d: day (2 digits), m: month (2 digits), y: year (4 digits). You can use this variables how you like ;). e.g. y-m-d, y-m-d, m/d/y.
     
+    // New 2.17
+    $normalize_upper_case=true;          // New 2.17 (true,false) if you enable normalize file names or directory names you can decide here if upper case chars are converted to lower case or not.
+    $start_folder='';                    // New 2.17 (String) You can define a start folder below your root folder. If you do this you are still able to navigate up to your root folder but the start folder is shown when you start the flash the first time. The start folder is always relative to the root folder. e.g. 'subdir' would be the folder 'upload\subdir'
+    // please do not forget to set the normal e-mail settings above!
+    $use_smtp = false;                   // New 2.17 (true,false) false: use build in php mail, true: use smtp. Please provide the settings below. 
+      $smtp_host = "localhost";          // New 2.17 (String) The smtp host. If you want to use ssl please use e.g. ssl://smtp.strato.de. See http://php.net/manual/en/transports.inet.php for available transport protocols. 
+      $smtp_port = 456;                  // New 2.17 (Number) The smtp port. 456 is the default for ssl!
+      $smtp_user = "<user>";             // New 2.17 (String) The smtp user name
+      $smtp_password = "<password>";     // New 2.17 (String) The smtp password
+   
+   
+    // new 3.1  - not implemented yet
+    $allow_only_basic_file_names="false"; // New 3.1 ("true", "false") You can define if the file names only allow the following characters: a-zA-Z0-9. This check is only applied on the name itself. Not the extension. This is done seperately. Important: This check is done on the client and shows a warning message if the characters does not fit. This is important if you have e.g. mod_security enabled that does not allow any special characters.
+    $change_to_new_folder=false;           // (true, false) If you create a new folder you can decide if you jump into the now folder (true) or if you stay in the parent folder (false)
+
     // special extension - a post upload panel - this is only implemented for JFU and not documented yet!
     $post_upload_panel='false';
     /*  This is example data for the post upload panel - this is not documented yet!

@@ -1,9 +1,9 @@
 <?php
 /**
- *   Wordpress Flash uploader 2.16.x  
+ *   Wordpress Flash uploader 3.1.x
  *   This file contains all methods used on the main wfu page from the WFU class
  *
- *   Copyright (c) 2004-2012 TinyWebGallery
+ *   Copyright (c) 2004-2013 TinyWebGallery
  *   Author: Michael Dempfle
  *   Author URI: http://www.tinywebgallery.com 
  */
@@ -57,7 +57,7 @@ if (!class_exists("WFUFlash")) {
 
             $_SESSION["WFU_USER_ROLE"] = array_shift($current_user->roles);
             // need an easy way to get the groups of a user...
-            $_SESSION["WFU_USER_GROUPS"] = WFUFlash::get_user_groups($current_user->id);
+            $_SESSION["WFU_USER_GROUPS"] = WFUFlash::get_user_groups($current_user->ID);
              
             WFUFlash::storeSettingsToSession($devOptions);
             WFUFlash::setUploadFolder();
@@ -260,7 +260,7 @@ if (!class_exists("WFUFlash")) {
             }
           }
           $output .= '
-          swfobject.embedSWF("'.$siteurl.'wp-content/plugins/wordpress-flash-uploader/tfu/tfu_216.swf", "flashcontent", "'.$width.'", "'.$height.'", "8.0.0", "", flashvars, params, attributes);
+          swfobject.embedSWF("'.$siteurl.'wp-content/plugins/wordpress-flash-uploader/tfu/tfu_3.1.swf", "flashcontent", "'.$width.'", "'.$height.'", "8.0.0", "", flashvars, params, attributes);
 
           </script>
           </div>

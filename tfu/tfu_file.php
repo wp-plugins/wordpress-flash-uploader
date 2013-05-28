@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.16.x
+ * TWG Flash uploader 3.0
  *
- * Copyright (c) 2004-2012 TinyWebGallery
+ * Copyright (c) 2004-2013 TinyWebGallery
  * written by Michael Dempfle
  *
  *     This file does all file functions of TFU
@@ -29,26 +29,18 @@
  */
 define('_VALID_TWG', '42');
 
-if (isset($_GET['TFUSESSID'])) { // this is a workaround if you set php_flag session.use_trans_sid=off + a workaround for some servers that don't handle sessions correctly if you open 2 instances of TFU
-    session_id($_GET['TFUSESSID']);
-}
-session_cache_limiter("private");
-session_cache_limiter("must-revalidate");
-session_start();
-
 $install_path = ''; // do not change!
-include 'tfu_helper.php';
 
-restore_temp_session(); // this restores a lost session if your server handles sessions wrong and increases the session time!
-
+include 'tfu_session.php';
 include 'tfu_config.php';
 
 // check if all included files have the same version to avoid problems during update!
-if ($tfu_config_version != '2.16' || $tfu_help_version != '2.16') {
+if ($tfu_config_version != '3.0' || $tfu_help_version != '3.0') {
   tfu_debug('Not all files belong to this version. Please update all files.');
 }
 
-if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['tfu_rn']) && ($_SESSION['TFU_RN'] ==    parseInputParameter($_GET['tfu_rn']))) {
+if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['tfu_rn']) && isset($_SESSION['TFU_RN']) && 
+   (strcmp($_SESSION['TFU_RN'],parseInputParameter($_GET['tfu_rn']))==0)) {
     $dir = getCurrentDir();
     // if you have more complex filenames you can use the index
     $action = parseInputParameter($_GET['action']);
@@ -141,21 +133,24 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['
             echo get_tree_xml();
             return;
         }
-        // Plugin check for folder operations: createdir, renamedir, deletedir. Will be refactored in the next version to be more generic!
-        if (isset($_GET['createdir']) || isset($_GET['renamedir']) || isset($_GET['deletedir'])) {
+        // Plugin check for folder operations: createdir, renamedir, deletedir. Will be refactored in the next version to be more generic!        
           $plugins = glob("*_plugin.php");
           if ($plugins) {
             foreach ($plugins as $f) {
                 include_once($f);
                 if (function_exists(basename ($f,".php"). "_process_file")) {
-                  $action = isset($_GET['createdir']) ? 'createdir' : (isset($_GET['renamedir']) ? 'renamedir' : 'deletedir');
+                  if (isset($_GET['createdir']) || isset($_GET['renamedir']) || isset($_GET['deletedir'])) {
+                    $action = isset($_GET['createdir']) ? 'createdir' : (isset($_GET['renamedir']) ? 'renamedir' : 'deletedir');
+                  } // else action is "dir"       
                   call_user_func(basename ($f,".php"). "_process_file" , $action, '', $dir);
                 }
             }
           }
-        }
         if (isset($_GET['createdir'])) { // creates a directory
             $status = create_dir($dir, $enable_folder_creation, $fix_utf8);
+            if ($change_to_new_folder && $status != '&create_dir=false') {
+                $dir = change_to_new_dir($dir, $normalise_directory_names, $fix_utf8);
+            }
         } else if (isset($_GET['renamedir'])) { // Rename a directory
             $status = rename_dir($dir, $enable_folder_rename, $fix_utf8);
         } else if (isset($_GET['deletedir'])) { // the check if the file can be deleted is done before - if it is not possible we never get here!
@@ -163,7 +158,7 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['
         }
         // needed for browsing - we check if a [..] is possible - it is never allowed to go higher as the defined root!
         $show_root = (isset($_SESSION["TFU_ROOT_DIR"])) ? ($dir != $_SESSION["TFU_ROOT_DIR"]) : false;
-
+        
         if (isset($_GET['changedir'])) { // Change a directory
            $dir = change_folder($dir, $show_root, $enable_folder_browsing, $exclude_directories, $sort_directores_by_date);
         }
@@ -211,15 +206,20 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_SESSION['TFU_RN']) && isset($_GET['
         $dirs = ($enable_folder_browsing == "true") ? implode("|", $myDirs) : "";
 
         $dirsub = create_directory_title($dir, $hide_directory_in_title, $truncate_dir_in_title , $fix_utf8);
-        $currentdir = basename($dir); // currently only the last folder is shown
+
+        $normalizeSpaces = true;
+        $normalize_upper_case = true;
+        $currentdir = normalizeFileNames(basename($dir)); // currently only the last folder is shown
         $baseurl = "&baseurl=" . getRootUrl() . $dir . "/"; // the baseurl
         if ($fix_utf8 == "") {
             $baseurl = utf8_encode($baseurl); // the baseurl
         }
         if ($directory_file_limit_size != -1) {
-           $status .= '&dir_size=' . getFoldersize($dir);
+           $size_dir = isset($_SESSION["TFU_ROOT_DIR"]) ? $_SESSION["TFU_ROOT_DIR"] : $dir;
+           $status .= '&dir_size=' . getFoldersize($size_dir);
         }
         store_temp_session();
+               
         $size = $nrFiles . " files (" . formatSize($size) . ")"; // formating of the display can be done here!
        echo "&tfufiles=" . $size . "|" . $files . "&tfudirs=" . $dirs . $status . "&currentDir=".$currentdir."&dirtext=" . $dirsub . $mem_errors . $upload_ok . $baseurl . '&last=true';
     } else {

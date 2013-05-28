@@ -3,7 +3,7 @@
 Plugin Name: Wordpress Flash Uploader
 Plugin URI: http://www.tinywebgallery.com/blog/wfu
 Description: The Wordpress Flash Uploader does contain 2 plugins: '<strong>Wordpress Flash Uploader</strong>' and '<strong>Sync Media Library</strong>'. The Wordpress Flash Uploader is a flash uploader that replaces the existing flash uploader and let you manage your whole  WP installation. 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library. 
-Version: 2.16.5
+Version: 3.1
 Author: Michael Dempfle
 Author URI: http://www.tinywebgallery.com
 */
@@ -48,6 +48,8 @@ if (!class_exists("WFU")) {
             $arr[] = get_option('medium_size_w');
             $arr[] = get_option('thumbnail_size_h');
             $arr[] = get_option('thumbnail_size_w');
+            $arr[] = "85x85";
+            $arr[] = "280x125";
             
             $unique_sizes=array_unique($arr);
             $unique_sizes_filter='';
@@ -108,7 +110,9 @@ if (!class_exists("WFU")) {
                 // new 2.16
                 'frontend_javascript' => '',
                 // new 2.17
-                 'sync_time' => ''               
+                 'sync_time' => '',
+                 'synch_max_files' => 'auto',
+                 'sync_warning_message' => 'true'                 
             );
 
             $wfuOptions = get_option($this->adminOptionsName);
@@ -351,9 +355,10 @@ if (!class_exists("WFU")) {
 		        'width' => '650',
 		        'configid' => '',
 	        ), $atts));	          
-	              ob_start();
+	              // could already be started by another plugin.
+                @ob_start();
                 @session_start();
-                ob_end_clean();
+                @ob_end_clean();
 
                $_SESSION["IS_ADMIN"] = "true";
                $devOptions = $this->getAdminOptions();
@@ -457,6 +462,13 @@ if (!class_exists("WFU")) {
            $_POST['synchronize_media_library'] = 'true';
            $this->printSync(true, false);
       }
+      
+      function Initialize() {  
+            // could already be started by another plugin.
+            @ob_start();
+            @session_start();
+            @ob_end_clean();
+      }
 
                
     } } //End Class WFU
@@ -508,7 +520,8 @@ if (isset($dl_pluginSeries)) {
 
     add_filter( 'cron_schedules', array( &$dl_pluginSeries, 'filter_cron_schedules' ) );
     add_action('wfu_task_hook', array( &$dl_pluginSeries, 'wfu_task_function' ) );
-
+    add_action('init',  array( &$dl_pluginSeries, 'Initialize' ) );
+    
     $wfuOptions = $dl_pluginSeries->getAdminOptions();
     if ( $wfuOptions['scheduler'] != 'none' && !wp_next_scheduled('wfu_task_hook') ) {
        wp_schedule_event( time(),  $wfuOptions['scheduler'], 'wfu_task_hook' ); // hourly, daily and twicedaily
@@ -516,4 +529,5 @@ if (isset($dl_pluginSeries)) {
         wp_clear_scheduled_hook('wfu_task_hook');
     }
 }
+
 ?>

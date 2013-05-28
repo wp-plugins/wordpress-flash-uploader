@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.16.x
+ * TWG Flash uploader 3.0
  *
- * Copyright (c) 2004-2012 TinyWebGallery
+ * Copyright (c) 2004-2013 TinyWebGallery
  * written by Michael Dempfle
  *
  *
@@ -14,7 +14,7 @@
  * * ensure this file is being included by a parent file
  */
 defined('_VALID_TWG') or die('Direct Access to this location is not allowed.');
-$tfu_help_version = '2.16';
+$tfu_help_version = '3.0';
 // some globals you can change
 $check_safemode = true;              // New 2.12.x - By default TFU checks if you have a safe mode problem. On some server this test does not work. There you can try to turn it off and test if you can e.g. create directories, upload files to new created directories.
 $session_double_fix = false; // this is only needed if you get errors because of corrupt sessions. If you turn this on a backup is made and checked if the first one is corrupt
@@ -46,7 +46,7 @@ tfu_setHeader();
 include dirname(__FILE__) . '/tfu_zip.class.php';
 
 // check if all included files have the same version to avoid problems during update!
-if ($tfu_zip_version != '2.16') {
+if ($tfu_zip_version != '3') {
   tfu_debug('Not all files belong to this version. Please update all files.');
 }
 
@@ -168,9 +168,10 @@ if (!isset($skip_error_handling)) {
  * 2 = unknown - we retry after the save later.
  *
  */
-function resize_file($image, $size, $compression, $image_name, $dest_image = false)
+function resize_file($image, $size, $compression, $image_name, $dest_image = false, $create_cropped_images = false)
 {
     global $use_image_magic, $image_magic_path, $enable_upload_debug, $store;
+    global $use_size_as_height;
 
     if (!isset($store)) {
       $store = 0;
@@ -206,7 +207,7 @@ function resize_file($image, $size, $compression, $image_name, $dest_image = fal
                  if ($enable_upload_debug) { tfu_debug('Resize: Image ('. $oldsizex .'x' .$oldsizey. ') is not resized with setting "' . $size . '"'); }
                  return 1;
              }
-             if ($oldsizex > $oldsizey) { // querformat - this keeps the dimension between horzonal and vertical
+             if ($oldsizex > $oldsizey && !$use_size_as_height) { // querformat - this keeps the dimension between horzonal and vertical
                  $width = $size;
                  $height = ($width / $oldsizex) * $oldsizey;
              } else { // hochformat - this keeps the dimension between horzonal an vertical
@@ -431,7 +432,7 @@ function send_thumb($image, $compression, $sizex, $sizey, $generateOnly = false)
             }
             if (!$generateOnly) {
                 ob_start();
-                if (imagejpeg($dst, '', $compression)) {
+                if (imagejpeg($dst, null, $compression)) {
                     $buffer = ob_get_contents();
                     header('Content-Length: ' . strlen($buffer));
                     ob_end_clean();
@@ -889,7 +890,7 @@ function restore_split_files($items)
     // first we check if files are split and group he splited files
     foreach ($items as $filename) {
         if (is_part($filename)) {
-            $split_array[removeExtension($filename)][] = $filename;
+            $split_array[tfu_removeExtension($filename)][] = $filename;
         }
     }
 
@@ -924,7 +925,7 @@ function resize_merged_files($items, $size)
     // first we check if files are split and group the splited files
     foreach ($items as $filename) {
         if (is_part($filename)) {
-            $split_array[removeExtension($filename)][] = $filename;
+            $split_array[tfu_removeExtension($filename)][] = $filename;
         }
     }
     foreach ($split_array as $restore => $parts) {
@@ -1055,7 +1056,7 @@ function cleanup_thumbs_cache()
     }
 }
 
-function removeExtension($name)
+function tfu_removeExtension($name)
 {
     return substr($name, 0, strrpos ($name, '.'));
 }
@@ -1219,13 +1220,13 @@ function tfu_seems_utf8($Str)
     return true;
 }
 
-function cp1252_to_utf8($str)
+function tfu_cp1252_to_utf8($str)
 {
     global $cp1252_map;
     return strtr(utf8_encode($str), $cp1252_map);
 }
 
-function utf8_to_cp1252($str)
+function tfu_utf8_to_cp1252($str)
 {
     global $cp1252_map;
     return utf8_decode(strtr($str, array_flip($cp1252_map)));
@@ -1276,7 +1277,7 @@ function tfu_enc($str, $id, $length = false)
 
 function setSessionVariables()
 {
-    global $folder, $user, $login;
+    global $folder, $start_folder, $user, $login;
     // this settings are needed in the other php files too!
     if ($login == 'true') {
         $_SESSION['TFU_LOGIN'] = 'true';
@@ -1286,8 +1287,16 @@ function setSessionVariables()
     } else {
        unset($_SESSION['TFU_USER']);
     }
-    $_SESSION['TFU_RN'] = parseInputParameter($_POST['twg_rn']);
+    $_SESSION['TFU_RN'] = (string)parseInputParameter($_POST['twg_rn']);
     $_SESSION['TFU_ROOT_DIR'] = $_SESSION['TFU_DIR'] = $folder;
+    
+    if ($start_folder != '') {
+        $new_folder = $folder . '/' . $start_folder;
+        if (file_exists($new_folder)) {
+            $_SESSION['TFU_DIR'] = $new_folder;
+        }
+    }
+    
     store_temp_session();
 }
 
@@ -1365,8 +1374,7 @@ function sendConfigData()
     $parameters = "&parameters=" . urlencode(tfu_enc($output, $rn));
 
     // we generate a nonce for this request
-    // last=true is added for such websites who add their own code to each page!
-    
+    // last=true is added for such websites who add their own code to each page!   
     echo '&tfu_nonce=' . create_tfu_nonce() . $parameters . "&last=true";
 }
 
@@ -1399,6 +1407,14 @@ function checkSessionTempDir($type = 0)
         $filename = $filen['name'];
         tfu_debug('It can be possible that someone tried to upload something without permissions! If you think this is the case the IP of this user is logged: ' . $_SERVER['REMOTE_ADDR'] . '. He tried to upload the following file: ' . $filename);
     }
+    if(strcmp($_SESSION['TFU_RN'],parseInputParameter($_GET['tfu_rn'])) != 0) {
+       tfu_debug('Security tokens did not match. Session: '.$_SESSION['TFU_RN']. ' : param '.$_GET['tfu_rn']. ' no further actions are allowed.');
+       session_destroy();
+       store_temp_session();
+       return;
+    }
+
+    
     if (!file_exists(dirname(__FILE__) . '/session_cache')) {
         tfu_debug('Or it is possible that the session handling of the server is not o.k. Therefore TFU simulates a basic session handling and uses the session_cache folder for that.');
         if (!mkdir(dirname(__FILE__) . '/session_cache')) {
@@ -1426,7 +1442,7 @@ $check_server_file_extensions = $m;
 
 function restore_temp_session($checkrn = false)
 {
-    global $session_double_fix;
+    global $session_double_fix;  
     clearstatcache();
     if (file_exists(dirname(__FILE__) . '/session_cache')) { // we do your own small session handling
         $cachename = dirname(__FILE__) . '/session_cache/' . session_id();
@@ -1434,6 +1450,12 @@ function restore_temp_session($checkrn = false)
             $data = file_get_contents($cachename);
             set_error_handler('on_error_no_output'); // is needed because error are most likly but we don't care about fields we don't even know
             $sdata = unserialize($data);
+            // check if there is maybe a session and the temp session is only here for backup
+            // save the old session and add the existing values to internal one!
+            if (isset($_SESSION) && count($_SESSION) > 0) {
+                // merge arrays
+                foreach($_SESSION as $k => $v) { $sdata[$k] = $v; }
+            }           
             set_error_handler('on_error');
             if (isset($sdata) && (isset($sdata['TFU_RN']) || $checkrn)) {
                 $_SESSION = $sdata;
@@ -1469,6 +1491,7 @@ function restore_temp_session($checkrn = false)
         // first we check if we have done this already!
         $today = dirname(__FILE__) . '/session_cache/_cache_day_' . date('Y_m_d') . '.tmp';
         if (file_exists($today)) {
+            checkrequest();
             return;
         }
         // not done - we delete all files on this folder older than 1 day + the _cache_day_*.tmp files
@@ -1501,6 +1524,31 @@ function restore_temp_session($checkrn = false)
       $_SESSION['__default']['session.counter'] = $_SESSION['__default']['session.counter'] + 1;
       $_SESSION['__default']['session.timer.now'] = time();
       $_SESSION['__default']['session.timer.last'] = $_SESSION['__default']['session.timer.now'];
+    }
+    
+    checkrequest();
+}
+
+function checkrequest() {
+    if (!isset($_SESSION['TFU_RH'])) {
+         $_SESSION['TFU_RH'] = array();
+         return;
+    } else {
+       if (isset($_GET['ts']) || isset($_GET['zeit'])) {
+         $requesthashes = $_SESSION['TFU_RH'];
+         $hashrequest =  $hashrequest_ =  isset($_GET['zeit']) ? $_GET['zeit'] : $_GET['ts'];
+         
+         if (isset($_GET['remaining'])) {
+             $hashrequest .= isset($_GET['remaining']) ? $_GET['remaining'] : "-";
+         }
+  
+         if (isset($requesthashes[$hashrequest]) || strlen($hashrequest_) != 13) {
+           tfu_debug("Invalid Request happend: " . strlen($hashrequest_) );
+           die ("Invalid Request");
+         }
+         $requesthashes[$hashrequest] = $hashrequest; 
+         $_SESSION['TFU_RH'] = $requesthashes;
+       }
     }
 }
 
@@ -1638,7 +1686,7 @@ function check_valid_filesize($name)
  * - parseInputParameter check for valid caracters because there I know the proper values
  * - parseInputParameterFile is an exclude - there I only check for chars that are not allowed in file names!
  */
-function parseInputParameter($value, $def = '', $valid_chars_regex = '.\w_,-')
+function parseInputParameter($value, $def = '', $valid_chars_regex = '.\w_,-@!+*%')
 {
     return (isset($value)) ? preg_replace('/[^' . $valid_chars_regex . ']|\.+$/i', '_', $value) : $def;
 }
@@ -1655,8 +1703,16 @@ function parseInputParameterFile($value, $def = '')
 
 function printServerInfo()
 {
-   global $check_image_magic;                                                                                                                                                                                   global $m;
+   global $check_image_magic;                                                                                                                                                                                   
+   global $m;
     echo '
+    <html>
+    <head>
+    <title>TinyWebGallery flash uploader configuration limits overview.</title>
+    <meta name="description" lang="en" content="The configuration overview shows the basic configuration limits. You can configure this limits by modifying the settings of your server.">
+    </head>
+    <body>
+    
   <style type="text/css">
   body { 	font-family : Arial, Helvetica, sans-serif; font-size: 12px; background-color:#ffffff; }
   td { vertical-align: top; font-size: 12px; }
@@ -1668,7 +1724,7 @@ function printServerInfo()
     echo '<br><p><center>Some info\'s about your server. This limits are not TFU limits. You have to change this in the php.ini.</center></p>';
     echo '<div class="install">';
     echo '<table><tr><td>';
-    echo '<tr><td width="400">TFU version:</td><td width="250">2.15.1&nbsp;';
+    echo '<tr><td width="400">TFU version:</td><td width="250">3.0.3&nbsp;';
     // simply output the license type by checking the strings in the license. No real check like in the flash is done here.
     
     if ($m != "" && $m != "s" && $m !="w" ) {
@@ -1725,6 +1781,7 @@ function printServerInfo()
     echo '<tr><td>PHP default socket timeout: </td><td>' . ini_get('default_socket_timeout') . ' s</td></tr>';
     echo '</table>';
     echo '</div>';
+    echo '</body></html>';
 }
 
 /*
@@ -1780,32 +1837,38 @@ function check_image_magic($path = "", $check_image_magic = true) {
    }
 }
 
+function fixencodingfordisk($value) {
+  return iconv("UTF-8", "ISO-8859-1", $value);
+} 
+
+
 /**
  *  Normalizes the file names - fix_encoding has to be called before this function is used.
  *  This isn't done here because normalize filenames is an optional step while fix_encoding
  *  is always done.
  **/
 function normalizeFileNames($imageName){
-   global $normalizeSpaces;
+   global $normalizeSpaces, $normalize_upper_case;
 
-  // it's needed to decode first because str_replace does not handle str_replace in utf-8
-  $imageName = utf8_decode($imageName);
-  // we make the file name lowercase ÄÖÜ as well.
-  // seems not to be available on all systems.
-  if (function_exists("mb_strtolower")) { 
-    $imageName = mb_strtolower($imageName); 
-  } else {
-    $imageName = strtolower($imageName); 
+   // it's needed to decode first because str_replace does not handle str_replace in utf-8
+   $imageName = utf8_decode($imageName);
+   // we make the file name lowercase Ã„Ã–Ãœ as well.
+   // seems not to be available on all systems.
+   if ($normalize_upper_case) {
+     $imageName = replaceChars($imageName);
+     if (function_exists("mb_strtolower")) { 
+       $imageName = mb_strtolower($imageName); 
+     } else {
+       $imageName = strtolower($imageName); 
+     } 
   }
   
   if ($normalizeSpaces == 'true') {
     $imageName=str_replace(' ','_',$imageName);
   }
-  // Some characters I know how to fix ;).
-  $imageName=str_replace(array('ä','ö','ü','ß'),array('ae','oe','ue','ss'),$imageName);
-  // and some others might need
-  $imageName=str_replace(array('á','à','ã','â','ç','¢','é','ê','è','ë','í','î','ï','ì','ñ','ô','ó','õ','ò','š','ú','ù','û','ü','ý','ÿ','ž'),
-                         array('a','a','a','a','c','c','e','e','e','e','i','i','i','i','n','o','o','o','o','s','u','u','u','u','y','y','z'),$imageName);
+  
+  // replace is not called all the time - therefore called again here.
+  $imageName = replaceChars($imageName);
  
   // we remove the rest of unwanted chars
   $patterns[] = '/[\x7b-\xff]/';  // remove all characters above the letter z.  This will eliminate some non-English language letters
@@ -1816,18 +1879,35 @@ function normalizeFileNames($imageName){
   $patterns[] = '/[\x21-\x2c]/u'; // remove range of shifted characters on keyboard - !"#$%&'()*+
   $patterns[] = '/[\x5b-\x60]/u'; // remove range including brackets - []\^_`
   $replacement ="_";
-  return utf8_encode(preg_replace($patterns, $replacement, $imageName));
+  $imageName =  utf8_encode(preg_replace($patterns, $replacement, $imageName));
+  return $imageName;
+  
+}
+
+function replaceChars($imageName) {
+      // Some characters I know how to fix ;).  Ã¤,Ã¶,Ã¼,ÃŸ - char is used below because this file is saved in utf-8 and if
+  // I use Ã¤ this would be the utf-8 Ã¤ which is <> the ansi Ã¤ which is used here because of the utf8_decode
+  $imageName=str_replace(array(chr(228) ,chr(246),chr(252), chr(223)),array('ae','oe','ue','ss'),$imageName);
+  // and some others might needed - here are not all chars mapped.
+  $imageName=str_replace(array(chr(224),chr(225),chr(226),chr(227),chr(229),chr(230),chr(231),chr(162),chr(232),chr(233),chr(234),chr(235),chr(236),chr(237),chr(238),chr(239),chr(241),chr(242),chr(243),chr(244),chr(245),chr(154),chr(249),chr(250),chr(251),chr(253),chr(255),chr(158)),
+                         array('a','a','a','a','a','ae','c','c','e','e','e','e','i','i','i','i','n','o','o','o','o','s','u','u','u','y','y','z'),$imageName);
+  $imageName=str_replace(array(chr(196),chr(214),chr(220)), array('ae','oe','ue'),$imageName);
+  return $imageName; 
 }
 
 function execute_command ($command) {
   $use_shell_exec = true;;
-  ob_start();
-  set_error_handler('on_error_no_output');
+ // ob_start();
+ // set_error_handler('on_error_no_output');
   if (substr(@php_uname(), 0, 7) == "Windows"){
   	   // Make a new instance of the COM object
-  		$WshShell = new COM("WScript.Shell");
-  		 // Make the command window but dont show it.
-  	   $oExec = $WshShell->Run("cmd /C " . $command, 0, true);
+  	   if (class_exists('COM')) {
+         $WshShell = new COM("WScript.Shell");
+  		   // Make the command window but dont show it.
+  	     $oExec = $WshShell->Run("cmd /C " . $command, 0, true);
+       } else {
+         tfu_debug("From PHP 5.4.5, COM and DOTNET is no longer built into the php core. You have to add COM support in php.ini. Add the line extension=php_com_dotnet.dll to your php.ini.");
+       }
   } else {
       if ($use_shell_exec) {
          shell_exec($command);
@@ -1835,8 +1915,8 @@ function execute_command ($command) {
   	      exec($command . " > /dev/null");
        }
   }
-  set_error_handler('on_error');
-  ob_end_clean();
+ // set_error_handler('on_error');
+ // ob_end_clean();
 }
 
 /*
@@ -2043,13 +2123,13 @@ function tfu_preview($file) {
 function tfu_createThumb($file) {
       global $compression, $use_image_magic, $image_magic_path, $pdf_thumb_format;
       if (!(preg_match("/.*\.(p|P)(d|D)(f|F)$/", $file))) {
-        $name = removeExtension($file) . "-" . $_GET['tfu_width'] . 'x' . $_GET['tfu_height'] . "." . getExtension($file);
+        $name = tfu_removeExtension($file) . "-" . $_GET['tfu_width'] . 'x' . $_GET['tfu_height'] . "." . getExtension($file);
         resize_file($file, $_GET['tfu_width'] . 'x' . $_GET['tfu_height'], $compression, basename($file), $name); 
         unset($_SESSION['TFU_LAST_UPLOADS']);
         $_SESSION['TFU_LAST_UPLOADS'] = array();
         $_SESSION['TFU_LAST_UPLOADS'][] = $name;
       } else if ($use_image_magic) {
-          $name = dirname(__FILE__) . '/' . removeExtension($file) . "-" . $_GET['tfu_width'] . '.' . $pdf_thumb_format;
+          $name = dirname(__FILE__) . '/' . tfu_removeExtension($file) . "-" . $_GET['tfu_width'] . '.' . $pdf_thumb_format;
           // create a pdf thumbnail
           $ima = realpath($file);
           if (!file_exists($name)) {
@@ -2141,7 +2221,7 @@ function  tfu_text($file) {
         $format = 'DOS';
     }
     if (!tfu_seems_utf8($content_new)) {
-        $content_new = cp1252_to_utf8($content_new);
+        $content_new = tfu_cp1252_to_utf8($content_new);
         $enc = 'ANSI';
     }
     echo urlencode($content_new);
@@ -2156,7 +2236,7 @@ function tfu_savetext($file, $overwrite=true) {
     } else {
       $content = urldecode($_POST['data']);
       if ($_POST['encoding'] == 'ANSI') {
-          $content = utf8_to_cp1252($content);
+          $content = tfu_utf8_to_cp1252($content);
       }
       if ($_POST['format'] == 'DOS') {
           $content = preg_replace("/\r\n|\r|\n/", chr(13) . chr(10), $content);
@@ -2216,17 +2296,6 @@ function tfu_zip_download($files, $enable_file_download) {
         exit(0);
     }
 
-    /*
-    $createZip = new createZip;
-    $nrfiles = count($files);
-    for ($i = 0; $i < $nrfiles; $i++) {
-      $createZip -> addFile(file_get_contents($files[$i]), my_basename($files[$i]));
-    }
-    $fileName = $zip_folder . '/' . $_GET['zipname'];
-    $fd = fopen ($fileName, "wb");
-    $out = fwrite ($fd, $createZip -> getZippedfile());
-    fclose ($fd);
-    */
     $nrfiles = count($files);
 
     if ($zip_file_pattern == '') {
@@ -2300,10 +2369,24 @@ function create_dir($dir, $enable_folder_creation, $fix_utf8) {
               if ($result && $dir_chmod != 0) {
                 @chmod($createdir, $dir_chmod);
               }
+              if (!$result) {
+                tfu_debug('Directory "' . $createdir . '" could not be created');
+              }
             }
             $status = ($result) ? '&create_dir=true':'&create_dir=false';
         }
     return $status;
+}
+
+function change_to_new_dir($dir, $normalise_directory_names, $fix_utf8) {
+    $newdir = parseInputParameterFile(trim(my_basename(' ' . $_GET['newdir'])));
+    if ($normalise_directory_names) {
+        $newdir = normalizeFileNames($newdir);
+    }
+    $newdir = fix_decoding($newdir, $fix_utf8);
+    $dir = $dir . "/" . $newdir;
+    $_SESSION["TFU_DIR"] = $dir;
+    return $dir;
 }
 
 function rename_dir( &$dir, $enable_folder_rename, $fix_utf8) {
@@ -2572,7 +2655,7 @@ function my_basename($name) {
 /**
  * Fixes the encoding of the file names we get from the flash. They come utf-8 encoded
  * from the flash and writing this directly to the filesystem produces depending on the
- * system unreadable file names. Especially if special characters like öäü or even
+ * system unreadable file names. Especially if special characters like Ã¶Ã¤Ã¼ or even
  * chinese Characters are used.
 */
 function fix_decoding($encoded_filename, $fix_utf8) {
@@ -2632,10 +2715,10 @@ function resetSessionTree() {
 function check_multiple_extensions($image, $remove_multiple_php_extension) {
   if ($remove_multiple_php_extension) {
     $ext = getExtension($image);
-    if (substr($ext,0,2) != "php") {
+    if (substr($ext,0,3) != "php") {
       $image2 = str_replace(".php", "", $image);
       if ($image != $image2) {
-          tfu_debug("SECURITY WARNING: Please check the file ".$image2.". It was uploaded with an image extensions and also a nested php extension. On some server this is a security problem (multiple extensions) and therefore the .php part of the file name was removed!" );
+          tfu_debug("SECURITY WARNING: Please check the file ".$image2.". It was uploaded with a extensions and also a nested php extension. On some server this is a security problem (multiple extensions) and therefore the .php part of the file name was removed!" );
           $image = $image2;
       }
     }
@@ -2758,6 +2841,55 @@ function file_upload_error_message($error_code) {
         default:
             return 'Unknown upload error';
     }
+}
+
+function tfu_mail($to, $subject, $body, $from, $type = 'text/plain') {
+global $fix_utf8, $use_smtp, $smtp_host, $smtp_port, $smtp_user, $smtp_password;
+
+if (strnatcmp(phpversion(),'5.0.0') >= 0) { // new version - used for php > 5 
+    require_once('class.phpmailer.php');
+   
+    $mail             = new PHPMailer();
+    $mail->CharSet = 'utf-8';
+    // $mail->SMTPDebug  = 2;  
+    
+    if ($use_smtp) {
+      $mail->IsSMTP(); // telling the class to use SMTP
+      $mail->SMTPAuth   = true;           // enable SMTP authentication
+      $mail->Host       = $smtp_host;     // sets the SMTP server
+      $mail->Port       = $smtp_port;     // set the SMTP port for the GMAIL server
+      $mail->Username   = $smtp_user;     // SMTP account username
+      $mail->Password   = $smtp_password; // SMTP account password
+    }
+    $mail->SetFrom($from);
+    $mail->AddReplyTo($from);
+
+    // split for multiple e-mails
+    $to_array = array_filter(explode(',',$to));
+    foreach($to_array as $to_email) {
+         $mail->AddAddress($to_email);  
+    }
+    $mail->Subject = $subject;
+    if ($type == 'text/plain') {
+      $mail->Body = $body;
+    } else {
+      $mail->MsgHTML($body);
+    }
+    
+    if(!$mail->Send()) {
+      tfu_debug("Mailer Error: " . $mail->ErrorInfo);
+    }
+
+} else { // old php 4 compatible sending!  
+      $submailheaders = "From: $from\n";
+      $submailheaders .= "Reply-To: $from\n";
+      $submailheaders .= "Return-Path: $from\n"; 
+      if ($fix_utf8 != '') {
+        $submailheaders .= 'Content-Type: text/plain; charset=' . $fix_utf8;
+      }
+      $subject = fix_decoding($subject, $fix_utf8);
+      @mail ($to, html_entity_decode ($subject), html_entity_decode ($body), $submailheaders); 
+   } 
 }
 
 @ob_end_clean();

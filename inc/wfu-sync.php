@@ -1,10 +1,10 @@
 <?php
 /**
- *   Wordpress Flash uploader 2.16.x  
+ *   Wordpress Flash uploader 3.1.x  
  *
  *   This file contains the methods used by the synch part from the WFU class
  *
- *   Copyright (c) 2004-2012 TinyWebGallery
+ *   Copyright (c) 2004-2013 TinyWebGallery
  *   Author: Michael Dempfle
  *   Author URI: http://www.tinywebgallery.com 
  */
@@ -12,20 +12,32 @@
 if (!class_exists("WFUSync")) {
     class WFUSync {
 
-        function printSync($devOptions, $istab = false, $check_nonce = true) {
-            // now we check all possible actions if the correct nonce is set.
-            $wfuOptions = $this->getAdminOptions();
+        function printSync($devOptions, $istab = false, $check_nonce = true) {    
+            $synch_start_time = time ();
+           
+            if (!(isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library'])  || 
+                  isset($_GET['clean_media_library']) || isset($_GET['synchronize_media_library']) || 
+                  isset($_POST['import_media_library']) || isset($_GET['import_media_library']))) {
+              unset($_SESSION['fuo_backup']);
+            }
+           
+            // now we check all possible actions if the correct nonce is set.           
+            $wfuOptions = $this->getAdminOptions();  
+            for ($i = 0; $i < ob_get_level(); $i++) { @ob_end_flush(); }
+            ob_implicit_flush(1);
             
             if ($wfuOptions['sync_time'] != '0' && $wfuOptions['sync_time'] != '') {
               $time = intval($wfuOptions['sync_time']);
               // Both settings should do the same! Only works with safemode off!
               @set_time_limit($time);
               @ini_set('max_execution_time', $time);
-            }
+            }              
+            $max_execution_time = intval(ini_get('max_execution_time'));
             
             if ($check_nonce) {
-              if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library'])  || isset($_GET['clean_media_library']) ) {
-                  $nonce=$_POST['wfunonce'];
+              if (isset($_POST['synchronize_media_library']) || isset($_GET['synchronize_media_library']) || 
+              isset($_POST['clean_media_library']) || isset($_GET['clean_media_library']) ) {
+                  $nonce= isset($_GET['wfunonce']) ? $_GET['wfunonce'] : $_POST['wfunonce'];
                   if (! wp_verify_nonce($nonce, 'wfu-nonce') ) die('Security check failed!');
               } 
             }
@@ -38,7 +50,12 @@ if (!class_exists("WFUSync")) {
             // this is printed first to get a header while generating thumbnails.
             echo '<div id="icon-upload" class="icon_jfu"><br></div>
                   <h2>Synchronize Media Library</h2>';
+                  
+            if  ($wfuOptions['sync_warning_message'] == 'true') {     
+                echo '<div class="error" style="padding:10px;">If you are using the synch the first time please make a backup of you upload folder and your database first!<br />Please disable this message in the settings once you have done this!</div>';      
+            }
             @flush();
+            //@wp_ob_end_flush_all();
             echo "\n<!-- DEBUG: before getMediaLibraryFiles -->\n";
             $mlf = WFUSync::getMediaLibraryFiles();
             echo "<!-- DEBUG: before getUploadFolderFiles -->\n";
@@ -53,15 +70,18 @@ if (!class_exists("WFUSync")) {
             $fuo = WFUSync::findUploadOnly($mlf, $uff);
 
             if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library'])  || isset($_GET['clean_media_library']) ||
-                isset($_POST['synchronize_media_library']) || isset($_POST['import_media_library']) || isset($_GET['import_media_library'])) {
+                isset($_GET['synchronize_media_library']) || isset($_POST['import_media_library']) || isset($_GET['import_media_library'])) {
                 echo '<script type="text/javascript">
               if (window.parent.frames[window.name] && (parent.document.getElementsByTagName(\'frameset\').length <= 0)) {
                 window.parent.document.getElementById("status_text").innerHTML = "Starting synchronisation.";
               }</script>';
             }
             @flush(); // is done to see the debug stuff
-            if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library']) || isset($_GET['clean_media_library'])) {
+            //@wp_ob_end_flush_all();
+            if (isset($_POST['synchronize_media_library']) || isset($_GET['synchronize_media_library']) ||  
+                isset($_POST['clean_media_library']) || isset($_GET['clean_media_library'])) {
                 // we remove the ones tat are not in the upload folder anymore.
+                
                 echo '<div class="updated"><p><strong>';
                 if (count($mfo) > 0) {
                   foreach($mfo as $item) {
@@ -78,16 +98,61 @@ if (!class_exists("WFUSync")) {
                 }
                 echo '</strong></p></div>';                
             }
-            if (isset($_POST['synchronize_media_library'])
-                || isset($_POST['import_media_library']) || isset($_GET['import_media_library'])) {
-                $sum = count ($fuo);
+            if (isset($_POST['synchronize_media_library']) || isset($_GET['synchronize_media_library']) || 
+                isset($_POST['import_media_library']) || isset($_GET['import_media_library'])) {
+                $sum = count ($fuo);  
+                $synch_max_files = $wfuOptions['synch_max_files'];
                 $current = 0;
-                foreach($fuo as $item) {
+                $start_time = time ();
+                $synch_before_time =  $start_time - $synch_start_time;
+                $num = count($fuo);
+                echo "<br />Calculating data for needed media library modifications: ". ceil($synch_before_time)."s<br />&nbsp;<br />"; 
+                
+                foreach($fuo as $key => $item) {
                     $current++;
-                    if( !ini_get('safe_mode') ){
-                       @set_time_limit(30);
+                    if(!ini_get('safe_mode') ){
+                       @set_time_limit($max_execution_time);
                     }
+                    
                     WFUSync::handle_import_file($item, $current, $sum);
+                    unset($_SESSION['fuo_backup'][$key]);
+                    $executed_time = time() - $start_time;                   
+                    $average = $executed_time / $current; 
+                    if ($num != $current) {  // not the last one!
+                        // we leave 1 calculation +3 sec as buffer
+                        $executed_time = $synch_before_time + $executed_time + 3 + $average;
+                       
+                        if ($synch_max_files == 'auto' && (($max_execution_time - $executed_time) < 0) || ($synch_max_files != 'auto' && ($current >= intval($synch_max_files)))  ) {
+                          if ($check_nonce) {
+                            echo "<br />Maximum number of files or maximum execution time reached.<br />Estimated remaining time for remaining files: ". ceil(($sum-$current) * $average) . "s<br /><br />Reload and continue...<br />"; 
+                            
+                            $action_url = '';
+                            if (isset($_POST['synchronize_media_library']) || isset($_GET['synchronize_media_library'])) {
+                              $action_url .= '&synchronize_media_library=true';
+                            } 
+                            if (isset($_POST['import_media_library']) || isset($_GET['import_media_library'])) {
+                               $action_url .= '&import_media_library=true';
+                            }
+                            $nonce= wp_create_nonce ('wfu-nonce'); 
+                                                      
+                            $reload_url = 'upload.php?page=wordpress-flash-uploader.php?printSync=true&wfunonce=' . $nonce . $action_url; 
+                            // 
+                            echo '<script type="text/javascript">                         
+                            function wp_reload() {
+                              window.location.href="'.$reload_url.'";
+                            }
+                            window.setTimeout("wp_reload()", 2000);
+                            </script>';
+                            @flush();
+                            //@wp_ob_end_flush_all();
+                            return;
+                          } else {
+                              // cronjob does only the maximum of the allows files...
+                              return;
+                          }
+                        }
+                    }
+                    
                 }
                 echo '<div class="updated"><p><strong>';
                 if ($current > 0) {
@@ -106,9 +171,8 @@ if (!class_exists("WFUSync")) {
         }
       }</script>';
 
-            if (isset($_POST['synchronize_media_library'])
-                || isset($_POST['clean_media_library'])
-                || isset($_POST['import_media_library'])) {
+            if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library']) || isset($_POST['import_media_library']) || 
+                isset($_GET['synchronize_media_library']) || isset($_GET['clean_media_library']) || isset($_GET['import_media_library']) ) {
                 // we reload the data.
                 $mlf = WFUSync::getMediaLibraryFiles();
                 $uff = WFUSync::getUploadFolderFiles('../' . WFUSync::getUploadPath(), !$check_nonce);
@@ -118,6 +182,9 @@ if (!class_exists("WFUSync")) {
                 $mfo = WFUSync::getMediaLibraryOnly($mlf);
                 $fuo = WFUSync::findUploadOnly($mlf, $uff);
             }
+            
+            
+            
 
             $count_mfo = 0;
             foreach($mfo as $item) {
@@ -215,14 +282,16 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
         }
       
         function getMediaLibraryFiles() {
+            $start_time = time();
             global $wpdb;
             $sql= "SELECT pm.post_id, pm.meta_id, pm.meta_value, pma.meta_value as meta_att FROM $wpdb->posts p,$wpdb->postmeta pm, $wpdb->postmeta pma WHERE pm.post_id=p.id and pma.post_id=pm.post_id and p.post_type = 'attachment' and pm.meta_key='_wp_attached_file' and pm.meta_value <> pma.meta_value order by pm.meta_value ";
             $mlf = $wpdb->get_results( $sql );
-            echo '<!-- DEBUG: getMediaLibraryFiles: ' . count($mlf) . "-->\n"; 
+            echo '<!-- DEBUG: getMediaLibraryFiles: ' . count($mlf) . " Duration: " . (time() -$start_time) . "s -->\n"; 
             return $mlf;
         }
 
         function getUploadFolderFiles( $from = '../wp-content/uploads', $is_cron) {
+            $start_time = time();
             if(!is_dir($from)) {
                echo '<div class="updated"><p><strong>';
                echo _e("Upload folder does not exist yet. Please upload at least one file.", "WFU");
@@ -271,12 +340,15 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                    unset($files[$key]); 
                  }
              }  
-             echo '<!-- DEBUG: getUploadFolderFiles: ' . count($files) . "-->\n"; 
+             echo '<!-- DEBUG: getUploadFolderFiles: ' . count($files) . " Duration: " . (time() -$start_time) . "s -->\n"; 
             return $files;
         }
 
         function getMediaLibraryOnly($mlf) {
+            $start_time = time();
             $mfo = array();
+            $upload_path =  '../' . WFUSync::getUploadPath();
+            
             foreach($mlf as $item) {
                 if (!WFUSync::isSupportedExtension($item->meta_value, false)) {
                     continue;
@@ -284,7 +356,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                 $main = false;
                 // echo $item->meta_value . '<br>';
                 // files have either a full path or the relative path in the uploads folder.
-                if (!file_exists($item->meta_value) && !file_exists('../' . WFUSync::getUploadPath() . '/' . $item->meta_value)) {
+                if (!file_exists($item->meta_value) && !file_exists( $upload_path . '/' . $item->meta_value)) {
                     $item->type = 'main';
                     $main = true;
                     $mfo[] = $item;
@@ -292,99 +364,111 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
 
                 if (!$main) { // we check the meta data if the main image is o.k.
                     $data = @unserialize($item->meta_att);
-                    // todo - check for thumbnails
                     $base = dirname($data['file']);
-
-                    if (isset($data['sizes'])) {
-                        if (isset($data['sizes']['thumbnail']) && isset($data['sizes']['thumbnail']['file'])) {
-                            $thumbnail =  $base . '/' . $data['sizes']['thumbnail']['file'];
-                            if (!file_exists($thumbnail) && !file_exists('../'.WFUSync::getUploadPath().'/' . $thumbnail)) {
-                                unset($error);
-                                $error->meta_value = $thumbnail;
-                                $error->type = 'thumbnail';
-                                $error->post_id = $item->post_id;
-                                unset($data['sizes']['thumbnail']);
-                                $error->data = $data;
-                                $mfo[] = $error;
-                            }
-                        }
-                        if (isset($data['sizes']['medium']) && isset($data['sizes']['medium']['file'])) {
-                            $medium =  $base . '/' . $data['sizes']['medium']['file'];
-                            if (!file_exists($medium) && !file_exists('../'.WFUSync::getUploadPath().'/' . $medium)) {
-                                unset($error);
-                                $error->meta_value = $medium;
-                                $error->type = 'medium';
-                                $error->post_id = $item->post_id;
-                                unset($data['sizes']['medium']);
-                                $error->data = $data;
-                                $mfo[] = $error;
-                            }
-                        }
-                        if (isset($data['sizes']['large']) && isset($data['sizes']['large']['file'])) {
-                            $large =  $base . '/' . $data['sizes']['large']['file'];
-                            if (!file_exists($medium) && !file_exists('../'.WFUSync::getUploadPath().'/' . $large)) {
-                                unset($error);
-                                $error->meta_value = $large;
-                                $error->type = 'large';
-                                $error->post_id = $item->post_id;
-                                unset($data['sizes']['large']);
-                                $error->data = $data;
-                                $mfo[] = $error;
-                            }
-                        }
+                    if (isset($data['sizes'])) {            
+                        $img_types = array('thumbnail', 'medium','large','Slideshow','Homepage','Sidebar'); 
+                        foreach ($img_types as $img_type) {
+                          if (isset($data['sizes'][$img_type]) && isset($data['sizes'][$img_type]['file'])) {
+                              $media_file =  $base . '/' . $data['sizes'][$img_type]['file'];
+                              if (!file_exists($media_file) && !file_exists( $upload_path.'/' . $media_file)) {
+                                  unset($error);
+                                  $error->meta_value = $media_file;
+                                  $error->type = $img_type;
+                                  $error->post_id = $item->post_id;
+                                  unset($data['sizes'][$img_type]);
+                                  $error->data = $data;
+                                  $mfo[] = $error;
+                              }
+                          }
+                        } 
                     }
                 }
             }
-            echo '<!-- DEBUG: getMediaLibraryOnly: ' . count($mfo) . " -->\n";  
+            echo '<!-- DEBUG: getMediaLibraryOnly: ' . count($mfo) . " Duration: " . (time() -$start_time) . "s -->\n";  
             return $mfo;
         }
 
         function findUploadOnly($media, $filesystem) {
+            $start_time = time();            
+            if (isset($_SESSION['fuo_backup'])) {      
+              $fuo =  $_SESSION['fuo_backup'];
+            } else {
+            $unserialize = array();
+            $media_cache = array();           
             $fuo = array();
             $wfuOptions = $this->getAdminOptions();
-             
-            foreach($filesystem as $fitem) {
+            $uploadPath = WFUSync::getUploadPath(); 
+           
+            //echo "<br>Files found on the filesystem : " . count($filesystem);
+            //echo "<br>Entires found in the media library : " . count($media);
+            
+            // a media cach is build that does all the expensive calculation!
+             foreach($media as $item) {
+                  $v1 =  realpath('../'.$uploadPath.'/' . $item->meta_value);
+                  $v3 = ($v1) ? $v1:realpath($item->meta_value);
+                  $rbase = realpath(dirname($v3)) . DIRECTORY_SEPARATOR;
+                  $nv3 =  WFUSync::normalizeFileNames($v3);
+                  $data = unserialize($item->meta_att);
+                                
+                  $media_cache[$item->meta_value . '-v'] =  $v3;
+                  $media_cache[$item->meta_value . '-nv'] =  $nv3; 
+                  $media_cache[$item->meta_value . '-rbase'] =  $rbase;  
+                  $media_cache[$item->meta_value . '-data'] =  $data;   
+             }
+
+            $counter = 0;
+            $filesystem_local = $filesystem; 
+
+            foreach($filesystem_local as $fkey => $fitem) {
+                
+                $realFitem = realpath($fitem);
+                $normRealFitem = WFUSync::normalizeFileNames($realFitem);
                 $found = false;
                 foreach($media as $item) {
-                    $v1 =  realpath('../'.WFUSync::getUploadPath().'/' . $item->meta_value);
-                    // echo $v1 . "<br>";
-                    $v2 =  realpath($item->meta_value);
-                    $v3 = ($v1) ? $v1:$v2;
-                    if (realpath($fitem) == $v3) {
-                        // echo "found";
+                   $v3 = $media_cache[$item->meta_value . '-v'];
+                   $nv3 = $media_cache[$item->meta_value . '-nv'] ; 
+                   $rbase = $media_cache[$item->meta_value . '-rbase'];   
+                     
+                    if ($realFitem == $v3 || $nv3 == $normRealFitem) { 
                         $found = true;
+                        // remove from checks that is it a resized file.
+                        unset($filesystem_local[$fkey]); 
                         break; // we have found this element - we search the next one.
-                    }
-
-                    $base = dirname($v3);
+                    }   
                     // now we check the metadata
-                    $data = @unserialize($item->meta_att);
-                    if (isset($data['sizes']) && isset($data['sizes']['thumbnail']) && isset($data['sizes']['thumbnail']['file'])) {
-                      $thumbnail =  realpath($base . '/' . $data['sizes']['thumbnail']['file']);
-                      if (realpath($fitem) == $thumbnail) { $found = true; break; }
-                    }
-                    if (isset($data['sizes']) && isset($data['sizes']['medium']) && isset($data['sizes']['medium']['file'])) {
-                      $medium =  realpath($base . '/' . $data['sizes']['medium']['file']);
-                      if (realpath($fitem) == $medium) { $found = true; break; }
-                    }
-                    if (isset($data['sizes']) && isset($data['sizes']['large']) && isset($data['sizes']['large']['file'])) {
-                      $large =  realpath($base . '/' . $data['sizes']['large']['file']);
-                      if (realpath($fitem) == $large) { $found = true; break; }
-                    }
-                }
+                    $data =  $media_cache[$item->meta_value . '-data'];                     
+                    
+                    if (isset($data['sizes'])) {
+                        $img_types = array('thumbnail', 'medium','large','Slideshow','Homepage','Sidebar'); 
+                        foreach ($img_types as $img_type)
+                            if (isset($data['sizes'][$img_type]) && isset($data['sizes'][$img_type]['file'])) {
+                              $type_file =  $rbase . $data['sizes'][$img_type]['file'];
+                              //echo "<br>" . $realFitem . ' - ' . $type_file;
+                              if ($realFitem == $type_file) {
+                                $found = true; 
+                                // remove from checks that is it a reasized file.
+                                unset($filesystem[$fkey]); 
+                                break 2; 
+                                }
+                            }                        
+                       }         
+                  }
+                                    
                 if (!$found) {
                     $add = true;
-                    
                     if ($wfuOptions['detect_resized'] == "true") {
-                      foreach($filesystem as $itemcomp) {
+                      $len_fitem = strlen($fitem);
+                      $fitem_base = strtolower(WFUSync::removeExtension($fitem));
+                      foreach($filesystem_local as $itemcomp) {
                         // we check if the file is maybe already a crunched file and if yes we ignore it
                         // the detection is very basic - I check the file name and if another one has 
-                        // the same filename with a - as next character we ignore it. 
-                        if (strlen($fitem) > strlen($itemcomp)) { // we check if it is longer                   
+                        // the same filename with a ???x??? size part. 
+                        if ($len_fitem > strlen($itemcomp)) { // we check if it is longer                   
                           $c1 = WFUSync::removeExtension($itemcomp) . '-';
+                          
                           $c2 = substr($fitem,0,strlen($c1));
-                          if (strtolower($c1) == strtolower($c2)) {
-                            $c3 = substr(WFUSync::removeExtension($fitem),strlen($c1));
+                          if (strtolower($c1) == $c2) {
+                            $c3 = substr($fitem_base,strlen($c1));
                             // it has the same prefix. Now it is checked if the rest 
                             // has the pattern [0-9]{1,5}x[0-9]{1,5}
                             if (preg_match('/[0-9]{1,5}x[0-9]{1,5}/', $c3) == 1) {
@@ -392,29 +476,39 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                             }    
                           } 
                         }
-                      }  
-                    }                   
+                      }                     
+                    }                 
                     if ($add) {
-                      $fuo[] = realpath($fitem);
+                      $fuo[] = $realFitem;
                     }
+                  }
+                
+                if (($counter++ % 100) == 99) {
+                  if(!ini_get('safe_mode') ){
+                     $max_execution_time = intval(ini_get('max_execution_time'));
+                     @set_time_limit($max_execution_time);
+                  }
                 }
-            }
-            echo '<!-- DEBUG: findUploadOnly: ' . count($fuo) . " -->\n"; 
+                
+                }
+                
+                $_SESSION['fuo_backup'] = $fuo;
+            } 
+            echo '<!-- DEBUG: findUploadOnly: ' . count($fuo) . " Duration: " . (time() -$start_time) . "s -->\n"; 
             return $fuo;
         }
 
         //Handle an individual file import. This function is based on the one from add-from-server
         function handle_import_file($file, $current, $sum, $post_id = 0) {
-            
+            $start_time = time ();
             $debug_string = '    Request: ' . $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'] . "\n";
-             
             $post_id = isset($_REQUEST['post_id']) ? intval($_REQUEST['post_id']) : 0;
 
             $file = str_replace('\\', '/',$file);
 
             // we have to replace special characters because wordpress does not handle them properly.
             $filenorm = WFUSync::normalizeFileNames($file);
-            if (@rename ($file, $filenorm)) {
+            if (rename ($file, $filenorm)) {
                 $file =  $filenorm;
             }
             // $path = WFUSync::stripAfterUpload($file);
@@ -477,18 +571,29 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
             $id = wp_insert_attachment($attachment, $new_file, $post_id);
             
             if ( !is_wp_error($id) ) {
-                echo 'Crunching ('.$current.'/'.$sum.'): ' . htmlentities($filename) . '<br>';
+                ob_implicit_flush();
+                echo 'Crunching ('.$current.'/'.$sum.'): ' . htmlentities($filename);
                 echo '<script type="text/javascript">
       if (window.parent.frames[window.name] && (parent.document.getElementsByTagName(\'frameset\').length <= 0)) {
         window.parent.document.getElementById("status_text").innerHTML = "Crunching ('.$current.'/'.$sum.'): ' . htmlentities($filename).'";
       }</script>';
                 @flush();
+                //@wp_ob_end_flush_all();
                 $data = wp_generate_attachment_metadata( $id, $file );
                 $data['file'] = $new_file; // fix to get the right file name into the database!
                 wp_update_attachment_metadata( $id, $data );
                 // hotfix for wordpress 3.4
                 update_attached_file( $id, $file );
-            }
+                $end_time = time ();
+                
+                echo ', duration: ' . ($end_time-$start_time) .'s';
+                // echo some spaces to the the browser to start rendering
+                echo str_repeat(" \n", 2100);
+                echo '<br />';
+                @ob_flush();
+                @flush();
+                //@wp_ob_end_flush_all();    
+            } 
             return $id;
         }
 
@@ -519,7 +624,8 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
         $patterns[] = '/[\x5b-\x60]/'; // remove range including brackets - []\^_`
         // we remove all kind of special characters for utf8 encoding as well
         $patterns[] = '/[\x7b-\xff]/u';  // remove all characters above the letter z.  This will eliminate some non-English language letters
-        $patterns[] = '/[\x21-\x2c]/u'; // remove range of shifted characters on keyboard - !"#$%&'()*+
+        $patterns[] = '/[\x21-\x27]/u'; // remove range of shifted characters on keyboard - !"#$%&'
+        $patterns[] = '/[\x2a-\x2c]/u'; // remove range of shifted characters on keyboard - *+,
         $patterns[] = '/[\x5b-\x60]/u'; // remove range including brackets - []\^_`
         $replacement ="_";
         return utf8_encode(preg_replace($patterns, $replacement, $imageName));
@@ -541,7 +647,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
             return substr($name, 0, strrpos ($name, '.'));
         }
         function getExtension($name) {
-	          return substr (strrchr ($name, '.'), 1);
+	          return strtolower(substr (strrchr ($name, '.'), 1));
         }
         /**
          * We check the extension + the if this is a cron a file has to be at least 1 min old!
@@ -564,7 +670,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
           if (!isset($wfuOptions['sync_extensions']) || ($wfuOptions['sync_extensions'] == '')) {
             return true;
           } else {  
-            $ae = array_map("trim", explode(",", $wfuOptions['sync_extensions'])); // we need an array here and trim spaces too.
+            $ae = array_map("trim", explode(",", strtolower($wfuOptions['sync_extensions']))); // we need an array here and trim spaces too.
             $ext = WFUSync::getExtension($filename);
             return in_array($ext, $ae); 
          }

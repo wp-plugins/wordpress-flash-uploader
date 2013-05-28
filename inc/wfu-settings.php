@@ -1,6 +1,6 @@
 <?php
 /**
- *   Wordpress Flash uploader 2.16.x  
+ *   Wordpress Flash uploader 3.1.x
  *   This file contains all the methods for the settings screen from the WFU class
  *  
  *  Copyright (c) 2004-2012 TinyWebGallery
@@ -130,7 +130,7 @@ The following custom configuration files do currently exist. Please note that yo
 </p>
 ';
 $roles = array('administrator', 'editor', 'author', 'contributor', 'subscriber');
-$groups = WFUFlash::get_user_groups($current_user->id);
+$groups = WFUFlash::get_user_groups($current_user->ID);
 
 $config_files = array();
 if (file_exists(dirname(__FILE__) . "/../wordpress-flash-uploader.js")) {
@@ -157,7 +157,7 @@ $config_files[] = '- wordpress-flash-uploader.js - Javascript file that is inclu
 }
 
 echo "<hr height=1>";
-if (count($config_files) == 0 && count($js_files) == 0) {
+if (count($config_files) == 0) {
      echo "<ul><li>No custom configuration files found.</li></ul>";
 } else {
   foreach ($config_files as $file) {
@@ -465,7 +465,9 @@ Below you find the results of some test WFU is performing if you can upload prop
 You can automatically sync the media library in a given interval. It is also possible to define the file extensions that should be synched
 </p>
 <table class="form-table">
-<!-- enable_file_download -->
+<!-- enable_file_download -->';
+            WFUSettings::printTrueFalse($devOptions, 'Show backup warning',  'sync_warning_message', 'The sync process does synchronize your upload folder with the media library. It does create thumbnails that do not exist yet and fix invalid database entries. Every server is different and every wordpress version as well. The sync has been tested carefully with the most common settings. But your settings are maybe different! Some make a backup when you use the synch the first time! I recommend to make a backup of your database and your upload folder!');
+echo '
 <tr valign="top">
 <th scope="row">Sync automatically</th>
 <td>';
@@ -491,7 +493,9 @@ You can automatically sync the media library in a given interval. It is also pos
               @set_time_limit($time);
               @ini_set('max_execution_time', $time);
             }
-            WFUSettings::printTextInput($devOptions, 'PHP time limit',  'sync_time', 'This sets the maximum execution time of the script. See <a target="_blank" href="http://php.net/manual/en/function.set-time-limit.php">http://php.net/manual/en/function.set-time-limit.php</a>. On most systems this is set to a default of 30 seconds. For big syncs this is not enough and you can increase this time. But not all servers do allow this. By leaving this field empty or by entering 0 noghing is done and the default of the server is used.<br />This only works with <strong>safe mode off</strong>. The current time returned from the system with the settings above is <strong>' .  ini_get('max_execution_time') . "s</strong>. If the time is NOT equals your setting than the time cannot be set. Please turn off safe mode." );
+            WFUSettings::printTextInput($devOptions, 'PHP time limit',  'sync_time', 'This sets the maximum execution time of the script. See <a target="_blank" href="http://php.net/manual/en/function.set-time-limit.php">http://php.net/manual/en/function.set-time-limit.php</a>. On most systems this is set to a default of 30 seconds. For big syncs this is not enough and you can increase this time. But not all servers do allow this. By leaving this field empty or by entering 0 nothing is done and the default of the server is used.<br />This only works with <strong>safe mode off</strong>. The current time returned from the system with the settings above is <strong>' .  ini_get('max_execution_time') . "s</strong>. If the time is NOT equals your setting than the time cannot be set. Please turn off safe mode." );
+            
+             WFUSettings::printTextInput($devOptions, 'Maximum files to sync in one request',  'synch_max_files', 'You can define how many images are synched in one request. If you are not able to increase the PHP time limit then syncs will fail after this time. If you enter a number here then after this number an automatic refresh of this command will happen and the next set of files will be processed. You can also enter "auto" here what is the default. The synch will measure the time each file will take to process and refresh before the limit is reached. auto is not 100% save because it does only count real time. Php execution time is the time the script gets really on the cpu. So auto does reload most likely more often than needed. Increase the php limit or use a number if auto does not work');            
             echo '
 </table>
 <div class="submit">

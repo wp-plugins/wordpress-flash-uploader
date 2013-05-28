@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 2.16.x
+ * TWG Flash uploader 3.0
  *
- * Copyright (c) 2004-2012 TinyWebGallery
+ * Copyright (c) 2004-2013 TinyWebGallery
  * written by Michael Dempfle
  *
  *
@@ -22,26 +22,16 @@
  */
 define('_VALID_TWG', '42');
 
-if (isset($_GET['TFUSESSID'])) { // this is a workaround if you set php_flag session.use_trans_sid=off + a workaround for some servers that don't handle sessions correctly if you open 2 instances of TFU
-    session_id($_GET['TFUSESSID']);
-}
-session_cache_limiter("private");
-session_cache_limiter("must-revalidate");
-session_start();
-
 $install_path = ''; // do not change!
 $path_fix = '';     // do not change!
 $store = 0;         // do not change!
 $email_plugin = false; // do not change!
 
-include 'tfu_helper.php';
-
-restore_temp_session(); // this restores a lost session if your server handles sessions wrong!
-
+include 'tfu_session.php';
 include 'tfu_config.php';
 
 // check if all included files have the same version to avoid problems during update!
-if ($tfu_config_version != '2.16' || $tfu_help_version != '2.16') {
+if ($tfu_config_version != '3.0' || $tfu_help_version != '3.0') {
   tfu_debug('Not all files belong to this version. Please update all files.');
 }
 
@@ -59,13 +49,15 @@ Otherwise the session is maybe not started properly!
  * tfu_debug("dir: " . $_SESSION["TFU_DIR"]);
  */
 // we check if a valid authenification was done in tfu_config.php
-if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['tfu_rn']) && isset($_SESSION['TFU_RN']) && $_SESSION['TFU_RN'] == parseInputParameter($_GET['tfu_rn'])) {
+
+if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['tfu_rn']) && isset($_SESSION['TFU_RN']) && 
+   (strcmp($_SESSION['TFU_RN'],parseInputParameter($_GET['tfu_rn']))==0)) {
     if ($enable_upload_debug) tfu_debug('2. Authenification sucessfull');
     $dir = getCurrentDir();
     if ($enable_upload_debug) tfu_debug('3. Directory read: ' . $dir);
     $size = (isset($_GET['size'])) ? parseInputParameter($_GET['size']) : 100000;
-    $remaining = parseInputParameter($_GET['remaining']) - 1;
-    if ($remaining < 0) { // not valid! we expect at least 1
+    $remaining = parseInputParameter(substr($_GET['remaining'], 0, -1)) - 1;
+    if ($remaining < 0) {
         return;
     }
     
@@ -74,7 +66,8 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
         unset($_SESSION['TFU_LAST_UPLOADS']);
         $_SESSION['TFU_LAST_UPLOADS'] = array();
     }
-    $_SESSION['TFU_UPLOAD_REMAINING'] = $_GET['remaining'];
+     
+    $_SESSION['TFU_UPLOAD_REMAINING'] = substr($_GET['remaining'], 0, -1);
     if ($enable_upload_debug) tfu_debug("3a. \$_FILES content:\n" . print_r($_FILES, true) );
   
     if (count($_FILES) == 0) {
@@ -222,13 +215,6 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
     // E-mail section
     // we only send an email for the last item of an upload cycle and if the e-mail plugin is not used.   
     if ($upload_notification_email != '' && $remaining == 0 && !$email_plugin) {
-        $submailheaders = "From: $upload_notification_email_from\n";
-        $submailheaders .= "Reply-To: $upload_notification_email_from\n";
-        $submailheaders .= "Return-Path: $upload_notification_email_from\n"; 
-        if ($fix_utf8 != '') {
-          $submailheaders .= 'Content-Type: text/plain; charset=' . $fix_utf8;
-        }
-        $subject = fix_decoding($upload_notification_email_subject, $fix_utf8);
         $filestr = "\n\n";
         foreach ($_SESSION['TFU_LAST_UPLOADS'] as $filename) {
             if ($upload_notification_use_full_path) {
@@ -245,9 +231,10 @@ if (isset($_SESSION['TFU_LOGIN']) && isset($_GET['remaining']) && isset($_GET['t
         if (isset ($_SESSION['TFU_PRE_UPLOAD_DATA'])) {
           $mailtext .= "\n\n" . $_SESSION['TFU_PRE_UPLOAD_DATA'];  
         }
-        @mail ($upload_notification_email, html_entity_decode ($subject), html_entity_decode ($mailtext), $submailheaders); 
+        tfu_mail($upload_notification_email, $upload_notification_email_subject, $mailtext, $upload_notification_email_from); 
     }
     if ($remaining == 0) { // cleanup
+      $_SESSION['TFU_RN'] = substr($_SESSION['TFU_RN'],0,-9) .substr($_GET['zeit'],-9);
       unset($_SESSION['TFU_PRE_UPLOAD_DATA']);
     }
     // end of e-mail section

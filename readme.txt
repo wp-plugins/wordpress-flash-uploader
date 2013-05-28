@@ -3,7 +3,7 @@ Contributors: mdempfle, Michael Dempfle
 Tags: upload, admin, media, synchronize, flash, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
 Tested up to: 3.5.1
-Stable tag: 2.16.5
+Stable tag: 3.1
 Donate link: Please check the settings of Wordpress Flash Uploader
 
 'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you also manage your whole Wordpress installation and synchronize your media library. 
@@ -79,6 +79,16 @@ If you have this problem please contact me to fix this because it is not reprodu
 Please go to the settings page of Wordpress Flash Uploader. There you find a small donation section. Thank you for your support.
 
 == Changelog ==
+= 3.1 =
+* New: TFU 3.1 is included
+* New: You can define how much images are processed at once. After that a automatic reload is done. This way you get around any timeout limits of php
+* New: Optimization and caching of the detection of the files to upload. Is now ~ 25 (!) times faster than before
+* New: Renamed files are now checked in the upload detection.
+* New: Image types Homepage, Slideshow, Sidebar are added to the detection.
+* New: A message that you should backup your upload folder when you use WFU the first time was added. 
+* Fix: Import of gifs has been checked. 
+* Fix: Frontend message that the language folder could not be found fixed (by using TFU 3.1)
+
 = 2.16.5 =
 * Fix: check if mb_strtolower is available. if not strtolower is used.
 * fix: Hotfix for Wordpress >= 3.4: update_attached_file is now used.
