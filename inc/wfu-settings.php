@@ -61,7 +61,7 @@ For the front end you can specify <strong>custom configurations</strong> for ind
             WFUSettings::printTextInput($devOptions, 'Security key',  'securitykey', 'This is security key which has to be used in the shorttag. This is mandatory because otherwise anyone who can create an article can use the flash. The default security key was randomly generated during installation. Please change the key if you like.');
             WFUSettings::printTextInput($devOptions, 'Upload folder',  'frontend_upload_folder', 'This is the optional upload folder for the frontend. If no folder is specified the current image upload directory is choosen. If you like a different directory simply add the folder relative to the main Wordpress installation. This makes is e.g. easy to use the uploader for a image gallery and let users without administrator access upload images too.');
             WFUSettings::printTrueFalse($devOptions, 'Master profile',  'master_profile', 'When the master profile is enabled a directory is created for each user.  The master profile is only used when you enter a \'Upload folder\' above. Make sure that you use the uploader on a page where a user is logged in. If this is not the case an error message is shown to avoid unrestricted access. Please test if directories can be created by php with the correct rights. If not please set the permissions for new directories below in the basic options.');
-            WFUSettings::printLoginId($devOptions, 'Master profile mode',  'master_profile_type', 'Selects the \'Username\', the \'Display name\' or the \'Id\' as directory name of the sub directory of the \'Upload folder\'.'); 
+            WFUSettings::printLoginId($devOptions, 'Master profile mode',  'master_profile_type', 'Selects the \'Username\', the \'Display name\', the \'Id\' or the \'IP\' as directory name of the sub directory of the \'Upload folder\'.'); 
           
             echo '</table>';
             echo '<div class="submit">
@@ -516,7 +516,9 @@ function printLoginId($options, $label,  $id, $description) {
             if ($options[$id] == "master_profile_type_display") {echo 'checked="checked"'; }
             echo '/> Display name&nbsp;<input type="radio" id="'.$id.'" name="'.$id.'" value="master_profile_type_id" ';
             if ($options[$id] == "master_profile_type_id") {echo 'checked="checked"'; }
-            echo '/> Id<br>
+            echo '/> Id&nbsp;<input type="radio" id="'.$id.'" name="'.$id.'" value="master_profile_type_ip" ';
+            if ($options[$id] == "master_profile_type_ip") {echo 'checked="checked"'; }
+            echo '/> IP<br>
 <em>'.$description.'</em></td>
 </tr>
 ';

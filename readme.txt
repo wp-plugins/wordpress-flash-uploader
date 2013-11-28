@@ -2,8 +2,8 @@
 Contributors: mdempfle, Michael Dempfle
 Tags: upload, admin, media, synchronize, flash, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
-Tested up to: 3.5.1
-Stable tag: 3.1.1
+Tested up to: 3.7.1
+Stable tag: 3.1.2
 Donate link: Please check the settings of Wordpress Flash Uploader
 
 'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you also manage your whole Wordpress installation and synchronize your media library. 
@@ -72,13 +72,16 @@ If you have this problem please contact me to fix this because it is not reprodu
 == Screenshots ==
 1. The Wordpress Flash Uploader page where you can upload images
 2. The Synch Media Library page where you can synchronize your upload folder with the Media Library
-3. The Wordpress Flash Uploader included in the site directly with the shortapi
+3. The Wordpress Flash Uploader included in the site directly with the shortapi/shortcode
 
 == Donation ==
 
 Please go to the settings page of Wordpress Flash Uploader. There you find a small donation section. Thank you for your support.
 
 == Changelog ==
+= 3.1.2 =
+* New: Support of ip using master profile mode
+
 = 3.1.1 =
 * Fix: Test data removed from the language file
 
