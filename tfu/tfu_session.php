@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 3.0
+ * TWG Flash uploader 3.2
  *
- * Copyright (c) 2004-2013 TinyWebGallery
+ * Copyright (c) 2004-2014 TinyWebGallery
  * written by Michael Dempfle
  *
  *

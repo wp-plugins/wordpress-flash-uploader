@@ -1,10 +1,10 @@
 <?php
 /**
- *   Wordpress Flash uploader 3.1.x  
+ *   Wordpress Flash uploader 3.2.x  
  *
  *   This file contains the methods used by the synch part from the WFU class
  *
- *   Copyright (c) 2004-2013 TinyWebGallery
+ *   Copyright (c) 2004-2014 TinyWebGallery
  *   Author: Michael Dempfle
  *   Author URI: http://www.tinywebgallery.com 
  */
@@ -13,6 +13,7 @@ if (!class_exists("WFUSync")) {
     class WFUSync {
 
         function printSync($devOptions, $istab = false, $check_nonce = true) {    
+            clearstatcache();
             $synch_start_time = time ();
            
             if (!(isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library'])  || 
@@ -20,7 +21,10 @@ if (!class_exists("WFUSync")) {
                   isset($_POST['import_media_library']) || isset($_GET['import_media_library']))) {
               unset($_SESSION['fuo_backup']);
             }
-           
+            if (isset($_GET['isFlash'])) {
+                unset($_SESSION['fuo_backup']);
+            }
+
             // now we check all possible actions if the correct nonce is set.           
             $wfuOptions = $this->getAdminOptions();  
             for ($i = 0; $i < ob_get_level(); $i++) { @ob_end_flush(); }
@@ -69,19 +73,14 @@ if (!class_exists("WFUSync")) {
             echo "<!-- DEBUG: before findUploadOnly -->\n"; 
             $fuo = WFUSync::findUploadOnly($mlf, $uff);
 
-            if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library'])  || isset($_GET['clean_media_library']) ||
-                isset($_GET['synchronize_media_library']) || isset($_POST['import_media_library']) || isset($_GET['import_media_library'])) {
-                echo '<script type="text/javascript">
-              if (window.parent.frames[window.name] && (parent.document.getElementsByTagName(\'frameset\').length <= 0)) {
-                window.parent.document.getElementById("status_text").innerHTML = "Starting synchronisation.";
-              }</script>';
-            }
             @flush(); // is done to see the debug stuff
             //@wp_ob_end_flush_all();
+             /*
             if (isset($_POST['synchronize_media_library']) || isset($_GET['synchronize_media_library']) ||  
                 isset($_POST['clean_media_library']) || isset($_GET['clean_media_library'])) {
                 // we remove the ones tat are not in the upload folder anymore.
                 
+               
                 echo '<div class="updated"><p><strong>';
                 if (count($mfo) > 0) {
                   foreach($mfo as $item) {
@@ -96,13 +95,15 @@ if (!class_exists("WFUSync")) {
                 } else {
                   echo _e("No invalid media library entries found.", "WFU");    
                 }
-                echo '</strong></p></div>';                
+                echo '</strong></p></div>';                 
             }
+            */
+            $current = 0;
             if (isset($_POST['synchronize_media_library']) || isset($_GET['synchronize_media_library']) || 
                 isset($_POST['import_media_library']) || isset($_GET['import_media_library'])) {
                 $sum = count ($fuo);  
                 $synch_max_files = $wfuOptions['synch_max_files'];
-                $current = 0;
+                
                 $start_time = time ();
                 $synch_before_time =  $start_time - $synch_start_time;
                 $num = count($fuo);
@@ -171,6 +172,11 @@ if (!class_exists("WFUSync")) {
         }
       }</script>';
 
+      if (isset($_GET['isFlash'])) {
+         return;
+      }
+
+
             if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library']) || isset($_POST['import_media_library']) || 
                 isset($_GET['synchronize_media_library']) || isset($_GET['clean_media_library']) || isset($_GET['import_media_library']) ) {
                 // we reload the data.
@@ -182,9 +188,6 @@ if (!class_exists("WFUSync")) {
                 $mfo = WFUSync::getMediaLibraryOnly($mlf);
                 $fuo = WFUSync::findUploadOnly($mlf, $uff);
             }
-            
-            
-            
 
             $count_mfo = 0;
             foreach($mfo as $item) {
@@ -201,13 +204,14 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
             if (!$istab) {
                 echo '
 <p><b>Import files to Media Library:</b> All files below the "'.WFUSync::getUploadPath().'" folder are checked if they do already exist in the media library. If they don\'t exist they are entered and can be managed in the media library. Image exif/iptc data are used as defaults for title and caption if possible.</p>
-<p><b>Remove invalid Media Library entries:</b> The database is checked if all files still exist. Data of deleted files (link, title, caption ...) are removed from the media library.</p>
-<p><b>Synchronize Media Library:</b> Import and Remove.</p>
 ';
+// <p><b>Remove invalid Media Library entries:</b> The database is checked if all files still exist. Data of deleted files (link, title, caption ...) are removed from the media library.</p>
+// <p><b>Synchronize Media Library:</b> Import and Remove.</p>
+
             }
             echo '
 <div class="submit">';
-            if (!$istab) {
+            if (false) {
                 echo '
 <input type="submit" class="button action" name="synchronize_media_library" value="';
                 echo _e('Synchronize Media Library', 'WFU');
@@ -217,7 +221,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
 <input type="submit" class="button action" name="import_media_library" value="';
             echo _e('Import files to Media Library', 'WFU');
             echo '" />';
-            if (!$istab) {
+            if (false) {
                 echo '
 <input type="submit" class="button action" name="clean_media_library" value="';
                 echo _e('Remove invalid Media Library entries', 'WFU');

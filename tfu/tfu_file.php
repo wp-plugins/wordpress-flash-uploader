@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 3.0
+ * TWG Flash uploader 3.2
  *
- * Copyright (c) 2004-2013 TinyWebGallery
+ * Copyright (c) 2004-2014 TinyWebGallery
  * written by Michael Dempfle
  *
  *     This file does all file functions of TFU
@@ -35,7 +35,7 @@ include 'tfu_session.php';
 include 'tfu_config.php';
 
 // check if all included files have the same version to avoid problems during update!
-if ($tfu_config_version != '3.0' || $tfu_help_version != '3.0') {
+if ($tfu_config_version != '3.2' || $tfu_help_version != '3.2') {
   tfu_debug('Not all files belong to this version. Please update all files.');
 }
 

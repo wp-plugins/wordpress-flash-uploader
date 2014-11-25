@@ -1,9 +1,9 @@
 <?php
 /**
- *   Wordpress Flash uploader 3.1.x
+ *   Wordpress Flash uploader 3.2.x
  *   This file contains all the methods for the settings screen from the WFU class
  *  
- *  Copyright (c) 2004-2012 TinyWebGallery
+ *  Copyright (c) 2004-2014 TinyWebGallery
  *  Author: Michael Dempfle
  *  Author URI: http://www.tinywebgallery.com    
  *  
@@ -25,7 +25,7 @@ if (!class_exists("WFUSettings")) {
 <a href="#lim">Limits</a> | <a href="#don">Donation / Registration</a> | 
 <a href="#lic">License</a> | <a href="#com">Coming next</a>
 <h3>Help</h3>
-<a target="_blank" href="http://www.tinywebgallery.com/blog/wfu">Website</a> | <a target="_blank"  href="http://www.tinywebgallery.com/blog/wfu-faq">FAQ/Help</a> | <a target="_blank" href="http://www.tinywebgallery.com/en/forum.php">Forum</a> 
+<a target="_blank" href="http://www.tinywebgallery.com/blog/wfu">Website</a> | <a target="_blank"  href="http://www.tinywebgallery.com/blog/wfu-faq">FAQ/Help</a> | <a target="_blank" href="http://www.tinywebgallery.com/en/forum.php">Forum</a>              
 <br>&nbsp;
 <div style="height:1px;width:100%;background-color:#aaa;"></div>
 </div>
@@ -366,10 +366,10 @@ There are 2 versions of WFU available:<br><ul>
 The registration is free (powered by trialpay) or only <b>15 €/domain</b> and can be done on www.tinywebgallery.com by clicking <a href="http://www.tinywebgallery.com/en/register_tfu.php"><b>here</b></a>.<br>The registration of the TWG Flash Uploader, JFU and WFU is the same. The registration is also valid for TWG and the standalone version of TFU!<p>To register please store the content of the 3 lines provided in the registration email in the text boxes below and press the register button. If everything worked fine you get a different message here and in the options of the registered version are enabled - and of course the 3MB limit is gone.</p>
 <div class="install" style="width: 650px; margin-left: 50px;">
 &lt;?php
-<table><tbody><tr><td style="text-align:right;">
-$l&nbsp; = " <input name="l" size="80" type="text"> ";</td></tr><tr><td style="text-align:right;">
-$d = " <input name="d" size="80" type="text"> ";</td></tr><tr><td style="text-align:right;">
-$s = " <input name="s" size="80" type="text"> ";</td></tr></tbody></table>
+<table><tbody><tr><td style="text-align:left;">
+$l&nbsp;=" <input name="l" size="65" type="text"> ";</td></tr><tr><td style="text-align:left;">
+$d=" <input name="d" size="65" type="text"> ";</td></tr><tr><td style="text-align:left;">
+$s=" <input name="s" size="65" type="text"> ";</td></tr></tbody></table>
 ?&gt;
 <div class="submit" style="padding:0px;padding-left:60px;">
 <input type="submit" class="button-primary" name="register_WFU" value="';

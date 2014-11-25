@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 3.0
+ * TWG Flash uploader 3.2
  *
- * Copyright (c) 2004-2013 TinyWebGallery
+ * Copyright (c) 2004-2014 TinyWebGallery
  * written by Michael Dempfle
  *
  *    This file is the main configuration file of the flash.
@@ -29,7 +29,7 @@
  */
 
 if (defined('_VALID_TWG')) {
-$tfu_config_version = '3.0';
+$tfu_config_version = '3.2';
 
     $login = 'true';                     // The login flag - has to set by yourself below 'true' is logged in, 'auth' shows the login form, 'reauth' should be set if the authentification has failed. 'false' if the flash should be shown with an eroror message that the authorisation finally failed. When using auth by default the users of the file .htuser.php are used. Please go to this file to setup users.
     $folder = 'upload';                  // this is the root upload folder. If you use login='auth' by default the folder from the user profile in .htusers.php is used!
@@ -85,7 +85,7 @@ $tfu_config_version = '3.0';
     $normalise_directory_names = false;   // new 2.8.1 - This setting convertes all directory names that are created or renamed to lowercase and special characters are removed e.g. !"#$%&'()*+,-- []\^_`öäüß are replaces with an _
 
     // This switch is for supporting filesystems for e.g. chinese characters.
-    $fix_utf8 = ''; // Please read the faq 8 for TFU on the homepage first before change anything here -> http://www.tinywebgallery.com/en/tfu/tfu_faq_10.php
+    $fix_utf8 = ''; // Please read the faq 10 for TFU on the homepage first before change anything here -> http://www.tinywebgallery.com/en/tfu/tfu_faq_10.php
     $debug_file = dirname(__FILE__) . "/tfu.log";
 
     /**
@@ -196,9 +196,11 @@ $tfu_config_version = '3.0';
       $smtp_password = "<password>";     // New 2.17 (String) The smtp password
    
    
-    // new 3.1  - not implemented yet
+    // new 3.1
     $allow_only_basic_file_names="false"; // New 3.1 ("true", "false") You can define if the file names only allow the following characters: a-zA-Z0-9. This check is only applied on the name itself. Not the extension. This is done seperately. Important: This check is done on the client and shows a warning message if the characters does not fit. This is important if you have e.g. mod_security enabled that does not allow any special characters.
     $change_to_new_folder=false;           // (true, false) If you create a new folder you can decide if you jump into the now folder (true) or if you stay in the parent folder (false)
+     // new 3.1.1
+     $scan_images_empty = true;        // If you have enabled $scan_images and php code is detected inside the file than only an empty file and a warning is created if you set this variable to true. If you set it to false than the file is uploaded  but <?php is replaced with <_php which should make the php code not executeable anymore. Default is that an empty file is created.
 
     // special extension - a post upload panel - this is only implemented for JFU and not documented yet!
     $post_upload_panel='false';

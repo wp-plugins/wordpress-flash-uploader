@@ -1,9 +1,9 @@
 <?php
 /**
- *   Wordpress Flash uploader 3.1.x
+ *   Wordpress Flash uploader 3.2.x
  *   This file contains all methods used on the main wfu page from the WFU class
  *
- *   Copyright (c) 2004-2013 TinyWebGallery
+ *   Copyright (c) 2004-2014 TinyWebGallery
  *   Author: Michael Dempfle
  *   Author URI: http://www.tinywebgallery.com 
  */
@@ -106,11 +106,13 @@ if (!class_exists("WFUFlash")) {
     <div id="statusframediv" style="display:none;" name="statusframediv"><iframe id="statusframe" name="statusfame" src="about:blank"></iframe></div>';
                 echo '<script type="text/javascript">';
                 echo 'function uploadFinished(loc) {';
-                echo 'document.getElementById("statusframe").src="upload.php?page=wordpress-flash-uploader.php?printSync=true&import_media_library=true"';
-                echo '}';
+                echo 'document.getElementById("status_text").innerHTML = "Starting synchronisation. Please wait..."; ';
+                echo 'document.getElementById("statusframe").src="upload.php?page=wordpress-flash-uploader.php?printSync=true&import_media_library=true&isFlash=true"';
+                echo '}';  
                 echo 'function deleteFile(loc) {';
-                echo 'document.getElementById("statusframe").src="upload.php?page=wordpress-flash-uploader.php?printSync=true&clean_media_library=true"';
-                echo '} </script>';
+                //echo 'document.getElementById("statusframe").src="upload.php?page=wordpress-flash-uploader.php?printSync=true&clean_media_library=true"';
+                echo '}'; 
+                echo '</script>';
             } else {
                 echo '<div id="status" name="status"><strong>Synchronisation status:</strong> Please synchronize the files manually.</div><br>';
             }
@@ -260,7 +262,7 @@ if (!class_exists("WFUFlash")) {
             }
           }
           $output .= '
-          swfobject.embedSWF("'.$siteurl.'wp-content/plugins/wordpress-flash-uploader/tfu/tfu_3.1.swf", "flashcontent", "'.$width.'", "'.$height.'", "8.0.0", "", flashvars, params, attributes);
+          swfobject.embedSWF("'.$siteurl.'wp-content/plugins/wordpress-flash-uploader/tfu/tfu_3.2.swf", "flashcontent", "'.$width.'", "'.$height.'", "8.0.0", "", flashvars, params, attributes);
 
           </script>
           </div>

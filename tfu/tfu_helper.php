@@ -1,8 +1,8 @@
 <?php
 /**
- * TWG Flash uploader 3.0
+ * TWG Flash uploader 3.2
  *
- * Copyright (c) 2004-2013 TinyWebGallery
+ * Copyright (c) 2004-2014 TinyWebGallery
  * written by Michael Dempfle
  *
  *
@@ -14,7 +14,7 @@
  * * ensure this file is being included by a parent file
  */
 defined('_VALID_TWG') or die('Direct Access to this location is not allowed.');
-$tfu_help_version = '3.0';
+$tfu_help_version = '3.2';
 // some globals you can change
 $check_safemode = true;              // New 2.12.x - By default TFU checks if you have a safe mode problem. On some server this test does not work. There you can try to turn it off and test if you can e.g. create directories, upload files to new created directories.
 $session_double_fix = false; // this is only needed if you get errors because of corrupt sessions. If you turn this on a backup is made and checked if the first one is corrupt
@@ -46,7 +46,7 @@ tfu_setHeader();
 include dirname(__FILE__) . '/tfu_zip.class.php';
 
 // check if all included files have the same version to avoid problems during update!
-if ($tfu_zip_version != '3') {
+if ($tfu_zip_version != '3.2') {
   tfu_debug('Not all files belong to this version. Please update all files.');
 }
 
@@ -109,7 +109,7 @@ function tfu_debug($data)
         }
         if ($debug_file == '') {
 		      @ob_start();
-              @error_log($debug_string, 0);
+          @error_log($debug_string, 0);
 		      @ob_end_clean();
 		      return;
 	      }
@@ -118,12 +118,12 @@ function tfu_debug($data)
             if (filesize($debug_file) > 2000000) { // debug file max = 2MB !
                 // we move the old one and start a new one - but only once!
                 rename (dirname(__FILE__) . '/tfu.log', dirname(__FILE__) . '/tfu.log.bak');
-                $debug_file_local = fopen($debug_file, 'w');
+                $debug_file_local = @fopen($debug_file, 'w');
             } else {
-                $debug_file_local = fopen($debug_file, 'a');
+                $debug_file_local = @fopen($debug_file, 'a');
             }
-            fputs($debug_file_local, $debug_string);
-            fclose($debug_file_local);
+            @fputs($debug_file_local, $debug_string);
+            @fclose($debug_file_local);
         } else {
             if (is_writeable(dirname(__FILE__))) {
                 if (!isset($debug_file)) { // if helper is included somewhere else!
@@ -951,7 +951,7 @@ function is_part($str)
 
 function is_supported_tfu_image($image,$current)
 {
-    global $scan_images;
+    global $scan_images, $scan_images_empty;
     $image = strtolower ($image);
     $isimage = preg_match('/.*\.(jp)(e){0,1}(g)$/', $image) ||
     preg_match('/.*\.(gif)$/', $image) ||
@@ -966,8 +966,14 @@ function is_supported_tfu_image($image,$current)
           $data = file_get_contents($current);
           $data2 = str_replace("<?php","<_php",$data);
           if ($data2 != $data) {
-            file_put_contents($current, $data2);
-            tfu_debug("SECURITY WARNING: Please check the file ".$image.". It was uploaded with an image extensions but included php code. The php start of this file was changed because of security issues!" );
+            if ($scan_images_empty) {
+               file_put_contents($current, "");
+               tfu_debug("SECURITY WARNING: The file ".$image." was uploaded with an image extensions but included php code. The content of the file was removed because of security issues!" );
+            } else {
+               file_put_contents($current, $data2);
+               tfu_debug("SECURITY WARNING: Please check the file ".$image.". It was uploaded with an image extensions but included php code. The php start of this file was changed because of security issues!" );
+            }
+            
           }
         }
       }
@@ -1724,7 +1730,7 @@ function printServerInfo()
     echo '<br><p><center>Some info\'s about your server. This limits are not TFU limits. You have to change this in the php.ini.</center></p>';
     echo '<div class="install">';
     echo '<table><tr><td>';
-    echo '<tr><td width="400">TFU version:</td><td width="250">3.0.3&nbsp;';
+    echo '<tr><td width="400">TFU version:</td><td width="250">3.2&nbsp;';
     // simply output the license type by checking the strings in the license. No real check like in the flash is done here.
     
     if ($m != "" && $m != "s" && $m !="w" ) {
@@ -2244,12 +2250,12 @@ function tfu_savetext($file, $overwrite=true) {
           $content = preg_replace("/\r\n|\r|\n/", chr(10), $content);
       }
       // now we write the file again
-      $file_local = fopen($file, 'w');
+      $file_local = @fopen($file, 'w');
       if (getExtension($file) == 'php') { // we remove leading and trailing spaces returns if it is a php file!
           $content = trim($content);
       }
-      fputs($file_local, $content);
-      fclose($file_local);
+      @fputs($file_local, $content);
+      @fclose($file_local);
       
       if (file_exists($file)) {
         echo "&create_file=true";
