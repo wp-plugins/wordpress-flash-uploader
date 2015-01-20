@@ -53,14 +53,24 @@ if (!class_exists("WFUSettings")) {
 <a name="front"></a>
 <div id="icon-options-general" class="icon_jfu"><br></div>
 <h2>WP Flash Uploader - Front end Options</h2>
-You can use the flash in the frontend by adding the following shorttag to your article or page: <p><b>[wfu securitykey="'.$devOptions['securitykey'].'"]</b></p>The security key is mandatory while there is an optional parameter <strong>\'width\'</strong> that has a default of 650 px. If you want to specify the width simply add e.g. width="500". Please note that the uploaded images are NOT synchronized with the media library. This can be done in the administration of Wordpress.
+You can use the flash in the frontend by adding the following shorttag to your article or page: <p><b>[wfu securitykey="'.$devOptions['securitykey'].'"]</b></p>The security key is mandatory. There are the following optional parameters which overwrite the defaults of this section: 
+
+<ul class="shortcode-frontend">
+<li><strong>configid</strong> - You can define an optional config file. If you specify configid="1" than the config file tfu_config_shortcode_1.php is used. Create a file tfu_config_shortcode_1.php in the tfu folder of the plugin and put you individual settings there. Please see the advanced options for user, group, role based config files.</li>
+<li><strong>width</strong> - Has a default of 650 px. If you want to specify the width simply add e.g. width="500".</li>
+<li><strong>frontend_upload_folder</strong> - You can specify an upload folder. Please read the description below. Shortcode attribute: frontend_upload_folder=""</li>
+<li><strong>master_profile</strong> - You can specify if master profiles are used. Please read the description below.  Shortcode attribute: master_profile="true" or master_profile="false".</li>
+<li><strong>master_profile_type</strong> - You can specify the master profile type. Please read the description below. Shortcode attribute: master_profile_type="". Valid settings are: master_profile_type_username, master_profile_type_display, master_profile_type_id, master_profile_type_ip.</li>
+</ul>
+
+Please note that the uploaded images are NOT synchronized with the media library. If the files are uploaded to the default upload folder of Wordpress this can be done at Media -> Synchronize Media Library in the administration of Wordpress.
 <p>
 For the front end you can specify <strong>custom configurations</strong> for individual <strong>users</strong>, <strong>groups</strong> or <strong>roles</strong>. Please read the <a class="wfu_reg nounderline" href="#adv">advanced options/ profile section</a> for details.  
 </p>
 <table class="form-table">';
             WFUSettings::printTextInput($devOptions, 'Security key',  'securitykey', 'This is security key which has to be used in the shorttag. This is mandatory because otherwise anyone who can create an article can use the flash. The default security key was randomly generated during installation. Please change the key if you like.');
             WFUSettings::printTextInput($devOptions, 'Upload folder',  'frontend_upload_folder', 'This is the optional upload folder for the frontend. If no folder is specified the current image upload directory is choosen. If you like a different directory simply add the folder relative to the main Wordpress installation. This makes is e.g. easy to use the uploader for a image gallery and let users without administrator access upload images too.');
-            WFUSettings::printTrueFalse($devOptions, 'Master profile',  'master_profile', 'When the master profile is enabled a directory is created for each user.  The master profile is only used when you enter a \'Upload folder\' above. Make sure that you use the uploader on a page where a user is logged in. If this is not the case an error message is shown to avoid unrestricted access. Please test if directories can be created by php with the correct rights. If not please set the permissions for new directories below in the basic options.');
+            WFUSettings::printTrueFalse($devOptions, 'Master profile',  'master_profile', 'When the master profile is enabled a directory is created for each user.  The master profile is only used when you enter a \'Upload folder\' above. Make sure that you use the uploader on a page where a user is logged in. If this is not the case an error message is shown to avoid unrestricted access. Only IP can be used without a valid login! Please test if directories can be created by php with the correct rights. If not please set the permissions for new directories below in the basic options.');
             WFUSettings::printLoginId($devOptions, 'Master profile mode',  'master_profile_type', 'Selects the \'Username\', the \'Display name\', the \'Id\' or the \'IP\' as directory name of the sub directory of the \'Upload folder\'.'); 
           
             echo '</table>';
@@ -112,7 +122,7 @@ For the front end you can specify <strong>custom configurations</strong> for ind
 <div id="icon-options-general" class="icon_jfu"><br></div>
 <h2>WP Flash Uploader - Advanced Options/ profiles</h2>
 <p>
-In the current version the most important settings are mapped in the administration panel. The WP Flash Uploader uses the TWG Flash Uploader which has much more features that can be directly configured here. If you want to configure WFU in more detail please create a file called tfu_config_wfu.php and copy your changes to this file. On the web page of WFU a tutorial is provided how this can be easily done by everyone -> <a target="_blank" class="nounderline" href="http://blog.tinywebgallery.com/blog/wfu/advanced-features/">go there</a>
+In the current version the most important settings are mapped in the administration panel. The WP Flash Uploader uses the TWG Flash Uploader which has much more features that can be directly configured here. If you want to configure WFU in more detail please create a file called tfu_config_wfu.php and copy your changes to this file. On the web page of WFU a tutorial is provided how this can be easily done by everyone -> <a target="_blank" class="nounderline" href="http://www.tinywebgallery.com/blog/wfu/advanced-features/">go there</a>
 </p>
 <p>
 <strong>You also can define individual configurations for a user, a group or a user role</strong>. This is done by a custom config file in the "wp-content/plugins/wordpress-flash-uploader/tfu" folder. Create file with the name tfu_config_&lt;user login&gt;.php for a user, tfu_config_&lt;group&gt;.php for a group or tfu_config_&lt;user role&gt;.php for a role. In this file you can overwrite any configuration that is possible in TFU. The file has to be a valid php file starting with &lt;?php and end with ?&gt;. There you can set all parameters available in tfu_config.php. If a config file for the user and a group is available the one for the user is used! If a config file for the group and a role is available the one for the group is used!<br>The default roles you have to use in Wordpress are administrator, editor, author, contributor, subscriber. So a filename for the admin user would be tfu_config_admin.php and for the role administrator tfu_config_administrator.php.
@@ -138,6 +148,7 @@ $config_files[] = '- wordpress-flash-uploader.js - Javascript file that is inclu
 }
  
    foreach (glob(dirname(__FILE__) .'/../tfu/tfu_config_*.php') as $filename) {
+    
     $base = basename($filename, '.php');
     $type = substr($base, 11);  
     $text = '';
@@ -145,13 +156,16 @@ $config_files[] = '- wordpress-flash-uploader.js - Javascript file that is inclu
        $text  = "The <strong>global</strong> custom configuration file that overrides <strong>all</strong> settings from <strong>tfu_config.php</strong> and <strong>my_tfu_config.php</strong>";
     } else  { 
         if (in_array($type, $roles)) {
-           $type_str  = "role";
-        } else if (in_array($type, $groups)) {
-           $type_str  = "group";
+           $type_str  = "role ";
+        } else if ($groups !== null && in_array($type, $groups)) {
+           $type_str  = "group ";
+        } else if (stripos($type, "shortcode_") !== false) {
+            $type_str  = "shortcode that sets the attribute configid=";
+            $type = substr($type, 10);  
         } else {
-            $type_str  = "user";
+            $type_str  = "user ";
         }
-        $text =  "Configuration file for the ".$type_str." '".$type."'.";
+        $text =  'Configuration file for the '.$type_str.'"'.$type.'".';
     }  
     $config_files[] = '- tfu/' . $base . '.php - ' . $text; 
 }
@@ -238,7 +252,7 @@ If you have a standard license then WFU does automatically enable the Javascript
             WFUSettings::printTextInput($devOptions, 'Edit textfile extensions',  'edit_textfile_extensions', 'This are the extensions that can be edited in the flash. You can restrict is to single files as well by using the full name. e.g. foldername.txt. * is supported as wildcard!');
             WFUSettings::printTextInput($devOptions, 'Exclude files and directores',  'exclude_directories', 'You can enter directories and files that are hidden in WFU. Separate them by ,');
             if (function_exists('fnmatch')) {
-              WFUSettings::printTextInput($devOptions, 'File filter',  'file_filter', 'You can enter a pattern for files that are hidden in WFU. The intension is to hide resized versions of a file. The default filter reads the values for thumbs, medium and large images. If you know your images you can enter a better filter! Separate them by ,');
+              WFUSettings::printTextInput($devOptions, 'File filter',  'file_filter', 'You can enter a pattern for files that are hidden in WFU. The intension is to hide resized versions of a file. The default filter reads the values for thumbs, medium and large images. If you know your images you can enter a better filter! Separate them by ,. Entering "auto" does restore the original filter. Using *-*x*.* does work fine if you don\'t have files with - and a x after that in the filename.');
             } else {
               echo '<tr><td colspan="2">fnmatch is not available on this system. Therefore the enhanced file filter to hide thumbnails, middle and large images cannot be enabled. Please update to php >= 5.3 if you have a windows server.</td></tr>';
             }
@@ -466,10 +480,12 @@ You can automatically sync the media library in a given interval. It is also pos
 </p>
 <table class="form-table">
 <!-- enable_file_download -->';
+            WFUSettings::printTrueFalse($devOptions, 'Sync automatically after upload',  'enable_auto_sync', 'If you upload files with the WP FLash uploader you can enable/disable that the files are automatically added to the media library. Depending on your setup the syncronisation might not work as you expect. Please disable the automatic sync then and use a different plugin for the synchronisation.');
+
             WFUSettings::printTrueFalse($devOptions, 'Show backup warning',  'sync_warning_message', 'The sync process does synchronize your upload folder with the media library. It does create thumbnails that do not exist yet and fix invalid database entries. Every server is different and every wordpress version as well. The sync has been tested carefully with the most common settings. But your settings are maybe different! Some make a backup when you use the synch the first time! I recommend to make a backup of your database and your upload folder!');
 echo '
 <tr valign="top">
-<th scope="row">Sync automatically</th>
+<th scope="row">Sync automatically by cronjob</th>
 <td>';
             echo '<select name="scheduler">';
             WFUSettings::printOptionLine('none', 'No automatic sync', $devOptions);            
@@ -494,8 +510,11 @@ echo '
               @ini_set('max_execution_time', $time);
             }
             WFUSettings::printTextInput($devOptions, 'PHP time limit',  'sync_time', 'This sets the maximum execution time of the script. See <a target="_blank" href="http://php.net/manual/en/function.set-time-limit.php">http://php.net/manual/en/function.set-time-limit.php</a>. On most systems this is set to a default of 30 seconds. For big syncs this is not enough and you can increase this time. But not all servers do allow this. By leaving this field empty or by entering 0 nothing is done and the default of the server is used.<br />This only works with <strong>safe mode off</strong>. The current time returned from the system with the settings above is <strong>' .  ini_get('max_execution_time') . "s</strong>. If the time is NOT equals your setting than the time cannot be set. Please turn off safe mode." );
-            
-             WFUSettings::printTextInput($devOptions, 'Maximum files to sync in one request',  'synch_max_files', 'You can define how many images are synched in one request. If you are not able to increase the PHP time limit then syncs will fail after this time. If you enter a number here then after this number an automatic refresh of this command will happen and the next set of files will be processed. You can also enter "auto" here what is the default. The synch will measure the time each file will take to process and refresh before the limit is reached. auto is not 100% save because it does only count real time. Php execution time is the time the script gets really on the cpu. So auto does reload most likely more often than needed. Increase the php limit or use a number if auto does not work');            
+            WFUSettings::printTextInput($devOptions, 'Maximum files to sync in one request',  'synch_max_files', 'You can define how many images are synched in one request. If you are not able to increase the PHP time limit then syncs will fail after this time. If you enter a number here then after this number an automatic refresh of this command will happen and the next set of files will be processed. You can also enter "auto" here what is the default. The synch will measure the time each file will take to process and refresh before the limit is reached. auto is not 100% save because it does only count real time. Php execution time is the time the script gets really on the cpu. So auto does reload most likely more often than needed. Increase the php limit or use a number if auto does not work');            
+            WFUSettings::printTrueFalse($devOptions, 'Show remove invalid media entries button',  'remove_invalid', 'You can also show a button that does remove invalid database entries. Please make a backup of your database before you enable this feature as some users report problems on some Wpordpress versions.');
+           
+           
+           
             echo '
 </table>
 <div class="submit">

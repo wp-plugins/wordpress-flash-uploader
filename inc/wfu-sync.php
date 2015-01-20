@@ -74,13 +74,11 @@ if (!class_exists("WFUSync")) {
             $fuo = WFUSync::findUploadOnly($mlf, $uff);
 
             @flush(); // is done to see the debug stuff
-            //@wp_ob_end_flush_all();
-             /*
-            if (isset($_POST['synchronize_media_library']) || isset($_GET['synchronize_media_library']) ||  
-                isset($_POST['clean_media_library']) || isset($_GET['clean_media_library'])) {
+            @wp_ob_end_flush_all();
+            
+            if (isset($_POST['clean_media_library']) || isset($_GET['clean_media_library'])) {
                 // we remove the ones tat are not in the upload folder anymore.
-                
-               
+ 
                 echo '<div class="updated"><p><strong>';
                 if (count($mfo) > 0) {
                   foreach($mfo as $item) {
@@ -97,7 +95,7 @@ if (!class_exists("WFUSync")) {
                 }
                 echo '</strong></p></div>';                 
             }
-            */
+            
             $current = 0;
             if (isset($_POST['synchronize_media_library']) || isset($_GET['synchronize_media_library']) || 
                 isset($_POST['import_media_library']) || isset($_GET['import_media_library'])) {
@@ -176,7 +174,6 @@ if (!class_exists("WFUSync")) {
          return;
       }
 
-
             if (isset($_POST['synchronize_media_library']) || isset($_POST['clean_media_library']) || isset($_POST['import_media_library']) || 
                 isset($_GET['synchronize_media_library']) || isset($_GET['clean_media_library']) || isset($_GET['import_media_library']) ) {
                 // we reload the data.
@@ -205,7 +202,9 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                 echo '
 <p><b>Import files to Media Library:</b> All files below the "'.WFUSync::getUploadPath().'" folder are checked if they do already exist in the media library. If they don\'t exist they are entered and can be managed in the media library. Image exif/iptc data are used as defaults for title and caption if possible.</p>
 ';
-// <p><b>Remove invalid Media Library entries:</b> The database is checked if all files still exist. Data of deleted files (link, title, caption ...) are removed from the media library.</p>
+if ($wfuOptions['remove_invalid'] == "true") {
+  echo '<p><b>Remove invalid Media Library entries:</b> The database is checked if all files still exist. Data of deleted files (link, title, caption ...) are removed from the media library.</p>';
+}
 // <p><b>Synchronize Media Library:</b> Import and Remove.</p>
 
             }
@@ -218,10 +217,10 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                 echo '" />';
             }
             echo '
-<input type="submit" class="button action" name="import_media_library" value="';
+<input type="submit" class="button action button-primary" name="import_media_library" value="';
             echo _e('Import files to Media Library', 'WFU');
             echo '" />';
-            if (false) {
+            if ($wfuOptions['remove_invalid'] == "true") {
                 echo '
 <input type="submit" class="button action" name="clean_media_library" value="';
                 echo _e('Remove invalid Media Library entries', 'WFU');
@@ -370,7 +369,8 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                     $data = @unserialize($item->meta_att);
                     $base = dirname($data['file']);
                     if (isset($data['sizes'])) {            
-                        $img_types = array('thumbnail', 'medium','large','Slideshow','Homepage','Sidebar'); 
+                        // $img_types = array('thumbnail', 'medium','large','Slideshow','Homepage','Sidebar'); 
+                        $img_types = array_keys($data['sizes']);
                         foreach ($img_types as $img_type) {
                           if (isset($data['sizes'][$img_type]) && isset($data['sizes'][$img_type]['file'])) {
                               $media_file =  $base . '/' . $data['sizes'][$img_type]['file'];
@@ -412,7 +412,7 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                   $v3 = ($v1) ? $v1:realpath($item->meta_value);
                   $rbase = realpath(dirname($v3)) . DIRECTORY_SEPARATOR;
                   $nv3 =  WFUSync::normalizeFileNames($v3);
-                  $data = unserialize($item->meta_att);
+                  $data = @unserialize($item->meta_att);
                                 
                   $media_cache[$item->meta_value . '-v'] =  $v3;
                   $media_cache[$item->meta_value . '-nv'] =  $nv3; 
@@ -443,7 +443,8 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                     $data =  $media_cache[$item->meta_value . '-data'];                     
                     
                     if (isset($data['sizes'])) {
-                        $img_types = array('thumbnail', 'medium','large','Slideshow','Homepage','Sidebar'); 
+                        // $img_types = array('thumbnail', 'medium','large','Slideshow','Homepage','Sidebar'); 
+                        $img_types = array_keys($data['sizes']);
                         foreach ($img_types as $img_type)
                             if (isset($data['sizes'][$img_type]) && isset($data['sizes'][$img_type]['file'])) {
                               $type_file =  $rbase . $data['sizes'][$img_type]['file'];
@@ -457,35 +458,25 @@ If you upload files by WFU or FTP or by any other tool than the internal uploade
                             }                        
                        }         
                   }
-                                    
-                if (!$found) {
+                 
+ 
+                 if (!$found) { 
                     $add = true;
                     if ($wfuOptions['detect_resized'] == "true") {
                       $len_fitem = strlen($fitem);
                       $fitem_base = strtolower(WFUSync::removeExtension($fitem));
-                      foreach($filesystem_local as $itemcomp) {
-                        // we check if the file is maybe already a crunched file and if yes we ignore it
-                        // the detection is very basic - I check the file name and if another one has 
-                        // the same filename with a ???x??? size part. 
-                        if ($len_fitem > strlen($itemcomp)) { // we check if it is longer                   
-                          $c1 = WFUSync::removeExtension($itemcomp) . '-';
-                          
-                          $c2 = substr($fitem,0,strlen($c1));
-                          if (strtolower($c1) == $c2) {
-                            $c3 = substr($fitem_base,strlen($c1));
-                            // it has the same prefix. Now it is checked if the rest 
-                            // has the pattern [0-9]{1,5}x[0-9]{1,5}
-                            if (preg_match('/[0-9]{1,5}x[0-9]{1,5}/', $c3) == 1) {
-                               $add = false;
-                            }    
-                          } 
-                        }
-                      }                     
+                      if (preg_match('/\-[0-9]{1,5}x[0-9]{1,5}$/', $fitem_base) == 1) {
+                         $main_file = preg_replace ('/\-[0-9]{1,5}x[0-9]{1,5}$/', "", $fitem_base) . "." . WFUSync::getExtension($fitem);
+                         if (file_exists($main_file)) {
+                           $add = false;
+                         }
+                      }                      
                     }                 
                     if ($add) {
                       $fuo[] = $realFitem;
                     }
-                  }
+                }  
+                  
                 
                 if (($counter++ % 100) == 99) {
                   if(!ini_get('safe_mode') ){

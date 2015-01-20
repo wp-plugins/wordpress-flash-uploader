@@ -85,3 +85,12 @@
 #wfu.wrap h2, #wfu .wrap h2 {
   padding-top:17px;
 }
+
+#wfu ul.shortcode-frontend {
+  list-style-type: disc;
+  padding-left: 25px;
+}
+
+#wfu ul.shortcode-frontend li {
+  padding-left: 10px; 
+}

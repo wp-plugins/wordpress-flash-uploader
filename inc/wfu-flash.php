@@ -75,10 +75,10 @@ if (!class_exists("WFUFlash")) {
 
             if (current_user_can('manage_options') && !$istab) {
                 echo '<p>Please select if you want to upload a media file or if you want to manage Wordpress.</p>';
-                echo '<div class="submit" style="padding:0px;">&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="upload_media" value="';
+                echo '<div class="submit" style="padding:0px;">&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" class="button-primary" name="upload_media" value="';
                 echo _e('Media', 'WFU');
                 echo  '" />&nbsp;&nbsp;&nbsp;&nbsp;';
-                echo '<input type="submit" name="upload_wordpress" value="';
+                echo '<input type="submit" name="upload_wordpress" class="button-primary" value="';
                 echo _e('Wordpress', 'WFU');
                 echo '" />';
 
@@ -100,10 +100,9 @@ if (!class_exists("WFUFlash")) {
             echo WFUFlash::printFlash($devOptions);
    
             echo '<br>&nbsp;';
-
-            if (true) { // file_exists($reg_path)
+            if ($devOptions['enable_auto_sync'] == 'true') {
                 echo '<div id="status" name="status"><strong>Synchronisation status:</strong> <span id="status_text">Files will be automatically synchronized after upload.</span></div><br>
-    <div id="statusframediv" style="display:none;" name="statusframediv"><iframe id="statusframe" name="statusfame" src="about:blank"></iframe></div>';
+                      <div id="statusframediv" style="display:none;" name="statusframediv"><iframe id="statusframe" name="statusfame" src="about:blank"></iframe></div>';
                 echo '<script type="text/javascript">';
                 echo 'function uploadFinished(loc) {';
                 echo 'document.getElementById("status_text").innerHTML = "Starting synchronisation. Please wait..."; ';
@@ -114,13 +113,13 @@ if (!class_exists("WFUFlash")) {
                 echo '}'; 
                 echo '</script>';
             } else {
-                echo '<div id="status" name="status"><strong>Synchronisation status:</strong> Please synchronize the files manually.</div><br>';
+                echo '<div id="status" name="status"><strong>Synchronisation status:</strong> Auto synch disabled. Please synchronize the files manually.</div><br>';
             }
 
             if (!$istab && current_user_can('manage_options') && $devOptions['hide_htaccess'] == 'false') {
                 if (!file_exists($htaccess_path)) {
                     echo '<div class="setting-description" style="float:left">If you get the error message in the flash that you have to copy the provided <br>.htaccess file please click on the button on the right to create this file.</div>';
-                    echo '<div class="submit" style="padding:5px; style="float:left">&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="create_htaccess" value="';
+                    echo '<div class="submit" style="padding:5px; style="float:left">&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="create_htaccess" class="button-primary" value="';
                     echo _e('Create .htaccess', 'WFU');
                     echo  '" />';
                 } else {

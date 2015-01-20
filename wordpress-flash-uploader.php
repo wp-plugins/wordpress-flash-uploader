@@ -2,8 +2,8 @@
 /*
 Plugin Name: Wordpress Flash Uploader
 Plugin URI: http://www.tinywebgallery.com/blog/wfu
-Description: The Wordpress Flash Uploader does contain 2 plugins: '<strong>Wordpress Flash Uploader</strong>' and '<strong>Sync Media Library</strong>'. The Wordpress Flash Uploader is a flash uploader that replaces the existing flash uploader and let you manage your whole  WP installation. 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library. 
-Version: 3.2.1
+Description: The Wordpress Flash Uploader does contain 2 plugins: '<strong>Wordpress Flash Uploader</strong>' and '<strong>Sync Media Library</strong>'. The Wordpress Flash Uploader is a flash uploader that replaces the existing flash uploader and let you manage your whole  WP installation. You can also include the flash to your site and enable your users to upload/manage files based on user names, groups or roles. 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library. 
+Version: 3.3
 Author: Michael Dempfle
 Author URI: http://www.tinywebgallery.com
 */
@@ -28,6 +28,8 @@ if (!class_exists("WFU")) {
         var $wfu_sync;
         var $nonce;
 
+        var $unique_sizes_filter='';
+
         function WFU() { //constructor
             $wfu_flash = new WFUFlash();
             $wfu_settings = new WFUSettings();
@@ -48,17 +50,19 @@ if (!class_exists("WFU")) {
             $arr[] = get_option('medium_size_w');
             $arr[] = get_option('thumbnail_size_h');
             $arr[] = get_option('thumbnail_size_w');
-            $arr[] = "85x85";
+            $arr[] = "85x85"; 
             $arr[] = "280x125";
             
             $unique_sizes=array_unique($arr);
-            $unique_sizes_filter='';
+            
+            $this->unique_sizes_filter = '';
             foreach($unique_sizes as $size) {
-               if ($unique_sizes_filter != '') {
-                 $unique_sizes_filter .= ',';
+               if ($this->unique_sizes_filter != '') {
+                 $this->unique_sizes_filter .= ',';
                }
-               $unique_sizes_filter .= '*'.$size.'*.*';
+               $this->unique_sizes_filter .= '*'.$size.'*.*';
             }
+           
             
             $wfuAdminOptions = array(
                 'wp_path' => '',
@@ -97,7 +101,7 @@ if (!class_exists("WFU")) {
                 'hide_donate' => 'false',
                 'hide_htaccess' => 'false',
                 'detect_resized' => 'true', 
-                'file_filter' => $unique_sizes_filter,
+                'file_filter' => $this->unique_sizes_filter,
                 'flash_size' => '650', // default in the backend - can be owerwritten by the frontend
                 'securitykey' => sha1(session_id()),
                 'frontend_upload_folder' => '',
@@ -112,7 +116,10 @@ if (!class_exists("WFU")) {
                 // new 2.17
                  'sync_time' => '',
                  'synch_max_files' => 'auto',
-                 'sync_warning_message' => 'true'                 
+                 'sync_warning_message' => 'true',
+                 // new 3.3
+                 'remove_invalid' => 'false',
+                 'enable_auto_sync' => 'true'                        
             );
 
             $wfuOptions = get_option($this->adminOptionsName);
@@ -146,7 +153,9 @@ if (!class_exists("WFU")) {
         }
 
         /* CSS für den Admin-Bereich von WFU */
-        function addAdminHeaderCode() {
+        function addAdminHeaderCode($hook) {
+             if( $hook != 'settings_page_wordpress-flash-uploader' && $hook != 'toplevel_page_wordpress-flash-uploader') 
+         		    return;
             echo '<link type="text/css" rel="stylesheet" href="' . get_bloginfo('wpurl') . '/wp-content/plugins/wordpress-flash-uploader/css/wfu.css" />' . "\n";
             $wfuOptions = $this->getAdminOptions();
         }
@@ -218,12 +227,18 @@ if (!class_exists("WFU")) {
                         // we validate
                         $ok = $this->validateInput($key, $option, $_POST[$key]);
                         if ($ok){
-                            $wfuOptions[$key] = $_POST[$key];
+                            if ($key == 'file_filter' && $_POST[$key] == 'auto') {
+                                $wfuOptions[$key] = $this->unique_sizes_filter;
+                            } else {
+                                $wfuOptions[$key] = $_POST[$key];
+                            }
                         } else {
                             $failure = true;
                         }
                     }
                 }
+                
+                
 
                 // fields that need special treatment
                 update_option($this->adminOptionsName, $wfuOptions);
@@ -364,25 +379,40 @@ if (!class_exists("WFU")) {
 	   	      'securitykey' => 'xxx',
 		        'width' => '650',
 		        'configid' => '',
+            'master_profile' => '',
+            'master_profile_type' => '',
+            'frontend_upload_folder' => '' 
 	        ), $atts));	          
-	              // could already be started by another plugin.
-                @ob_start();
-                @session_start();
-                @ob_end_clean();
-
+	             // could already be started by another plugin.
+               if(session_id() == '') {
+                 @session_start();
+               }
+                
                $_SESSION["IS_ADMIN"] = "true";
                $devOptions = $this->getAdminOptions();
                
                if ($devOptions['securitykey'] == $securitykey) {
+                  
+                  // set the settings of the shortcode options.
+                  if (!empty($master_profile)) {
+                    $devOptions['master_profile'] = $master_profile;
+                  }
+                  if (!empty($master_profile_type)) {
+                    $devOptions['master_profile_type'] = $master_profile_type;
+                  }
+                  if (!empty($frontend_upload_folder)) {
+                    $devOptions['frontend_upload_folder'] = $frontend_upload_folder;
+                  }
+                   if (is_numeric ($width)) {
+                   $devOptions['flash_size'] = $width;
+                 }
+                  
                   global $current_user;
                   wp_get_current_user();
                   $logged_id = (0 != $current_user->ID );              
-                  $showflash = $logged_id || $devOptions['master_profile'] =='false';
+                  $showflash = $logged_id || $devOptions['master_profile'] =='false' || ($devOptions['master_profile'] =='true' && $devOptions['master_profile_type'] == 'master_profile_type_ip');
                  if ($showflash) {
-                
-                 if (is_numeric ($width)) {
-                   $devOptions['flash_size'] = $width;
-                 }
+
                  if ($configid != '' && is_numeric ($configid)) {
                     $_SESSION["WFU_SHORTCODE_CONFIG"] = $configid; 
                  } else if (isset($_SESSION["WFU_SHORTCODE_CONFIG"])) {
@@ -391,18 +421,18 @@ if (!class_exists("WFU")) {
                  WFUFlash::storeSettingsToSession($devOptions); 
                  unset($_SESSION["IS_ADMIN"]);
 	               $_SESSION["IS_FRONTEND"] = "true";
-	            if ($logged_id) {
-                  $_SESSION["WFU_USER_LOGIN"] = $current_user->user_login;
-                  $_SESSION["WFU_USER_ROLE"] = array_shift($current_user->roles);
-                  $_SESSION["WFU_USER_EMAIL"] = $current_user->user_email;
-                } else {
-                  unset($_SESSION["WFU_USER_LOGIN"]);
-                  unset($_SESSION["WFU_USER_ROLE"]);
-                  unset($_SESSION["WFU_USER_EMAIL"]);
+	               if ($logged_id) {
+                   $_SESSION["WFU_USER_LOGIN"] = $current_user->user_login;
+                   $_SESSION["WFU_USER_ROLE"] = array_shift($current_user->roles);
+                   $_SESSION["WFU_USER_EMAIL"] = $current_user->user_email;
+                 } else {
+                   unset($_SESSION["WFU_USER_LOGIN"]);
+                   unset($_SESSION["WFU_USER_ROLE"]);
+                   unset($_SESSION["WFU_USER_EMAIL"]);
                 }
 	              $dir_chmod=($devOptions['dir_chmod'] == '') ? 0 : octdec($devOptions['dir_chmod']);
 	            
-                if ($devOptions['frontend_upload_folder'] == '') {
+              if ($devOptions['frontend_upload_folder'] == '') {
 	              WFUFlash::setUploadFolder('', $dir_chmod);
 	            } else {
 	               $pathprefix = '../../../../';
@@ -428,9 +458,8 @@ if (!class_exists("WFU")) {
                      $_SESSION["TFU_FOLDER"] =  $pathprefix . $devOptions['frontend_upload_folder'];
                    }                           
                  }           
-                  $js = '<script type="text/javascript">function uploadFinished(loc) {}; function deleteFile(loc) {} </script>';
-
-                  
+                   $js = '<script type="text/javascript">function uploadFinished(loc) {}; function deleteFile(loc) {} </script>';
+   
                    // Fix 2.12.1 - relative path was not good because of permurls !
                    $siteurl = get_option('siteurl') . '/';    
                    return $js . WFUFlash::printFlash($devOptions , '/' , 'frontend', $siteurl) ;
@@ -517,7 +546,7 @@ if (isset($dl_pluginSeries)) {
     //Actions
     add_action('admin_menu', 'WFU_ap');
     add_action('wordpress-flash-uploader/wordpress-flash-uploader.php',  array(&$dl_pluginSeries, 'init'));
-    add_action('admin_head', array(&$dl_pluginSeries, 'addAdminHeaderCode'),99);
+    add_action('admin_enqueue_scripts', array(&$dl_pluginSeries, 'addAdminHeaderCode'),99);
 
     add_action('media_upload_wfu', array(&$dl_pluginSeries, 'add_tab_head_files') );
     add_action('media_upload_sync', array(&$dl_pluginSeries, 'add_tab_head_files') );

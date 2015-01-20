@@ -3,21 +3,21 @@ Contributors: mdempfle, Michael Dempfle
 Tags: upload, admin, media, synchronize, flash, ftp, media library, sync, uploader, images, gallery, image upload, image preview
 Requires at least: 2.7
 Tested up to: 4.1
-Stable tag: 3.2.1
+Stable tag: 3.3
 Donate link: Please check the settings of Wordpress Flash Uploader
 
 'Wordpress Flash Uploader' is a replacement of the internal flash uploader which let you also manage your whole Wordpress installation and synchronize your media library. 
 
 == Description ==
 
-'Wordpress Flash Uploader' is a flash uploader that replaces the existing flash uploader and let you manage your whole Wordpress installation. 
+'Wordpress Flash Uploader' is a flash uploader that replaces the existing flash uploader and let you manage your whole Wordpress installation. You can also include the flash to your site and enable your users to upload/manage files based on user names, groups or roles. 
 The Wordpress Flash Uploader does contain 2 plugins: 'Wordpress Flash Uploader' and 'Sync Media Library'. 
 'Sync Media Library' is a plugin which allows you to synchronize the Wordpress database with your 
 upload folder. You can upload by WFU, FTP or whatever and import this files to the Media Library.
 
 = Features =
 * Support of all features of TFU: http://www.tinywebgallery.com/en/tfu/web_overview.php 
-* Add the flash uploader to the site! You can define different profiles for users, groups and roles! So you can define exactly who can do/upload what and where on the server! See the frontend settings for details.
+* Add the flash uploader to the site! You can define different profiles for users, groups and roles! So you can define exactly who can do/upload what and where on the server! See the frontend settings for details. 
 * Manage your Wordpress installation with WFU.
 * Synchronize the upload folder with the media library. 
 * Synchronize the media library automatically using the wordpress cron 
@@ -79,13 +79,20 @@ If you have this problem please contact me to fix this because it is not reprodu
 Please go to the settings page of Wordpress Flash Uploader. There you find a small donation section. Thank you for your support.
 
 == Changelog ==
+= 3.3 =
+* New: Full profile support in the frontend! All frontend options can be set now in the shortcode and each shortcode can have a different profile! 
+* New: css is only loaded in the administration if needed
+* New: Sync can be disabled - "Sync automatically after upload"
+* New: Autodetection of thumbnails was improved.
+* New: Remove invalid entries can be enabled. 
+* Fix: All sizes are now detected
+* Fix: Session is only started when not started already
+
 = 3.2.1 =
-* Tested with Wordpress 4.1
+* New: Tested with Wordpress 4.1
 
 = 3.2 =
 * New: TFU 3.2 is included
-* Fix: Sync is now started every time after an upload.
-* Fix: Sync text is now shown directly afte rthe upload finishes
 * Fix: Removal of invalid media entries are disabled right now as it seems it causes problems on some systems. Please still make a backup of you install before useing this plugin.
 * Fix: Small layout fixes
 
